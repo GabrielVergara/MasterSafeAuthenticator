@@ -12,7 +12,9 @@ namespace MasterSafe.Platform;
 public sealed class SessionMonitor : IDisposable
 {
     /// <summary>Raised on a background thread when Windows is locked, the user is switched, or the computer suspends.</summary>
+#pragma warning disable CS0067 // Only raised on Windows; other systems never raise it.
     public event EventHandler? SessionLocking;
+#pragma warning restore CS0067
 
     /// <summary>True when this system can report these events.</summary>
     public static bool IsSupported =>
