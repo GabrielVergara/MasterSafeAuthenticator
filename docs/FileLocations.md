@@ -15,7 +15,7 @@ files. The Vaults page in the app shows these locations too.
 | `vault.sauth` | Your vault: accounts, passwords and notes, encrypted. This is the one file that matters | Encrypted |
 | `vault.sauth.bak` | The version before the last save, kept so a crash cannot destroy your vault | Encrypted |
 | `vault.sauth.tmp` | Exists for a moment during a save, then replaces `vault.sauth`. If you ever see it, a save was interrupted; the real vault is intact | Encrypted |
-| `settings.json` | Theme, tray and auto-lock choices, the list of other vault files you opened, and the recovery **public** key | No secrets |
+| `settings.json` | Theme, tray, locking, clipboard and privacy choices, the sign-in pause counter, the list of other vault files you opened, the folder for automatic recovery backups, and the recovery **public** key | No secrets |
 | `archive\vault-<date>-<time>.sauth` | Old vaults moved aside, for example after a forgotten master password (plus their `.bak` files) | Encrypted |
 
 Never stored on disk: your master password, the vault's encryption key, the codes shown on screen, or the

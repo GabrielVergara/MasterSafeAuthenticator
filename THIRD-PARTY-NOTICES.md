@@ -21,10 +21,19 @@ included, and nothing is taken from KeePass, KeePassXC or any other password man
 Icons used: folder, email, bank, briefcase, cart, home, cloud, controller, key-variant, lock, shield-check, web,
 server, wifi, credit-card, school, heart, star, music-note, camera, code-braces, account, phone, airplane, paperclip.
 
+## Services the app can contact (only when you use them)
+
+- **Pwned Passwords** by Troy Hunt (Have I Been Pwned, <https://haveibeenpwned.com/Passwords>): the optional breach check
+  sends the first 5 characters of a password's SHA-1 hash to api.pwnedpasswords.com and compares the answer locally. The
+  Pwned Passwords data is made available under the Creative Commons Attribution 4.0 licence; this notice is the
+  attribution.
+- **GitHub** (github.com): the optional update check asks for the project's public release information and, when you
+  choose "Download and verify", downloads a release file.
+
 ## Other components
 
 Avalonia (MIT), CommunityToolkit.Mvvm (MIT), SkiaSharp (MIT), ZXing.Net (Apache-2.0), Inter font (SIL OFL 1.1),
-Konscious.Security.Cryptography (MIT), Microsoft.Windows.CsWin32 (MIT) and the .NET runtime (MIT). See
+Konscious.Security.Cryptography (MIT), Microsoft.Win32.SystemEvents (MIT), Microsoft.Windows.CsWin32 (MIT) and the .NET runtime (MIT). See
 [docs/SBOM.md](docs/SBOM.md) for the exact list.
 
 ## Trademarks and independence

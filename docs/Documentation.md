@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.3.2  
+**Version:** 1.4.0  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -106,6 +106,13 @@ classDiagram
     VaultContents o-- PasswordEntry
 ```
 
+### Entries, bin and history (1.4)
+
+A password entry also carries `DeletedUtc` (set while it is in the recycle bin; entries older than 30 days are removed
+when the vault opens) and `History` (up to ten earlier versions, newest first). Both are inside the encrypted contents.
+Older versions of the app ignore these fields, so a vault that was used with 1.4 still opens, but the bin and history
+are not shown there.
+
 ## 6. Start-up and screens
 
 On start a rounded splash window shows the logo, product name, author and version for about two seconds, then the
@@ -154,6 +161,20 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Copy a password, wait 2 minutes, paste somewhere | Nothing is pasted: the clipboard was cleared |
 | Copy a password, then 1 minute later copy a code, then wait 1.5 minutes | The code is still on the clipboard (the wait restarted); 2 minutes after the code was copied it is gone |
 | Copy a password, then copy some other text yourself, wait 2 minutes | Your own text is still on the clipboard |
+| Type a wrong master password 5 times | After the 5th, sign-in pauses with a countdown (30 s); closing and reopening the app keeps the pause; a later correct password works and the dashboard says "5 wrong passwords were entered" |
+| Lock Windows (Win+L) while MasterSafe is unlocked, then sign in to Windows | MasterSafe is locked and asks for the password |
+| Settings, turn on "Lock when the window is minimized", minimize | The vault is locked |
+| Take a screenshot (Win+Shift+S) or share the screen while MasterSafe is open | The MasterSafe window is black; after turning "Keep this window out of screenshots" off it is visible |
+| Create a new vault with the master password `aaaaaaaaaaaa` or `password123456` | Refused as too easy to guess; a phrase of several words is accepted |
+| Delete a password, open Recycle bin, Restore | It is back in its folder with its attached files; Delete for good asks first |
+| Edit a password twice | "Earlier versions" lists the old ones; "Copy its password" works |
+| Password health with a weak and a reused password | Both are listed; with the breach check off the button says why it is off |
+| Settings, allow the breach check, run it with a known leaked password such as `Password123!` | The entry appears under "Found in known data breaches" |
+| Settings, Check for updates | A message about the newest version; with a newer release "Download and verify" saves a verified installer |
+| Recovery, switch on automatic backup, choose a folder, edit a password, wait a minute | A new `recovery-*.sauth` file appears; after more than five, the oldest are removed |
+| Press Ctrl+B, Ctrl+C, Ctrl+U, Ctrl+F, Ctrl+N and Delete on the Passwords page after clicking an entry | Copies user name, copies password, opens the site, focuses search, starts a new entry, asks to delete |
+| Drag an entry onto a folder, and onto Recycle bin | It moves; dropping on the bin asks nothing but can be restored |
+| Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/ |
 | Passwords, Edit an entry, Attach a file (a PDF under 5 MB), Save, then Lock and unlock | The entry shows "1 attached file"; Edit, then Save as writes an identical copy |
 | Attach a file over 5 MB | A message names the file and the limit; nothing is attached |
 | Select a folder, Change icon, click an icon | The picker closes, the icon shows in the folder list and the folder pickers, and stays after Lock and unlock |

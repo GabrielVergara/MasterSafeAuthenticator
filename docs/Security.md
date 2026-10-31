@@ -86,6 +86,20 @@ Deleting a vault also removes the Windows Hello credentials created for it.
 Vault formats 1 and 2 (a key derived directly from the password) can still be opened. They are upgraded to
 format 3 the next time the vault is unlocked with the master password.
 
+## Protections for everyday use (1.4)
+
+- **Wrong passwords:** after 5 in a row, sign-in pauses (30 s, 1, 2, 5, then 15 min). The counter is kept in
+  `settings.json`, so it survives a restart, but a person with access to your files can edit that file: the pause protects
+  against guessing at your keyboard, not against attacks on a copy of the vault.
+- **Locking:** after inactivity, when Windows locks or sleeps, and optionally on minimize. Locking wipes the data key and
+  the decrypted screens, a shown recovery passphrase, the health report and pending reminders.
+- **Screen and clipboard:** the window is excluded from screenshots and screen sharing (Windows); secret copies are marked so
+  they stay out of the clipboard history and cloud clipboard, and are cleared after 30 seconds, 1 or 2 minutes.
+- **Recycle bin and history:** deleted passwords and the last ten versions of an entry stay inside the encrypted vault
+  (30 days for the bin). Delete for good or empty the bin to remove them.
+- **Network use, only when you switch it on or start it:** the breach check (api.pwnedpasswords.com, only a 5-character hash
+  prefix), the update check (github.com, public release information) and a WebDAV server.
+
 ## Recovery
 
 Recovery requires the master password, a set-up unlock method, or a recovery-key backup. There is no

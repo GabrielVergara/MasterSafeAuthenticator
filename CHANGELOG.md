@@ -2,6 +2,37 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.4.0 (2026-11-01)
+
+A release about safety and everyday comfort. Nothing changes in how existing vaults are stored: they open as before.
+
+### Security
+- **Sign-in pause after wrong master passwords.** After 5 wrong passwords in a row the sign-in screen pauses for 30 seconds, then 1, 2, 5 and 15 minutes with each further mistake. The counter survives restarting the app, a correct password resets it, and the next unlock tells you how many wrong passwords were entered. Nothing is ever deleted because of wrong passwords.
+- **The vault locks when Windows locks or the computer goes to sleep** (on by default), and optionally when the window is minimized.
+- **The window can be kept out of screenshots and screen sharing** (Windows, on by default; turn it off in Settings if you need a screenshot).
+- **A weak master password is refused when you create a vault.** New master passwords are checked for length, variety, repeats, common passwords and patterns, with a live hint.
+- **Recycle bin, 30 days.** Deleting a password moves it to the recycle bin, with its files, where it can be restored. Entries are removed for good after 30 days, or when you empty the bin.
+- **Linux:** the data folder is now readable by its owner only (the vault file already was).
+- **Signed update check.** Settings can look for a newer version, and "Download and verify" checks the installer's ML-DSA-65 signature and checksum against the project key built into the app, deleting a download that does not verify. Nothing is installed automatically. Looking for updates after you unlock is optional and off by default.
+- The About window shows the fingerprint of the release signing key.
+
+### Added
+- **Password health** page: weak, reused and old passwords, with an Open button for each. An optional check against known data breaches (Have I Been Pwned, off by default) sends only the first 5 characters of a password's SHA-1 hash.
+- **Password strength meter** while you type, and **entry history**: the last ten versions of an entry, so an overwritten password can be found again.
+- **Automatic recovery backups**: a minute after a change, a new recovery backup is saved to a folder you choose, and the newest five are kept. It never writes while the vault is locked or empty.
+- **Reminders on the codes page** for a missing recovery key, an old recovery backup, an available update, and unlock methods you could add. Each has "Not now", and all can be switched off in Settings.
+- Codes page: **search**, **sort** and **rename** (issuer and label only; the secret is untouched).
+- Passwords page: **sort** (title, recently changed, folder), **Open site** (http and https only), **keyboard shortcuts** (Ctrl+F, Ctrl+N, Ctrl+B, Ctrl+C, Ctrl+U, Delete), **right-click menus**, **double-click to copy a password**, and **dragging entries onto folders**.
+- The folder list **fits the folder names** and can be resized with a divider; its width is remembered.
+- **Help** rewritten as a task-based guide with search, and a redesigned **About** window with links to the article, website, source code, releases, security policy, licence and third-party notices.
+
+### Changed
+- Copied passwords, codes and the recovery passphrase stay on the clipboard for 30 seconds, 1 minute or 2 minutes (your choice, 2 minutes at first); copying another secret restarts the wait.
+- Updated libraries: ZXing.Net 0.16.11, Microsoft.Win32.SystemEvents 10.0, and the GitHub Actions used by the build and release workflows.
+
+### Repository
+- Only the owner can change `main` or the `v*` release tags (rulesets), force-pushes are blocked, secret scanning with push protection is on, and the release workflow signs the Linux packages on a Windows runner. See SECURITY.md.
+
 ## 1.3.2 (2026-11-01)
 
 ### Security

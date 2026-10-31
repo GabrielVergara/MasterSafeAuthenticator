@@ -28,6 +28,12 @@ flowchart TD
 | Has your computer and your Windows PIN | Yes, via Windows Hello | Hello is as strong as your PIN or biometrics |
 | Has your security key but not its PIN | No | The vault asks the key for a secret, and the key requires its PIN and a touch. Too many wrong PINs lock the key |
 | Gets a file you saved out of an entry ("Save as...") | Yes, that file | A saved attachment is a normal file on disk and is no longer protected by the vault. The app says so when it saves one; delete it when you are done |
+| Guesses the master password at your keyboard | Slowed | After 5 wrong passwords, sign-in pauses 30 s to 15 min. This cannot stop guessing on a copy of the vault file; see the first row |
+| Walks up to a computer you left unlocked | Limited | The vault locks after inactivity, when Windows locks or sleeps, and optionally on minimize |
+| Records the screen, shares the screen or takes screenshots | No (Windows) | The window is kept out of captures while the setting is on |
+| Reads the Windows clipboard history or cloud clipboard | No | Secret copies carry the markers that exclude them; they are cleared after the chosen time |
+| Serves a fake update | No | Updates are never installed by the app; a download is checked against the built-in ML-DSA-65 key and deleted if it fails |
+| Reads old passwords from the recycle bin or history | Only with the unlocked vault | They are inside the encrypted vault; they are removed for good when you empty the bin or delete the entry |
 | Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https |
 
 ## Recovery and old vaults

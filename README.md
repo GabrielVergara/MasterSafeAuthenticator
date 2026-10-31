@@ -1,6 +1,6 @@
 # MasterSafe Authenticator
 
-A privacy-first, offline-first authenticator for TOTP/HOTP with an encrypted vault for passwords,
+A privacy-first, offline-first authenticator for TOTP/HOTP with an encrypted vault for passwords and files,
 targeting **.NET 10** and running on **Windows** and **Linux**. Free for personal, non-commercial use
 (see [License](#license)).
 
@@ -10,37 +10,48 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 
 ## Features
 
-- TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits), imported from an
-  `otpauth://` link or a QR code image (drag it onto the window, or choose the file).
-- Encrypted vault for authenticator accounts and KeePass-style password entries, with a password generator
-  and clipboard auto-clear after the last copy (30 seconds, 1 or 2 minutes, your choice). Copies are kept out of the Windows
-  clipboard history and cloud clipboard.
-- Unlock with the master password (**Argon2id**), **Windows Hello** or a **FIDO2 security key** (tested with a
-  Thales SafeNet key). Each method is a separate key slot, so changing the master password never re-encrypts the vault.
-- Vault contents encrypted with **AES-256-GCM**; the header and slots are authenticated; saves are atomic and
-  keep a `.bak` copy.
-- Auto-lock after inactivity; locking wipes the key and decrypted data from memory.
-- Encrypted `.sauth` backups to a local folder or a WebDAV server (Nextcloud, ownCloud; https only).
-- **Recovery**: a recovery key and recovery backups let you get your data back if you forget the master password.
-  On the sign-in screen, "Forgot your master password?" can restore from a recovery backup, or start a new vault
-  while the old one is kept in an archive (never deleted) and can be opened later if the password is found.
-- **Vaults page**: shows where your files are stored, opens any vault file (a USB stick, another folder), and
-  deletes old vaults after a confirmation. Settings are saved between runs.
-- **Post-quantum**: hybrid ECDH-P384 + ML-KEM-768 recovery-key backups (library), ML-DSA-65 signed releases.
-- System tray (the app keeps running there when the window is closed or minimized), light/dark theme, in-app help.
-  On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
+**Authenticator and passwords in one encrypted vault**
+- TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits) from an `otpauth://` link or a QR code
+  image (drag it onto the window, or choose the file). Search, sort and rename on the codes page.
+- Password manager: folders with icons you choose, attached files (5 MB each), a recycle bin (30 days), entry history,
+  a strength meter, a password generator, sorting, shortcuts, right-click menus and drag and drop.
+- **Password health**: weak, reused and old passwords, plus an optional, privacy-preserving check against known data
+  breaches.
+- Import from **KeePass and KeePassXC** (XML or CSV) with a preview before anything is added.
 
-- Import from KeePass and KeePassXC (XML or CSV export) with a preview before anything is added. Groups become folders and
-  attached files come along.
-- Password folders with icons you choose, select several passwords to delete or move, and files attached to entries
-  (up to 5 MB each).
+**Security**
+- Vault contents encrypted with **AES-256-GCM**; the master password is stretched with **Argon2id** (128 MiB); the
+  header and key slots are authenticated; saves are atomic and keep a `.bak` copy.
+- Unlock with the master password, **Windows Hello** or a **FIDO2 security key** (tested with a Thales SafeNet key).
+  Each method is a separate key slot, so changing the master password never re-encrypts the vault.
+- Sign-in pauses after repeated wrong passwords; the vault locks after inactivity, when Windows locks or sleeps, and
+  optionally on minimize; locking wipes the key and decrypted data. Weak master passwords are refused.
+- Copied secrets are cleared from the clipboard (30 seconds, 1 or 2 minutes, your choice) and kept out of the Windows
+  clipboard history and cloud clipboard; the window can be kept out of screenshots.
+- **Recovery**: a recovery key and recovery backups (optionally automatic) let you get your data back if you forget the
+  master password. Recovery backups use a hybrid **ECDH-P384 + ML-KEM-768** (post-quantum) scheme.
+- **Signed releases** (ML-DSA-65) with checksums and an SBOM; a built-in update check verifies the signature before it
+  offers a download. Nothing updates automatically.
+- Hostile-file hardening: sizes, key-derivation settings and counts of everything the app opens are limited and tested.
+- See the [OWASP self-assessment](docs/OwaspChecklist.md), the [threat model](docs/ThreatModel.md) and
+  [SECURITY.md](SECURITY.md).
+
+**Everyday comfort**
+- Encrypted `.sauth` backups to a local folder or a WebDAV server (Nextcloud, ownCloud; https only).
+- A **Vaults** page that shows where your files are, opens any vault file and keeps old vaults in an archive.
+- Reminders for the steps you have not done, a task-based in-app Help with search, a light/dark theme and a system tray
+  icon. On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
+
+**More to read**: the article about MasterSafe Authenticator on the author's site,
+<https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/>.
 
 Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
 a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
 
 ## Download and install
 
-Author: [Gabriel Vergara Ezcurdia](https://www.gabriel-vergara.com/).
+Author: [Gabriel Vergara Ezcurdia](https://www.gabriel-vergara.com/). Article:
+[MasterSafe Authenticator](https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/).
 
 Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthenticator/releases>.
 

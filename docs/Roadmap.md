@@ -9,7 +9,8 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - Recovery: recovery key file, recovery backups (hybrid post-quantum), restore from the sign-in screen.
 - Vault management: where files are stored, archive an old vault, open any vault file, delete old vaults.
 - Settings saved between runs. Confirmation before deleting accounts, passwords and vaults.
-- Password folders (passwords only) with user-selectable icons, multiple delete and move, attached files on entries (5 MiB each, 50 MiB per vault) (1.3.0). Recovery key creation with a generated passphrase (1.3.1).
+- Password folders (passwords only) with user-selectable icons, multiple delete and move, attached files on entries (5 MiB each, 50 MiB per vault) (1.3.0). Recovery key creation with a generated passphrase (1.3.1). Clipboard choices and Windows clipboard-history protection (1.3.2).
+- 1.4.0: sign-in pause after wrong passwords, lock on Windows lock or sleep, screen-capture protection, recycle bin and entry history, password strength and health report, optional breach check, signed update check, automatic recovery backups with reminders, shortcuts, right-click menus, drag and drop, sorting, a rewritten Help and About.
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen (in the next release).
 - Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0 and 1.2.1.)
 
@@ -38,6 +39,25 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 | Accessibility review | Screen reader names, contrast checks, keyboard-only use |
 | Reproducible builds and SLSA provenance | So a download can be checked against the source |
 | Fuzzing of the file parsers | Vault, backup, recovery key, KeePass |
+
+## Hardening ideas (toward "unbreakable", without making it harder to use)
+
+No program is unbreakable, but these steps raise the cost of an attack a lot. Each says how much it changes daily use.
+
+| Idea | What it does | Effect on ease of use |
+| --- | --- | --- |
+| Tune Argon2id to the computer | Measure at vault creation and pick the strongest settings that still unlock in about a second; offer "re-encrypt with stronger settings" later | None: it happens once |
+| Bind the vault to this computer (optional) | A second key protected by the TPM or Windows DPAPI is needed besides the master password, so a copied vault file cannot be guessed offline from another machine. Recovery backups still work with the recovery key | One extra recovery step when moving computers |
+| Hardware-only unlock (optional) | Allow turning off master-password sign-in once a security key and a recovery key exist | Faster sign-in; the recovery key becomes essential |
+| Keep secrets out of .NET strings | Hold decrypted passwords as wipeable buffers and decrypt only while copying | None visible; a large internal change |
+| Process hardening | Block code injection (process mitigation policies), exclude the app from crash dumps | None |
+| Rotating encrypted vault snapshots | Keep several dated copies of the vault, not only the last `.bak`, against ransomware, sync mistakes and corruption | None; uses disk space |
+| Auto-hide revealed passwords | Hide a shown password again after a few seconds or when the window loses focus | Slight |
+| Offline signing key | Sign releases only on the maintainer's computer or a hardware key, so a leaked CI secret cannot sign malware; show a second signature as proof | None for users |
+| Pin and verify the supply chain | Pin GitHub Actions to commit hashes, publish SLSA build provenance, run OpenSSF Scorecard, require signed commits | None for users |
+| Fuzzing in CI | Fuzz the vault, backup, KeePass and QR parsers on every release | None |
+| Event history | A small encrypted list of recent security events (failed sign-ins, exports, saved attachments), shown in Settings | Optional reading |
+| Authenticode and Store packaging | Signed installer and an MSIX build, so SmartScreen warnings fade | Fewer warnings |
 
 ## KeePass support plan
 
