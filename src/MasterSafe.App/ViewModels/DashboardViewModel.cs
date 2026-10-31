@@ -27,6 +27,28 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<OtpItemViewModel> Accounts { get; } = [];
 
+    /// <summary>The account waiting for the user to confirm its deletion.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPendingDelete))]
+    private OtpItemViewModel? _pendingDelete;
+
+    /// <summary>True while a deletion waits for confirmation.</summary>
+    public bool HasPendingDelete => PendingDelete is not null;
+
+    [RelayCommand]
+    private void RequestDelete(OtpItemViewModel? item) => PendingDelete = item;
+
+    [RelayCommand]
+    private void CancelDelete() => PendingDelete = null;
+
+    [RelayCommand]
+    private void ConfirmDelete()
+    {
+        var item = PendingDelete;
+        PendingDelete = null;
+        Delete(item);
+    }
+
     /// <summary>True when there are no accounts, so the view can show its empty state.</summary>
     public bool IsEmpty => Accounts.Count == 0;
 

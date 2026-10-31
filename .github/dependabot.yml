@@ -1,0 +1,26 @@
+# Keeps dependencies patched. Security updates for known vulnerabilities are opened as soon as an advisory is
+# published (enable "Dependabot security updates" in the repository settings); the weekly runs below keep
+# everything else current. Review and merge these pull requests promptly, then tag a new release.
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      avalonia:
+        patterns: ["Avalonia*"]
+      testing:
+        patterns: ["xunit*", "FluentAssertions", "Moq", "coverlet*", "Microsoft.NET.Test.Sdk"]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"

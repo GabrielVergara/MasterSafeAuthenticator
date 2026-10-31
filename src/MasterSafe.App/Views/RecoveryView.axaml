@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             x:Class="MasterSafe.App.Views.RecoveryView"
+             x:DataType="vm:RecoveryViewModel">
+  <ScrollViewer>
+    <StackPanel Spacing="16" MaxWidth="640" HorizontalAlignment="Left" Margin="0,0,14,0">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Recovery" Classes="h1" />
+        <TextBlock Classes="hint"
+                   Text="If you forget your master password, nobody can recover your data for you. A recovery key is your safety net." />
+      </StackPanel>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Text="How it works" Classes="h2" />
+          <TextBlock TextWrapping="Wrap"
+                     Text="1. Create a recovery key and save its file somewhere safe, away from this computer, with its passphrase." />
+          <TextBlock TextWrapping="Wrap"
+                     Text="2. Create a recovery backup now and then. It holds your accounts and passwords, locked so that only your recovery key can open it. Keep it anywhere, even in the cloud." />
+          <TextBlock TextWrapping="Wrap"
+                     Text="3. If you forget your master password, choose Forgot your master password on the sign-in screen and restore from the backup with your key." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsNotSupported}">
+        <TextBlock Classes="error"
+                   Text="This computer's operating system does not provide the post-quantum encryption needed for recovery keys. Update the system and try again." />
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsAvailable}">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Recovery key" Classes="h2" />
+          <TextBlock Text="{Binding KeyInfo}" TextWrapping="Wrap" />
+
+          <StackPanel Spacing="12" IsVisible="{Binding CanCreateKey}">
+            <TextBlock Classes="hint"
+                       Text="The key file is protected by a passphrase you choose now. You need both the file and the passphrase to use it. Write the passphrase down and keep it separately from the file." />
+            <StackPanel>
+              <TextBlock Text="Passphrase for the recovery key" Classes="label" />
+              <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding Passphrase, Mode=TwoWay}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="Confirm passphrase" Classes="label" />
+              <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding ConfirmPassphrase, Mode=TwoWay}" />
+            </StackPanel>
+            <Button Classes="accent" Content="Create and save recovery key..." HorizontalAlignment="Left"
+                    Command="{Binding CreateKeyCommand}" IsEnabled="{Binding !IsBusy}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding HasKey}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Recovery backup" Classes="h2" />
+          <TextBlock Text="{Binding LastBackupInfo}" />
+          <TextBlock Classes="hint"
+                     Text="Make a new recovery backup after you add or change accounts and passwords, so it stays up to date." />
+          <Button Classes="accent" Content="Create recovery backup..." HorizontalAlignment="Left"
+                  Command="{Binding CreateBackupCommand}" IsEnabled="{Binding !IsBusy}" />
+        </StackPanel>
+      </Border>
+
+      <TextBlock Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -18,7 +18,7 @@
   .\installer\build-windows.ps1 -Version 1.2.0 -SigningKey C:\keys\masterSafe-release.key
 #>
 param(
-    [string]$Version = "1.1.0",
+    [string]$Version = "1.2.0",
     [string]$SigningKey = ""
 )
 

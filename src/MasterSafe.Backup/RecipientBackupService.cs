@@ -35,14 +35,28 @@ public sealed class RecipientBackupService
     /// <summary>Creates a recovery key pair. Keep the private key offline; share only the public key.</summary>
     public PqKeyPair GenerateRecoveryKeyPair() => _kem.GenerateKeyPair();
 
-    /// <summary>Encrypts the accounts to <paramref name="recipientPublicKey"/> and uploads them. Returns the location.</summary>
-    public async Task<string> ExportAsync(
+    /// <summary>Encrypts only the authenticator accounts to <paramref name="recipientPublicKey"/> and uploads them.</summary>
+    public Task<string> ExportAsync(
         IEnumerable<OtpAccount> accounts,
         byte[] recipientPublicKey,
         IBackupProvider provider,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(accounts);
+        return ExportContentsAsync(new VaultContents { Accounts = accounts.ToList() }, recipientPublicKey, provider, cancellationToken);
+    }
+
+    /// <summary>
+    /// Encrypts everything in the vault (accounts and passwords) to <paramref name="recipientPublicKey"/> and uploads
+    /// it. Returns the location.
+    /// </summary>
+    public async Task<string> ExportContentsAsync(
+        VaultContents contents,
+        byte[] recipientPublicKey,
+        IBackupProvider provider,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(contents);
         ArgumentNullException.ThrowIfNull(recipientPublicKey);
         ArgumentNullException.ThrowIfNull(provider);
 
@@ -51,7 +65,7 @@ public sealed class RecipientBackupService
         var encapsulation = _kem.Encapsulate(recipientPublicKey);
         try
         {
-            var json = JsonSerializer.SerializeToUtf8Bytes(accounts.ToList());
+            var json = JsonSerializer.SerializeToUtf8Bytes(contents);
             var compressed = BoundedGzip.Compress(json);
             CryptographicOperations.ZeroMemory(json);
             var payload = _encryption.Encrypt(compressed, dataKey, ContentAad(id));
@@ -82,9 +96,18 @@ public sealed class RecipientBackupService
         }
     }
 
-    /// <summary>Downloads a recovery backup and decrypts it with the private recovery key.</summary>
+    /// <summary>Downloads a recovery backup and returns only its authenticator accounts.</summary>
     /// <exception cref="InvalidPasswordException">The key is wrong or the file was changed.</exception>
     public async Task<IReadOnlyList<OtpAccount>> ImportAsync(
+        string fileName,
+        byte[] recipientPrivateKey,
+        IBackupProvider provider,
+        CancellationToken cancellationToken = default)
+        => (await ImportContentsAsync(fileName, recipientPrivateKey, provider, cancellationToken).ConfigureAwait(false)).Accounts;
+
+    /// <summary>Downloads a recovery backup and decrypts all of it (accounts and passwords) with the private recovery key.</summary>
+    /// <exception cref="InvalidPasswordException">The key is wrong or the file was changed.</exception>
+    public async Task<VaultContents> ImportContentsAsync(
         string fileName,
         byte[] recipientPrivateKey,
         IBackupProvider provider,
@@ -124,7 +147,17 @@ public sealed class RecipientBackupService
 
             var json = BoundedGzip.Decompress(decrypted);
             CryptographicOperations.ZeroMemory(decrypted);
-            return JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [];
+            try
+            {
+                // Backups made before passwords were included hold just a JSON array of accounts.
+                return json.Length > 0 && json[0] == (byte)'['
+                    ? new VaultContents { Accounts = JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [] }
+                    : JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(json);
+            }
         }
         finally
         {

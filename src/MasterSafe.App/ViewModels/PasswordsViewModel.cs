@@ -45,6 +45,28 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>Entries matching the current search.</summary>
     public ObservableCollection<PasswordEntry> Entries { get; } = [];
 
+    /// <summary>The entry waiting for the user to confirm its deletion.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPendingDelete))]
+    private PasswordEntry? _pendingDelete;
+
+    /// <summary>True while a deletion waits for confirmation.</summary>
+    public bool HasPendingDelete => PendingDelete is not null;
+
+    [RelayCommand]
+    private void RequestDelete(PasswordEntry? entry) => PendingDelete = entry;
+
+    [RelayCommand]
+    private void CancelDelete() => PendingDelete = null;
+
+    [RelayCommand]
+    private void ConfirmDelete()
+    {
+        var entry = PendingDelete;
+        PendingDelete = null;
+        Delete(entry);
+    }
+
     /// <summary>True when no entries match, so the view can show its empty state.</summary>
     public bool IsEmpty => Entries.Count == 0;
 

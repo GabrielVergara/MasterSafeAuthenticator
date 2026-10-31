@@ -6,6 +6,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Crypto;
 
 namespace MasterSafe.App.ViewModels;
@@ -89,7 +90,52 @@ public sealed partial class SettingsViewModel : ViewModelBase
         UnlockMethodStatus = error ?? $"{row.Label} removed.";
     }
 
-    partial void OnSelectedThemeChanged(AppTheme value) => App.ApplyTheme(value);
+    /// <summary>Creates the settings page. With a store, values are loaded from it and saved when they change.</summary>
+    public SettingsViewModel(ISettingsStore? store = null)
+    {
+        _store = store;
+        if (store is not null)
+        {
+            var saved = store.Load();
+            _selectedTheme = saved.Theme;
+            _minimizeToTray = saved.MinimizeToTray;
+            _autoLockMinutes = saved.AutoLockMinutes;
+        }
+    }
+
+    private readonly ISettingsStore? _store;
+
+    partial void OnSelectedThemeChanged(AppTheme value)
+    {
+        App.ApplyTheme(value);
+        SaveSettings();
+    }
+
+    partial void OnMinimizeToTrayChanged(bool value) => SaveSettings();
+
+    partial void OnAutoLockMinutesChanged(int value) => SaveSettings();
+
+    private void SaveSettings()
+    {
+        if (_store is null)
+        {
+            return;
+        }
+
+        try
+        {
+            // Load first so settings owned by other screens (recovery key, vault list) are kept.
+            var settings = _store.Load();
+            settings.Theme = SelectedTheme;
+            settings.MinimizeToTray = MinimizeToTray;
+            settings.AutoLockMinutes = AutoLockMinutes;
+            _store.Save(settings);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Settings are a convenience; the app keeps working with the values in memory.
+        }
+    }
 
     [RelayCommand]
     private void ApplyCurrentTheme() => App.ApplyTheme(SelectedTheme);

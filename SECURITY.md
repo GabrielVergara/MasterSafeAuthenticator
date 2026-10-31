@@ -14,6 +14,16 @@ Use GitHub's private reporting: open the repository's **Security** tab and choos
 Please include the version, your operating system, what you did, and what you expected to happen. I will
 acknowledge a report as soon as I can, work on a fix, and credit you in the release notes if you wish.
 
+## How quickly problems are fixed
+
+Targets for a one-person project, measured from when a problem is confirmed: critical within 2 days, high within 7,
+medium within 30, low in the next release. Every build fails on known vulnerable dependencies, Dependabot proposes
+updates weekly and on every new advisory, and releases bundle the newest patched .NET runtime available when they are
+built. Details are in [docs/Roadmap.md](docs/Roadmap.md) and the assessment in [docs/OwaspChecklist.md](docs/OwaspChecklist.md).
+
+(Repository maintainer: turn on **Dependabot security updates**, **secret scanning** and **push protection** in the
+repository's Security settings.)
+
 ## What counts
 
 Weaknesses in how the vault, backups, unlock methods or release signatures protect your data, or that let a

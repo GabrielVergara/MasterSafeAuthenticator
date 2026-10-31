@@ -10,13 +10,19 @@
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<!-- Known-vulnerability gate: every build checks direct and transitive packages against the NuGet advisory database.
+	     With TreatWarningsAsErrors a vulnerable package fails the build. NU1900 (advisory source unreachable, e.g. offline) stays a warning. -->
+	<NuGetAudit>true</NuGetAudit>
+	<NuGetAuditMode>all</NuGetAuditMode>
+	<NuGetAuditLevel>low</NuGetAuditLevel>
+	<WarningsNotAsErrors>$(WarningsNotAsErrors);NU1900</WarningsNotAsErrors>
 	<EnableNETAnalyzers>true</EnableNETAnalyzers>
 	<AnalysisLevel>latest</AnalysisLevel>
 	<GenerateDocumentationFile>false</GenerateDocumentationFile>
 	<Deterministic>true</Deterministic>
 	<Company>MasterSafe</Company>
 	<Product>MasterSafe</Product>
-	<Version>1.1.0</Version>
+	<Version>1.2.0</Version>
 	<Authors>Gabriel Vergara Ezcurdia</Authors>
 	<Copyright>Copyright (c) Gabriel Vergara Ezcurdia</Copyright>
   </PropertyGroup>

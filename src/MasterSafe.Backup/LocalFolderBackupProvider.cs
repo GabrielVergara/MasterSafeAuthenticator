@@ -28,7 +28,7 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
         ArgumentException.ThrowIfNullOrEmpty(fileName);
         ArgumentNullException.ThrowIfNull(encryptedContent);
 
-        var path = Path.Combine(_folder, fileName);
+        var path = SafePath(fileName);
         await File.WriteAllBytesAsync(path, encryptedContent, cancellationToken).ConfigureAwait(false);
         return path;
     }
@@ -37,10 +37,15 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
     public async Task<byte[]> DownloadAsync(string fileName, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(fileName);
-        var path = Path.Combine(_folder, fileName);
+        var path = SafePath(fileName);
         if (!File.Exists(path))
         {
             throw new FileNotFoundException("Backup not found.", path);
+        }
+
+        if (new FileInfo(path).Length > MaxBackupBytes)
+        {
+            throw new InvalidDataException("The backup is larger than the allowed limit.");
         }
 
         return await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
@@ -55,5 +60,20 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
             .Select(n => n!)
             .ToList();
         return Task.FromResult<IReadOnlyList<string>>(files);
+    }
+
+    /// <summary>Largest backup that will be read (32 MiB).</summary>
+    public const long MaxBackupBytes = 32L * 1024 * 1024;
+
+    // A backup name must be a plain file name. Names with folders, "..", or a full path are refused so a
+    // crafted name can never reach outside the backup folder.
+    private string SafePath(string fileName)
+    {
+        if (fileName != Path.GetFileName(fileName) || fileName is "." or ".." || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        {
+            throw new ArgumentException("The backup name must be a plain file name.", nameof(fileName));
+        }
+
+        return Path.Combine(_folder, fileName);
     }
 }

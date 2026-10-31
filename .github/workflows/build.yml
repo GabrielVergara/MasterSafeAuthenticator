@@ -30,8 +30,9 @@ jobs:
       - name: Test
         run: dotnet test MasterSafe.slnx --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory ./coverage
 
-      - name: Check for vulnerable packages
-        run: dotnet list MasterSafe.slnx package --vulnerable --include-transitive
+      - name: Fail on known vulnerable packages
+        shell: bash
+        run: bash scripts/check-vulnerabilities.sh
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

@@ -4,12 +4,16 @@
 // License: See LICENSE
 
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using MasterSafe.App.Services;
 using MasterSafe.App.ViewModels;
 using MasterSafe.App.Views;
+using MasterSafe.Backup;
 using MasterSafe.Crypto;
+using MasterSafe.PostQuantum;
 using MasterSafe.Platform;
 
 namespace MasterSafe.App;
@@ -31,11 +35,11 @@ public partial class App : Application
             desktop.MainWindow = splash;
             splash.Show();
 
-            var mainViewModel = new MainWindowViewModel(CreateVault(), PlatformServices.CreateUnlockProviders(), startIdleTimer: true);
-            var mainWindow = new MainWindow
-            {
-                DataContext = mainViewModel,
-            };
+            var mainWindow = new MainWindow();
+            var (vault, services) = CreateServices(mainWindow);
+            var mainViewModel = new MainWindowViewModel(vault, PlatformServices.CreateUnlockProviders(), startIdleTimer: true, services: services);
+            mainWindow.DataContext = mainViewModel;
+            ApplyTheme(mainViewModel.Settings.SelectedTheme);
 
             SetupTray(desktop, mainWindow, mainViewModel);
             _ = ShowMainWindowAfterSplashAsync(desktop, splash, mainWindow);
@@ -58,17 +62,28 @@ public partial class App : Application
 
     private static readonly TimeSpan SplashDuration = TimeSpan.FromMilliseconds(2000);
 
-    private static IVaultService CreateVault()
+    private static (IVaultService Vault, AppServices Services) CreateServices(Window owner)
     {
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "MasterSafe");
-        Directory.CreateDirectory(folder);
+        var paths = AppPaths.Default;
+        Directory.CreateDirectory(paths.DataFolder);
 
-        return new VaultService(
-            new FileVaultRepository(Path.Combine(folder, "vault.sauth")),
-            new AesGcmEncryptionService(),
-            new MasterPasswordService());
+        var settings = new SettingsStore(paths.SettingsPath);
+        var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);
+        var catalog = new VaultCatalog(paths, repository, settings);
+        var encryption = new AesGcmEncryptionService();
+        var passwords = new MasterPasswordService();
+
+        var vault = new VaultService(repository, encryption, passwords);
+        var hybrid = PostQuantumProviderFactory.CreateHybrid();
+        var services = new AppServices(
+            paths,
+            catalog,
+            settings,
+            new WindowFileDialogs(() => owner),
+            new RecoveryKeyService(encryption, passwords, hybrid),
+            new RecipientBackupService(encryption, hybrid));
+
+        return (vault, services);
     }
 
     private void SetupTray(

@@ -104,6 +104,45 @@ public static class HelpContent
             open About, and exit the application.
             """),
         new(
+            "Forgotten master password",
+            "Recovery keys, recovery backups and starting over.",
+            """
+            Nobody can reset a master password, because your data is encrypted with it. Prepare while you
+            still remember it:
+
+            1. Open Recovery and create a recovery key. Save the key file somewhere safe and away from
+               this computer, and write down its passphrase separately.
+            2. Create a recovery backup there now and then, especially after adding accounts or passwords.
+               It holds your accounts and passwords, locked so that only your recovery key can open it.
+
+            If you forget the password:
+
+            - On the sign-in screen choose "Forgot your master password?".
+            - Restore from a recovery backup: pick the backup file, your key file, its passphrase and a
+              new master password.
+            - Or start a new vault. Your old vault is moved to the archive, not deleted. If you find the
+              password later, open the old vault from the Vaults page.
+            - Windows Hello or a security key may still open your vault. If so, change the master
+              password in Settings.
+            """),
+        new(
+            "Vaults and files",
+            "Where your data is stored and how to open another vault.",
+            """
+            Your data is one encrypted file, a vault, kept in the MasterSafe folder:
+            Windows: %LocalAppData%\MasterSafe. Linux: ~/.local/share/MasterSafe.
+
+            The Vaults page shows these locations and lists your vaults:
+            - Open a vault file: use a vault from a USB stick or another folder. MasterSafe leaves the file
+              where it is.
+            - Start a new vault: moves the current vault into the archive and creates an empty one.
+            - Open an archived vault again, show a file in its folder, or delete an old vault. Deleting asks
+              for confirmation and cannot be undone.
+
+            To move to another computer, copy vault.sauth there, install MasterSafe and choose "I already
+            have a vault file". Uninstalling never removes your vault.
+            """),
+        new(
             "Security model",
             "How your data is protected.",
             """

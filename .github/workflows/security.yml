@@ -29,6 +29,17 @@ jobs:
       - name: Analyze
         uses: github/codeql-action/analyze@v3
 
+  dependency-audit:
+    name: Known vulnerable packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Fail on known vulnerable packages
+        run: bash scripts/check-vulnerabilities.sh
+
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest

@@ -53,8 +53,33 @@ method (a "slot"), wrapped under a key that only that method can produce. Conseq
   they remain until garbage collected.
 - **Backups over https only.** WebDAV addresses must be `https://` (plain `http://` is allowed only on
   the same computer) and may not contain a user name or password.
+- **Password policy.** New master passwords and recovery passphrases need at least 12 characters (OWASP ASVS 2.1.1).
+- **Safe file names and image sizes.** Backup names must be plain file names, so a crafted name cannot reach outside
+  the backup folder; QR images are limited to 20 MiB and 40 megapixels before they are decoded.
+- **Confirmation before deletion** of accounts, passwords and vaults.
 - **No raw key stored.** The older "remember me" feature, which kept the vault key in Windows Credential
   Manager, was removed. Windows Hello replaces it.
+
+## Forgotten master password and recovery
+
+There is no backdoor, so a forgotten master password cannot be reset. These are the ways forward, in the order to try them:
+
+1. **Another unlock method.** Windows Hello or a security key may still open the vault. Then change the master
+   password in Settings.
+2. **A recovery backup.** On the Recovery page you create a **recovery key** (a hybrid post-quantum key pair; the
+   private half is saved in a file protected by a passphrase) and, now and then, a **recovery backup**: your accounts
+   and passwords encrypted so only that key can open them. After a lost password, "Forgot your master password?" on the
+   sign-in screen restores the backup into a new vault with a new master password.
+3. **Start over, keeping the old vault.** The old vault is moved to the `archive` folder (not deleted). If the password
+   is found later, open it from the Vaults page, or delete it for good after a confirmation.
+
+The recovery key is only as safe as the place you keep the file and its passphrase. Keep them away from this computer.
+
+## Several vaults
+
+The app works with one vault file at a time (`Open a vault file` can switch). Switching, archiving or deleting a
+vault locks the current session first. Vaults opened from outside the app folder are never moved or deleted by the app.
+Deleting a vault also removes the Windows Hello credentials created for it.
 
 ## Older vaults
 

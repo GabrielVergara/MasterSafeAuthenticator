@@ -3,8 +3,11 @@
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.LoginView"
              x:DataType="vm:LoginViewModel">
-  <Border Classes="card" Width="380" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="28">
-    <StackPanel Spacing="14">
+  <ScrollViewer VerticalAlignment="Center" HorizontalAlignment="Center" VerticalScrollBarVisibility="Auto">
+  <Border Classes="card" Width="440" Margin="16" Padding="28">
+    <Grid>
+    <ContentControl Content="{Binding Forgot}" IsVisible="{Binding Forgot.IsOpen}" />
+    <StackPanel Spacing="14" IsVisible="{Binding !Forgot.IsOpen}">
       <Image Source="/Assets/logo-256.png" Width="72" Height="72" HorizontalAlignment="Center" />
       <StackPanel Spacing="2">
         <TextBlock Text="{Binding Title}" Classes="h1" HorizontalAlignment="Center" />
@@ -29,8 +32,8 @@
             <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
           </TextBox.KeyBindings>
         </TextBox>
-        <TextBlock Classes="hint" Margin="0,8,0,0"
-                   Text="Use a long passphrase (at least 8 characters). It cannot be recovered if you forget it." />
+        <TextBlock Classes="hint" Margin="0,8,0,0" Text="{Binding PasswordHint}" />
+        <TextBlock Classes="hint" Text="It cannot be recovered if you forget it. After signing in you can set up a recovery key." />
       </StackPanel>
 
       <TextBlock Classes="error" Text="{Binding Error}"
@@ -48,6 +51,12 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+      <Button Content="I already have a vault file..." HorizontalAlignment="Center" IsVisible="{Binding IsCreateMode}"
+              Command="{Binding Forgot.OpenVaultFileCommand}" />
+      <Button Content="Forgot your master password?" HorizontalAlignment="Center" IsVisible="{Binding !IsCreateMode}"
+              Command="{Binding ShowForgotCommand}" />
     </StackPanel>
+    </Grid>
   </Border>
+  </ScrollViewer>
 </UserControl>

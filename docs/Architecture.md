@@ -55,6 +55,22 @@ The Windows target framework is selected by the `MasterSafeWindowsTarget` MSBuil
 `Directory.Build.props`: true on Windows hosts, or with `-p:MasterSafeTargetOs=windows`; build for Linux from
 any host with `-p:MasterSafeTargetOs=linux`. Windows-only code sits behind `#if WINDOWS`.
 
+## Application services
+
+`MasterSafe.App/Services` holds the pieces that are not screens, so they can be tested without a window:
+
+| Type | Role |
+| --- | --- |
+| `AppPaths` | Where files live (`%LocalAppData%\MasterSafe` or `~/.local/share/MasterSafe`), see [FileLocations.md](FileLocations.md) |
+| `SettingsStore`, `AppSettings` | Settings saved as JSON, written atomically; no secrets |
+| `VaultCatalog` | Lists vault files, archives the old vault, switches the active vault, deletes only inside the app folder |
+| `SwitchableVaultRepository` (Crypto) | A vault repository whose file can change at run time |
+| `IFileDialogs`, `WindowFileDialogs` | File and folder pickers behind an interface |
+| `AppServices` | The bundle passed to the view models; absent in design and test mode |
+| `RecoveryKeyService`, `RecipientBackupService` (Backup) | Recovery key files and recovery backups |
+
+View models added for these: `VaultsViewModel`, `RecoveryViewModel`, `ForgotPasswordViewModel`.
+
 ## Principles
 
 - Offline-first: no network dependency to generate codes.

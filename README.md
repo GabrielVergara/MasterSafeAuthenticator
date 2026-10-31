@@ -18,11 +18,16 @@ by Gabriel Vergara Ezcurdia
   keep a `.bak` copy.
 - Auto-lock after inactivity; locking wipes the key and decrypted data from memory.
 - Encrypted `.sauth` backups to a local folder or a WebDAV server (Nextcloud, ownCloud; https only).
+- **Recovery**: a recovery key and recovery backups let you get your data back if you forget the master password.
+  On the sign-in screen, "Forgot your master password?" can restore from a recovery backup, or start a new vault
+  while the old one is kept in an archive (never deleted) and can be opened later if the password is found.
+- **Vaults page**: shows where your files are stored, opens any vault file (a USB stick, another folder), and
+  deletes old vaults after a confirmation. Settings are saved between runs.
 - **Post-quantum**: hybrid ECDH-P384 + ML-KEM-768 recovery-key backups (library), ML-DSA-65 signed releases.
 - System tray, light/dark theme, in-app help.
 
-Not done yet: a recovery-key screen in the app, hardware unlock (Hello, security keys) on Linux, more than one
-security key per vault, and a mobile app. See [docs/ThreatModel.md](docs/ThreatModel.md) for the full list.
+Planned: KeePass import, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
+a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
 
 ## Download and install
 
@@ -41,7 +46,8 @@ MasterSafe.Cli verify <downloaded-file> masterSafe-release.pub
 ```
 
 Your vault is stored in `%LocalAppData%\MasterSafe\vault.sauth` on Windows and `~/.local/share/MasterSafe/vault.sauth`
-on Linux. Uninstalling never deletes it.
+on Linux. Uninstalling never deletes it. [docs/FileLocations.md](docs/FileLocations.md) lists every file the app
+creates and where.
 
 ## Build and test
 
@@ -52,6 +58,7 @@ dotnet restore MasterSafe.slnx
 dotnet build MasterSafe.slnx -c Release
 dotnet test MasterSafe.slnx -c Release
 dotnet run --project src/MasterSafe.App          # start the app
+bash scripts/check-vulnerabilities.sh            # fail if any package has a known vulnerability
 ```
 
 On Windows the build targets `net10.0-windows10.0.19041.0` (needed for Windows Hello). On other systems it
@@ -107,8 +114,17 @@ MasterSafe.slnx
   [threat model](docs/ThreatModel.md) for what is and is not protected.
 
 See [docs/Security.md](docs/Security.md), [docs/ThreatModel.md](docs/ThreatModel.md),
+[docs/OwaspChecklist.md](docs/OwaspChecklist.md), [docs/FileLocations.md](docs/FileLocations.md),
 [docs/Architecture.md](docs/Architecture.md), [docs/BackupFormat.md](docs/BackupFormat.md),
-[docs/PQC.md](docs/PQC.md), [docs/Documentation.md](docs/Documentation.md) and [docs/SBOM.md](docs/SBOM.md).
+[docs/PQC.md](docs/PQC.md), [docs/Roadmap.md](docs/Roadmap.md), [docs/Documentation.md](docs/Documentation.md)
+and [docs/SBOM.md](docs/SBOM.md).
+
+### Patching and compliance
+
+Every build checks all packages against the NuGet advisory database and fails if one has a known vulnerability.
+CI repeats the check on Windows and Linux, weekly scans catch new advisories, Dependabot opens update pull requests,
+and release builds bundle the newest patched .NET runtime. The self-assessment against the OWASP ASVS is in
+[docs/OwaspChecklist.md](docs/OwaspChecklist.md); it is a self-assessment, not a certification.
 
 ## Packages
 

@@ -34,7 +34,8 @@ flowchart LR
     DEK -->|AES-256-GCM| FILE[recovery-*.sauth]
 ```
 
-Any device holding the public key (a second computer, later a phone) can write a backup. Only the holder of the
+The backup holds the whole vault (accounts and passwords). Any device holding the public key (a second computer,
+later a phone) can write a backup. Only the holder of the
 private recovery key can open it, and keep it offline. The backup id and algorithm are bound into the encryption.
 
 ## Platform support
@@ -43,10 +44,13 @@ private recovery key can open it, and keep it offline. The backup id and algorit
 Windows 11 development machine. On Linux they need OpenSSL 3.5 or newer. Features that need them are
 checked at run time, and the vault itself never depends on them, so vaults stay portable.
 
-## Not done yet
+## In the app
 
-- A screen in the app to create the recovery key pair and to export or import recovery backups
-  (the library and tests exist).
+- **Recovery page**: creates the recovery key (the private key goes into a passphrase-protected `.msrk` file that you
+  save yourself; the app keeps only the public key) and creates recovery backups of the whole vault.
+- **Forgot your master password**: restores a recovery backup into a new vault. See [Security.md](Security.md).
+
+## Not done yet
 - A post-quantum design for the Windows Hello unlock slot. Hello uses an RSA key held in the TPM, and RSA is
   breakable by a quantum computer. The slot is still safe against someone who only has the vault file, because
   the RSA public key is not stored in it, and the master-password slot does not use RSA at all. An attacker

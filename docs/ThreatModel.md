@@ -29,6 +29,17 @@ flowchart TD
 | Has your security key but not its PIN | No | The vault asks the key for a secret, and the key requires its PIN and a touch. Too many wrong PINs lock the key |
 | Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https |
 
+## Recovery and old vaults
+
+| Risk | Position |
+| --- | --- |
+| Someone finds your recovery key file | They also need its passphrase. The key file holds the private key encrypted with Argon2id and AES-256-GCM. Keep file and passphrase apart |
+| Someone finds a recovery backup | It is encrypted to the recovery public key (hybrid, post-quantum). Without the private key it is unreadable |
+| Someone gets both the key file and its passphrase | They can read every recovery backup you made. Treat them like the master password |
+| An archived old vault | Still encrypted under its old password. It stays on disk until you delete it, so an old password that leaked still protects only that old data |
+| `settings.json` | Holds no secrets: theme, paths and the recovery **public** key |
+| A recovery backup that is out of date | Restoring gives the data as of the backup. The Recovery page shows when the last one was made |
+
 ## Mitigations for the unlocked state
 
 An unlocked application can always be read by software running as the same user. To shorten the window, the
@@ -50,4 +61,3 @@ locks, and clears copied passwords from the clipboard after 30 seconds.
   password works everywhere. A Linux FIDO2 backend (libfido2) is planned.
 - Only one security key can be set up per vault. Adding a second key replaces the first.
 - A security key must support the CTAP2 `hmac-secret` extension. Older U2F-only keys do not.
-- A confirmation step before deleting an account.

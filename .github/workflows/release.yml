@@ -18,6 +18,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Fail on known vulnerable packages
+        shell: bash
+        run: bash scripts/check-vulnerabilities.sh
+
       - name: Test
         run: dotnet test MasterSafe.slnx --configuration Release
 
@@ -56,6 +60,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Fail on known vulnerable packages
+        run: bash scripts/check-vulnerabilities.sh
+
       - name: Test
         run: dotnet test MasterSafe.slnx --configuration Release
 
@@ -64,6 +71,11 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           bash installer/linux/build-linux.sh "$version" linux-x64
           bash installer/linux/build-linux.sh "$version" linux-arm64
+
+      - name: Software bill of materials
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet CycloneDX MasterSafe.slnx -o artifacts -f sbom.cyclonedx.json --json
 
       - name: Sign packages
         env:
@@ -83,6 +95,7 @@ jobs:
             artifacts/*.tar.gz
             artifacts/*.tar.gz.sha256
             artifacts/*.tar.gz.sig
+            artifacts/sbom.cyclonedx.json
 
   publish:
     needs: [windows, linux]

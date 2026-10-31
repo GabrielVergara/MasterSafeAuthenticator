@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -110,7 +110,9 @@ classDiagram
 
 On start a rounded splash window shows the logo, product name, author and version for about two seconds, then the
 main window opens. A left sidebar switches between Authenticator codes, Passwords, Add account, Import, Backup,
-Settings and Help; Lock vault and About are at the bottom. Every input field has a label above it.
+Recovery, Vaults, Settings and Help; Lock vault and About are at the bottom. Every input field has a label above it.
+The sign-in screen has "Forgot your master password?", and the first-run screen has "I already have a vault file".
+Where every file is kept: [FileLocations.md](FileLocations.md).
 
 ## 7. Building, testing and packaging
 
@@ -142,6 +144,11 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Unlock with Security key, then cancel the prompt | A "cancelled" message; the master password still works |
 | Remove the security key in Settings | The login button disappears; the master password still works |
 | Change the master password | Hello and the security key still unlock the vault |
+| Recovery, Create and save recovery key, then Create recovery backup | A `.msrk` key file and a `recovery-*.sauth` file are written where you chose |
+| Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
+| Vaults, Start a new vault, then Open the archived vault | The old vault opens again with its old password |
+| Vaults, Delete on an archived vault | Asks first; the file is gone afterwards and the other vaults are untouched |
+| Close and reopen the app | Theme, tray and auto-lock choices are remembered |
 
 Tested on Windows 11 build 26100 (WebAuthn API version 9) with a Thales SafeNet eToken FIDO key.
 A key must support the CTAP2 `hmac-secret` extension and have a PIN (Windows offers to set one).

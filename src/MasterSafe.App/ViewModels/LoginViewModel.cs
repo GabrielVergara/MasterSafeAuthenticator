@@ -17,6 +17,7 @@ public sealed partial class LoginViewModel : ViewModelBase
 {
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    [NotifyPropertyChangedFor(nameof(PasswordHint))]
     private string _masterPassword = string.Empty;
 
     [ObservableProperty]
@@ -40,8 +41,20 @@ public sealed partial class LoginViewModel : ViewModelBase
     [ObservableProperty]
     private string _confirmPassword = string.Empty;
 
+    /// <summary>The "forgot your master password" panel. Set by the shell.</summary>
+    public ForgotPasswordViewModel Forgot { get; set; } = new();
+
+    /// <summary>Opens the "forgot your master password" panel.</summary>
+    [RelayCommand]
+    private void ShowForgot() => Forgot.IsOpen = true;
+
+    /// <summary>Guidance shown while a new master password is typed.</summary>
+    public string PasswordHint => MasterPassword.Length >= MinPasswordLength
+        ? "Length is good. A phrase of several words is easier to remember than random characters."
+        : $"At least {MinPasswordLength} characters ({MinPasswordLength - MasterPassword.Length} more). A phrase of several words works well.";
+
     /// <summary>Minimum master password length when creating a vault.</summary>
-    public const int MinPasswordLength = 8;
+    public const int MinPasswordLength = 12;
 
     public string Title => IsCreateMode ? "Create your vault" : "Unlock your vault";
 

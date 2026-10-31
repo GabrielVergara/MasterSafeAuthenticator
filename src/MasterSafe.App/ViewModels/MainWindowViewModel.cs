@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 using MasterSafe.Crypto;
 
@@ -22,6 +23,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private readonly IReadOnlyList<ISecretProvider> _providers;
     private readonly Func<DateTimeOffset> _clock;
     private readonly SemaphoreSlim _saveLock = new(1, 1);
+    private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly DispatcherTimer? _idleTimer;
     private byte[]? _sessionKey;
     private DateTimeOffset _lastActivity;
@@ -44,6 +46,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             AccountEditorViewModel => "Add",
             ImportViewModel => "Import",
             BackupViewModel => "Backup",
+            VaultsViewModel => "Vaults",
+            RecoveryViewModel => "Recovery",
             SettingsViewModel => "Settings",
             HelpViewModel => "Help",
             _ => string.Empty,
@@ -55,7 +59,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public PasswordsViewModel Passwords { get; } = new();
 
-    public SettingsViewModel Settings { get; } = new();
+    public SettingsViewModel Settings { get; }
+
+    public VaultsViewModel Vaults { get; }
+
+    public RecoveryViewModel Recovery { get; }
 
     public BackupViewModel Backup { get; } = new();
 
@@ -75,17 +83,23 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <param name="providers">Hardware or OS unlock methods offered on this platform.</param>
     /// <param name="clock">Time source (replaced in tests).</param>
     /// <param name="startIdleTimer">Starts the auto-lock timer; needs the UI thread.</param>
+    /// <param name="services">Vault management, settings and recovery services; null in design and test mode.</param>
     public MainWindowViewModel(
         IVaultService? vault = null,
         IEnumerable<ISecretProvider>? providers = null,
         Func<DateTimeOffset>? clock = null,
-        bool startIdleTimer = false)
+        bool startIdleTimer = false,
+        AppServices? services = null)
     {
         _vault = vault;
         _providers = providers?.ToList() ?? [];
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _lastActivity = _clock();
         Dashboard = new DashboardViewModel();
+        Settings = new SettingsViewModel(services?.SettingsStore);
+        Vaults = new VaultsViewModel(services, _providers);
+        Recovery = new RecoveryViewModel(services, BuildContents);
+        Login.Forgot = new ForgotPasswordViewModel(services, vault);
         _currentPage = Login;
 
         if (_vault is null)
@@ -116,6 +130,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             Dashboard.Add(account);
             CurrentPage = Dashboard;
+        };
+        Vaults.ActiveVaultChanged = OnActiveVaultChangedAsync;
+        Login.Forgot.ActiveVaultChanged = OnActiveVaultChangedAsync;
+        Login.Forgot.Restored = async password =>
+        {
+            await InitializeLoginAsync();
+            await UnlockVaultAsync(password);
         };
         Settings.ChangePasswordHandler = ChangeMasterPasswordAsync;
         Settings.AddMethodHandler = AddUnlockMethodAsync;
@@ -312,6 +333,19 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Reloads the lists of unlock methods shown on the login screen and in Settings.</summary>
     public async Task RefreshUnlockMethodsAsync()
     {
+        await _refreshLock.WaitAsync();
+        try
+        {
+            await RefreshUnlockMethodsCoreAsync();
+        }
+        finally
+        {
+            _refreshLock.Release();
+        }
+    }
+
+    private async Task RefreshUnlockMethodsCoreAsync()
+    {
         Login.UnlockMethods.Clear();
         Settings.UnlockMethods.Clear();
         Settings.AddableMethods.Clear();
@@ -375,6 +409,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private void ShowHelp() => CurrentPage = Help;
 
     [RelayCommand]
+    private void ShowVaults()
+    {
+        Vaults.Refresh();
+        CurrentPage = Vaults;
+    }
+
+    [RelayCommand]
+    private void ShowRecovery()
+    {
+        Recovery.Refresh();
+        CurrentPage = Recovery;
+    }
+
+    [RelayCommand]
     private void ShowAbout() => AboutRequested?.Invoke(this, EventArgs.Empty);
 
     /// <summary>Locks the vault: wipes the session key and removes decrypted data from memory-backed view models.</summary>
@@ -409,6 +457,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             _ = RefreshUnlockMethodsAsync();
         }
+    }
+
+    // The active vault changed (another file opened, or a new vault started): lock and reload the login screen.
+    private async Task OnActiveVaultChangedAsync()
+    {
+        Lock();
+        Login.Forgot.Reset();
+        Vaults.Refresh();
+        Recovery.Refresh();
+        await InitializeLoginAsync();
     }
 
     private async Task InitializeLoginAsync()

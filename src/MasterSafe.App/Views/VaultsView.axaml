@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             x:Class="MasterSafe.App.Views.VaultsView"
+             x:DataType="vm:VaultsViewModel">
+  <ScrollViewer>
+    <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left" Margin="0,0,14,0">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Vaults" Classes="h1" />
+        <TextBlock Classes="hint"
+                   Text="Your data lives in one encrypted file, a vault. Here you can see where it is stored, open another vault file, or start over with a new vault." />
+      </StackPanel>
+
+      <Border Classes="card" IsVisible="{Binding !IsAvailable}">
+        <TextBlock Classes="hint" Text="Vault management is not available in this mode." />
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsAvailable}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Where your files are stored" Classes="h2" />
+          <StackPanel>
+            <TextBlock Text="MasterSafe folder" Classes="label" />
+            <SelectableTextBlock Text="{Binding DataFolder}" TextWrapping="Wrap" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Text="Vault in use" Classes="label" />
+            <SelectableTextBlock Text="{Binding ActivePath}" TextWrapping="Wrap" />
+          </StackPanel>
+          <TextBlock Classes="hint"
+                     Text="Vaults moved aside are kept in the archive folder inside the MasterSafe folder. Nothing is ever deleted unless you delete it here." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsAvailable}">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Your vaults" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Vaults}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:VaultRowViewModel">
+                <StackPanel Spacing="6" Margin="0,0,0,12">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Badge}" Foreground="{DynamicResource SystemAccentColor}" FontWeight="SemiBold" />
+                      </StackPanel>
+                      <TextBlock Text="{Binding Description}" Classes="hint" />
+                      <TextBlock Text="{Binding Path}" Classes="hint" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding Size}" Classes="hint" VerticalAlignment="Top" />
+                  </Grid>
+
+                  <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsConfirmingDelete}">
+                    <Button Content="Open" IsVisible="{Binding CanOpen}"
+                            Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).OpenRowCommand}"
+                            CommandParameter="{Binding}" />
+                    <Button Content="Show in folder"
+                            Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).ShowInFolderCommand}"
+                            CommandParameter="{Binding}" />
+                    <Button Classes="danger" Content="Delete..." IsVisible="{Binding CanDelete}"
+                            Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).RequestDeleteCommand}"
+                            CommandParameter="{Binding}" />
+                    <Button Content="Remove from list" IsVisible="{Binding CanForget}"
+                            Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).ForgetCommand}"
+                            CommandParameter="{Binding}" />
+                  </StackPanel>
+
+                  <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" IsVisible="{Binding IsConfirmingDelete}">
+                    <StackPanel Spacing="8">
+                      <TextBlock Classes="error"
+                                 Text="Delete this vault forever? Everything in it is lost for good and cannot be recovered, even with the master password." />
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="danger" Content="Yes, delete it forever"
+                                Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).ConfirmDeleteCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Content="Keep it"
+                                Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).CancelDeleteCommand}"
+                                CommandParameter="{Binding}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsAvailable}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Open or start over" Classes="h2" />
+          <TextBlock Classes="hint"
+                     Text="Open a vault file from another folder or a USB stick, or move your current vault into the archive and start a new one. The old vault can be opened again later if you find its password." />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Open a vault file..." Command="{Binding OpenFileCommand}" />
+            <Button Content="Start a new vault..." Command="{Binding RequestStartNewCommand}" IsVisible="{Binding !ConfirmingNew}" />
+          </StackPanel>
+          <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" IsVisible="{Binding ConfirmingNew}">
+            <StackPanel Spacing="8">
+              <TextBlock TextWrapping="Wrap"
+                         Text="Your current vault is moved to the archive, not deleted. You will be asked to choose a master password for the new vault, and you can open the archived one later." />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="accent" Content="Move it aside and start a new vault" Command="{Binding ConfirmStartNewCommand}" />
+                <Button Content="Cancel" Command="{Binding CancelStartNewCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <TextBlock Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -38,6 +38,10 @@
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Import}" />
           <Button Classes="nav" Content="Backup" Command="{Binding ShowBackupCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Backup}" />
+          <Button Classes="nav" Content="Recovery" Command="{Binding ShowRecoveryCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Recovery}" />
+          <Button Classes="nav" Content="Vaults" Command="{Binding ShowVaultsCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Vaults}" />
           <Button Classes="nav" Content="Settings" Command="{Binding ShowSettingsCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Settings}" />
           <Button Classes="nav" Content="Help" Command="{Binding ShowHelpCommand}"

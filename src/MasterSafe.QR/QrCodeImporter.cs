@@ -32,6 +32,13 @@ public static class QrImageFormats
 /// </summary>
 public sealed class QrCodeImporter
 {
+
+    /// <summary>Largest image file that will be read (20 MiB).</summary>
+    public const long MaxImageBytes = 20L * 1024 * 1024;
+
+    /// <summary>Largest picture that will be decoded (40 million pixels).</summary>
+    public const long MaxPixels = 40_000_000;
+
     private readonly BarcodeReaderGeneric _reader;
 
     public QrCodeImporter()
@@ -74,7 +81,30 @@ public sealed class QrCodeImporter
     {
         ArgumentNullException.ThrowIfNull(imageStream);
 
-        using var bitmap = SKBitmap.Decode(imageStream)
+        // Images come from files the user picked or dropped, so they are treated as untrusted: the size of the file
+        // and of the picture are limited before the picture is decoded into memory.
+        using var buffered = new MemoryStream();
+        var chunk = new byte[81920];
+        int read;
+        while ((read = imageStream.Read(chunk, 0, chunk.Length)) > 0)
+        {
+            if (buffered.Length + read > MaxImageBytes)
+            {
+                throw new QrImportException("The image file is too large.");
+            }
+
+            buffered.Write(chunk, 0, read);
+        }
+
+        buffered.Position = 0;
+        using var codec = SKCodec.Create(buffered)
+            ?? throw new QrImportException("The image could not be decoded.");
+        if ((long)codec.Info.Width * codec.Info.Height > MaxPixels)
+        {
+            throw new QrImportException("The image is too large (more than 40 million pixels).");
+        }
+
+        using var bitmap = SKBitmap.Decode(codec)
             ?? throw new QrImportException("The image could not be decoded.");
         var source = ToLuminanceSource(bitmap);
         var result = _reader.Decode(source);
