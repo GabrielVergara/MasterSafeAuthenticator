@@ -354,6 +354,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         }
 
         _editingId = entry.Id;
+        SetCurrent(entry);
         Title = entry.Title;
         UserName = entry.UserName;
         Password = entry.Password;
@@ -453,7 +454,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         Entries.Clear();
         Rows.Clear();
         _selected.IntersectWith(_all.Select(e => e.Id));
-        foreach (var e in _all
+        foreach (var e in Sorted(_all
             .Where(e => e.IsDeleted == inBin)
             .Where(e => folder is null || FolderPath.IsInside(e.Folder, folder))
             .Where(e => q.Length == 0
@@ -461,12 +462,10 @@ public sealed partial class PasswordsViewModel : ViewModelBase
                 || e.Folder.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.UserName.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Url.Contains(q, StringComparison.OrdinalIgnoreCase)
-                || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase)))
-            .OrderByDescending(e => inBin ? e.DeletedUtc ?? DateTimeOffset.MinValue : DateTimeOffset.MinValue)
-            .ThenBy(e => e.Title, StringComparer.OrdinalIgnoreCase))
+                || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase))), inBin))
         {
             Entries.Add(e);
-            Rows.Add(new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged));
+            Rows.Add(new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged) { IsCurrent = e.Id == _currentId });
         }
 
         NotifySelectionChanged();
@@ -490,6 +489,10 @@ public sealed partial class PasswordRow(PasswordEntry entry, bool isSelected, Ac
 
     /// <summary>For example "2 attached files".</summary>
     public string AttachmentsText => Entry.Attachments.Count == 1 ? "1 attached file" : $"{Entry.Attachments.Count} attached files";
+
+    /// <summary>True for the entry that keyboard shortcuts act on.</summary>
+    [ObservableProperty]
+    private bool _isCurrent;
 
     /// <summary>True while the entry is ticked.</summary>
     [ObservableProperty]
