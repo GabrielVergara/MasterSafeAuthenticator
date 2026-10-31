@@ -27,12 +27,20 @@ public sealed partial class AboutViewModel : ViewModelBase
 
     public string ProjectUrl => AppInfo.ProjectUrl;
 
+    /// <summary>The author's web site.</summary>
+    public string WebsiteUrl => AppInfo.WebsiteUrl;
+
     [RelayCommand]
-    private void OpenProject()
+    private void OpenProject() => OpenInBrowser(AppInfo.ProjectUrl);
+
+    [RelayCommand]
+    private void OpenWebsite() => OpenInBrowser(AppInfo.WebsiteUrl);
+
+    private static void OpenInBrowser(string url)
     {
         try
         {
-            Process.Start(new ProcessStartInfo(AppInfo.ProjectUrl) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
         catch
         {

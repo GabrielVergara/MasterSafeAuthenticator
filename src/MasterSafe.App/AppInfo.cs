@@ -19,6 +19,9 @@ public static class AppInfo
     /// <summary>Project home page.</summary>
     public const string ProjectUrl = "https://github.com/GabrielVergara/MasterSafeAuthenticator";
 
+    /// <summary>The author's web site.</summary>
+    public const string WebsiteUrl = "https://www.gabriel-vergara.com/";
+
     /// <summary>Author of the application.</summary>
     public const string Author = "Gabriel Vergara Ezcurdia";
 

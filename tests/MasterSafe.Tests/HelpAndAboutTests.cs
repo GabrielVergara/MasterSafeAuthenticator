@@ -41,6 +41,7 @@ public class HelpAndAboutTests
         vm.ProductName.Should().Be(AppInfo.ProductName);
         vm.Version.Should().NotBeNullOrWhiteSpace();
         vm.ProjectUrl.Should().Contain("github.com");
+        vm.WebsiteUrl.Should().Be("https://www.gabriel-vergara.com/");
     }
 
     [Fact]

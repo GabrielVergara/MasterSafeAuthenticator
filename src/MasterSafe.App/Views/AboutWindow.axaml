@@ -3,7 +3,7 @@
         xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
         x:Class="MasterSafe.App.Views.AboutWindow"
         x:DataType="vm:AboutViewModel"
-        Width="420" Height="340"
+        Width="440" Height="360"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Title="About MasterSafe Authenticator">
@@ -16,7 +16,10 @@
     <TextBlock Text="{Binding Version, StringFormat='Version {0}'}" />
     <TextBlock Text="{Binding Author, StringFormat='By {0}'}" />
     <TextBlock Text="{Binding Copyright}" Opacity="0.7" />
-    <Button Content="Project on GitHub" Command="{Binding OpenProjectCommand}" />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="Website" Command="{Binding OpenWebsiteCommand}" ToolTip.Tip="{Binding WebsiteUrl}" />
+      <Button Content="Project on GitHub" Command="{Binding OpenProjectCommand}" ToolTip.Tip="{Binding ProjectUrl}" />
+    </StackPanel>
     <Button Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />
   </StackPanel>
 </Window>

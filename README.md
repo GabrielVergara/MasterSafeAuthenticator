@@ -36,6 +36,8 @@ a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs
 
 ## Download and install
 
+Author: [Gabriel Vergara Ezcurdia](https://www.gabriel-vergara.com/).
+
 Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthenticator/releases>.
 
 | System | File | How |
