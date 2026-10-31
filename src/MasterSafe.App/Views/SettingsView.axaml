@@ -22,6 +22,13 @@
             <NumericUpDown Minimum="1" Maximum="120" HorizontalAlignment="Left" Width="160"
                            Value="{Binding AutoLockMinutes, Mode=TwoWay}" />
           </StackPanel>
+          <StackPanel>
+            <TextBlock Text="Clear the clipboard after copying a password or code" Classes="label" />
+            <ComboBox HorizontalAlignment="Left" Width="200" ItemsSource="{Binding ClipboardDelays}"
+                      SelectedItem="{Binding SelectedClipboardDelay, Mode=TwoWay}" />
+            <TextBlock Classes="hint" TextWrapping="Wrap"
+                       Text="Counted from the last copy: copying another secret starts the wait again. Anything else you copy yourself is left alone." />
+          </StackPanel>
         </StackPanel>
       </Border>
 

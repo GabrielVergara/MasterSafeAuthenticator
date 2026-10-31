@@ -353,7 +353,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         }
 
         CopyRequested?.Invoke(this, entry.Password);
-        Status = $"Copied password for {entry.Title}. The clipboard clears in 30 seconds.";
+        Status = $"Copied password for {entry.Title}. The clipboard clears in {ClipboardPolicy.ClearAfterText}.";
     }
 
     [RelayCommand]

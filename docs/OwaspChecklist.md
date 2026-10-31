@@ -38,7 +38,7 @@ Legend: **Met** = implemented and covered by tests or CI. **Partial** = implemen
 | V6 | 6.4 Keys in memory | Partial | Byte arrays are wiped. Strings typed by the user (the master password) cannot be wiped in .NET |
 | V7 Errors, logging | 7.1 No sensitive data in logs or errors | Met | The app writes no log files. Error messages never contain secrets |
 | V7 | 7.2 Security event logging | N/A | Deliberately absent: an offline privacy tool keeps no activity record |
-| V8 Data protection | 8.2 Client-side data | Met | Clipboard cleared after 30 seconds; nothing cached to disk; screens clear on lock |
+| V8 Data protection | 8.2 Client-side data | Met | Clipboard cleared 2 minutes after the last copy; nothing cached to disk; screens clear on lock |
 | V8 | 8.3 Sensitive private data | Met | Everything at rest is encrypted; backups are encrypted before leaving the computer |
 | V8 | Windows clipboard history / screen capture | Gap | A copied value may be captured by Windows clipboard history before it is cleared |
 | V9 Communications | 9.1 TLS for all connections | Met | WebDAV requires `https://` (plain http only for the local machine); .NET validates certificates |

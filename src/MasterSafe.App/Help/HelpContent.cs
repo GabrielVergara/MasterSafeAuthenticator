@@ -71,7 +71,7 @@ public static class HelpContent
             The Passwords screen keeps logins in your encrypted vault.
 
             - Fill in the form and choose Save. Use Generate for a strong password.
-            - Copy user and Copy password put the value on the clipboard; it is cleared after 30 seconds.
+            - Copy user and Copy password put the value on the clipboard; it is cleared after the time chosen in Settings (2 minutes at first). Copying another secret restarts the wait, and anything else you copy in the meantime is left alone.
             - Search matches the title, user name, URL, folder and tags.
             - Folders: the list on the left shows your folders with how many passwords each holds. Choose one to
               see its passwords and the ones in its subfolders. Type a name and choose New folder to add one inside
@@ -97,7 +97,7 @@ public static class HelpContent
             - TOTP codes change on a fixed schedule (usually every 30 seconds). The progress
               bar and countdown indicate when the next code appears.
             - HOTP codes advance by a counter and are shown without a countdown.
-            - Use Copy code to place the current code on the clipboard. It is cleared again after 30 seconds.
+            - Use Copy code to place the current code on the clipboard. It is cleared again after the time chosen in Settings (2 minutes at first; copying another secret restarts the wait).
             - Delete removes an account from the vault immediately. Make sure you can still
               sign in to the service some other way first.
 

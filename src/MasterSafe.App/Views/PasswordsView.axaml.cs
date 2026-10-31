@@ -9,7 +9,7 @@ using MasterSafe.App.ViewModels;
 
 namespace MasterSafe.App.Views;
 
-/// <summary>Passwords page. Copies secrets to the clipboard and clears them after 30 seconds.</summary>
+/// <summary>Passwords page. Copies secrets to the clipboard and clears them after a while (see ClipboardPolicy).</summary>
 public partial class PasswordsView : UserControl
 {
     private PasswordsViewModel? _vm;

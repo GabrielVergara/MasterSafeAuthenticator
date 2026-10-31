@@ -26,6 +26,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private int _autoLockMinutes = 5;
 
     [ObservableProperty]
+    private ClipboardDelayOption _selectedClipboardDelay = ClipboardPolicy.Current;
+
+    /// <summary>The waits offered for clearing the clipboard.</summary>
+    public IReadOnlyList<ClipboardDelayOption> ClipboardDelays => ClipboardPolicy.Options;
+
+    [ObservableProperty]
     private string _currentPassword = string.Empty;
 
     [ObservableProperty]
@@ -100,6 +106,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _selectedTheme = saved.Theme;
             _minimizeToTray = saved.MinimizeToTray;
             _autoLockMinutes = saved.AutoLockMinutes;
+            ClipboardPolicy.Use(saved.ClipboardClearSeconds);
+            _selectedClipboardDelay = ClipboardPolicy.Current;
         }
     }
 
@@ -115,6 +123,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     partial void OnAutoLockMinutesChanged(int value) => SaveSettings();
 
+    partial void OnSelectedClipboardDelayChanged(ClipboardDelayOption value)
+    {
+        ClipboardPolicy.Use(value.Seconds);
+        SaveSettings();
+    }
+
     private void SaveSettings()
     {
         if (_store is null)
@@ -129,6 +143,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.Theme = SelectedTheme;
             settings.MinimizeToTray = MinimizeToTray;
             settings.AutoLockMinutes = AutoLockMinutes;
+            settings.ClipboardClearSeconds = SelectedClipboardDelay.Seconds;
             _store.Save(settings);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

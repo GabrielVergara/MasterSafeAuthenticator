@@ -21,6 +21,9 @@ public sealed class AppSettings
     /// <summary>Minutes without activity before the vault locks (1 to 120).</summary>
     public int AutoLockMinutes { get; set; } = 5;
 
+    /// <summary>Seconds a copied secret stays on the clipboard before it is cleared: 30, 60 or 120.</summary>
+    public int ClipboardClearSeconds { get; set; } = ClipboardPolicy.DefaultSeconds;
+
     /// <summary>The vault file in use. Empty means the default vault.</summary>
     public string? ActiveVaultPath { get; set; }
 

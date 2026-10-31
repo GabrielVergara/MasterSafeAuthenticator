@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 
 namespace MasterSafe.App.ViewModels;
@@ -144,7 +145,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
         }
 
         CopyRequested?.Invoke(this, item.Code);
-        StatusMessage = $"Copied code for {item.Issuer}. The clipboard clears in 30 seconds.";
+        StatusMessage = $"Copied code for {item.Issuer}. The clipboard clears in {ClipboardPolicy.ClearAfterText}.";
     }
 
     public void Dispose()

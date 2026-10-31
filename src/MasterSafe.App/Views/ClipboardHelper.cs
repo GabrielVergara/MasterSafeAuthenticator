@@ -7,14 +7,17 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Threading;
+using MasterSafe.App.Services;
 
 namespace MasterSafe.App.Views;
 
-/// <summary>Copies a secret to the clipboard and clears it again after 30 seconds if it is still there.</summary>
+/// <summary>
+/// Copies a secret to the clipboard and clears it again after <see cref="ClipboardPolicy.ClearAfter"/> if it is still
+/// there. Copying another secret restarts the wait.
+/// </summary>
 internal static class ClipboardHelper
 {
-    private static readonly TimeSpan ClearAfter = TimeSpan.FromSeconds(30);
-    private static DispatcherTimer? _clearTimer;
+    private static readonly ClipboardClearScheduler Scheduler = new(StartTimer);
 
     /// <summary>Copies <paramref name="text"/>. Returns false when the clipboard could not be written.</summary>
     public static async Task<bool> CopyAsync(Visual visual, string text)
@@ -31,7 +34,7 @@ internal static class ClipboardHelper
             try
             {
                 await clipboard.SetTextAsync(text);
-                ScheduleClear(clipboard, text);
+                Scheduler.Schedule(text, () => clipboard.TryGetTextAsync(), () => clipboard.ClearAsync());
                 return true;
             }
             catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException or IOException)
@@ -43,25 +46,20 @@ internal static class ClipboardHelper
         return false;
     }
 
-    private static void ScheduleClear(IClipboard clipboard, string text)
+    private static IDisposable StartTimer(TimeSpan interval, Func<Task> action)
     {
-        _clearTimer?.Stop();
-        _clearTimer = new DispatcherTimer { Interval = ClearAfter };
-        _clearTimer.Tick += async (_, _) =>
+        var timer = new DispatcherTimer { Interval = interval };
+        timer.Tick += async (_, _) =>
         {
-            _clearTimer?.Stop();
-            try
-            {
-                if (await clipboard.TryGetTextAsync() == text)
-                {
-                    await clipboard.ClearAsync();
-                }
-            }
-            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException or IOException)
-            {
-                // The clipboard is busy; the copy simply stays until the next one.
-            }
+            timer.Stop();
+            await action();
         };
-        _clearTimer.Start();
+        timer.Start();
+        return new TimerHandle(timer);
+    }
+
+    private sealed class TimerHandle(DispatcherTimer timer) : IDisposable
+    {
+        public void Dispose() => timer.Stop();
     }
 }

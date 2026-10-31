@@ -149,6 +149,10 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Recovery, Create and save recovery key, then Create recovery backup | A `.msrk` key file and a `recovery-*.sauth` file are written where you chose |
 | Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
+| Settings, Clear the clipboard after, choose 30 seconds, then copy a password and wait | The clipboard is cleared after 30 seconds; the choice is still set after restarting the app |
+| Copy a password, wait 2 minutes, paste somewhere | Nothing is pasted: the clipboard was cleared |
+| Copy a password, then 1 minute later copy a code, then wait 1.5 minutes | The code is still on the clipboard (the wait restarted); 2 minutes after the code was copied it is gone |
+| Copy a password, then copy some other text yourself, wait 2 minutes | Your own text is still on the clipboard |
 | Passwords, Edit an entry, Attach a file (a PDF under 5 MB), Save, then Lock and unlock | The entry shows "1 attached file"; Edit, then Save as writes an identical copy |
 | Attach a file over 5 MB | A message names the file and the limit; nothing is attached |
 | Select a folder, Change icon, click an icon | The picker closes, the icon shows in the folder list and the folder pickers, and stays after Lock and unlock |
