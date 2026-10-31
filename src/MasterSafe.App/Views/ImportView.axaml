@@ -10,7 +10,7 @@
     </StackPanel>
     <StackPanel>
       <TextBlock Text="Setup link (otpauth://)" Classes="label" />
-      <TextBox Watermark="otpauth://totp/Example:name@example.com?secret=..." Text="{Binding ManualUri, Mode=TwoWay}" />
+      <TextBox PlaceholderText="otpauth://totp/Example:name@example.com?secret=..." Text="{Binding ManualUri, Mode=TwoWay}" />
     </StackPanel>
     <Button Classes="accent" Content="Import" HorizontalAlignment="Left" Command="{Binding ImportUriCommand}" />
     <Border Classes="card" Padding="20">

@@ -12,15 +12,15 @@
 
       <StackPanel>
         <TextBlock Text="Issuer (service name)" Classes="label" />
-        <TextBox Watermark="e.g. GitHub" Text="{Binding Issuer, Mode=TwoWay}" />
+        <TextBox PlaceholderText="e.g. GitHub" Text="{Binding Issuer, Mode=TwoWay}" />
       </StackPanel>
       <StackPanel>
         <TextBlock Text="Account label (user name or e-mail)" Classes="label" />
-        <TextBox Watermark="e.g. name@example.com" Text="{Binding Label, Mode=TwoWay}" />
+        <TextBox PlaceholderText="e.g. name@example.com" Text="{Binding Label, Mode=TwoWay}" />
       </StackPanel>
       <StackPanel>
         <TextBlock Text="Secret key (Base32)" Classes="label" />
-        <TextBox Classes="revealPasswordButton" PasswordChar="●" Watermark="e.g. JBSWY3DPEHPK3PXP"
+        <TextBox Classes="revealPasswordButton" PasswordChar="●" PlaceholderText="e.g. JBSWY3DPEHPK3PXP"
                  Text="{Binding Secret, Mode=TwoWay}" />
       </StackPanel>
 

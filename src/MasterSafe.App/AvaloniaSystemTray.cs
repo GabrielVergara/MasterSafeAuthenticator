@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -33,7 +34,7 @@ public sealed class AvaloniaSystemTray : ISystemTray
     {
         ArgumentNullException.ThrowIfNull(menu);
 
-        Dispatcher.UIThread.Invoke(() =>
+        OnUiThread(() =>
         {
             _trayIcon?.Dispose();
 
@@ -82,7 +83,7 @@ public sealed class AvaloniaSystemTray : ISystemTray
     {
         // Avalonia's TrayIcon does not expose balloon notifications in a cross-platform way;
         // update the tooltip so the user still gets feedback where the tray is visible.
-        Dispatcher.UIThread.Invoke(() =>
+        OnUiThread(() =>
         {
             if (_trayIcon is not null)
             {
@@ -100,10 +101,24 @@ public sealed class AvaloniaSystemTray : ISystemTray
         }
 
         _disposed = true;
-        Dispatcher.UIThread.Invoke(() =>
+        OnUiThread(() =>
         {
             _trayIcon?.Dispose();
             _trayIcon = null;
         });
+    }
+
+    // Tray icons must be changed on the UI thread. When there is no running application (tests, or after shutdown)
+    // there is no UI thread to wait for, so the action runs directly instead of blocking forever.
+    private static void OnUiThread(Action action)
+    {
+        if (Application.Current is null || Dispatcher.UIThread.CheckAccess())
+        {
+            action();
+        }
+        else
+        {
+            Dispatcher.UIThread.Invoke(action);
+        }
     }
 }

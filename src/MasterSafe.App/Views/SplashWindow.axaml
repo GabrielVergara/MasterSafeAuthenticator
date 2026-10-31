@@ -4,7 +4,7 @@
         x:Class="MasterSafe.App.Views.SplashWindow"
         Width="520" Height="320"
         CanResize="False"
-        SystemDecorations="None"
+        WindowDecorations="None"
         ShowInTaskbar="False"
         Topmost="True"
         WindowStartupLocation="CenterScreen"

@@ -27,14 +27,14 @@
       <!-- Local folder -->
       <StackPanel IsVisible="{Binding IsLocal}">
         <TextBlock Text="Backup folder" Classes="label" />
-        <TextBox Watermark="e.g. D:\Backups\MasterSafe" Text="{Binding Folder, Mode=TwoWay}" />
+        <TextBox PlaceholderText="e.g. D:\Backups\MasterSafe" Text="{Binding Folder, Mode=TwoWay}" />
       </StackPanel>
 
       <!-- WebDAV (Nextcloud, ownCloud, others) -->
       <StackPanel Spacing="12" IsVisible="{Binding IsWebDav}">
         <StackPanel>
           <TextBlock Text="WebDAV folder address" Classes="label" />
-          <TextBox Watermark="https://cloud.example.com/remote.php/dav/files/you/backups/"
+          <TextBox PlaceholderText="https://cloud.example.com/remote.php/dav/files/you/backups/"
                    Text="{Binding WebDavUrl, Mode=TwoWay}" />
         </StackPanel>
         <StackPanel>

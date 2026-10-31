@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using MasterSafe.App.ViewModels;
 
@@ -49,7 +50,7 @@ public partial class PasswordsView : UserControl
         _clearTimer.Tick += async (_, _) =>
         {
             _clearTimer?.Stop();
-            if (await clipboard.GetTextAsync() == text)
+            if (await clipboard.TryGetTextAsync() == text)
             {
                 await clipboard.ClearAsync();
             }
