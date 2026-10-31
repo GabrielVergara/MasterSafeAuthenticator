@@ -72,6 +72,8 @@ public static class HelpContent
 
             - Fill in the form and choose Save. Use Generate for a strong password.
             - Copy user and Copy password put the value on the clipboard; it is cleared after the time chosen in Settings (2 minutes at first). Copying another secret restarts the wait, and anything else you copy in the meantime is left alone.
+            - Copies are kept out of the Windows clipboard history (Win+V) and the cloud clipboard, so a copied
+              password does not linger there after the clipboard is cleared.
             - Search matches the title, user name, URL, folder and tags.
             - Folders: the list on the left shows your folders with how many passwords each holds. Choose one to
               see its passwords and the ones in its subfolders. Type a name and choose New folder to add one inside

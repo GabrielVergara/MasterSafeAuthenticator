@@ -45,7 +45,7 @@ flowchart TD
 
 An unlocked application can always be read by software running as the same user. To shorten the window, the
 vault locks after a period of inactivity (set in Settings), wipes the data key and decrypted data when it
-locks, and clears copied passwords from the clipboard after 2 minutes (a new copy restarts the wait; text that is no longer a copied secret is not touched).
+locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 minutes (your choice; 2 minutes at first), and keeps them out of the Windows clipboard history and cloud clipboard (a new copy restarts the wait; text that is no longer a copied secret is not touched).
 
 ## Out of scope
 

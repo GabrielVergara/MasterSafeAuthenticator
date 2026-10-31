@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.3.1  
+**Version:** 1.3.2  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -150,6 +150,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
 | Settings, Clear the clipboard after, choose 30 seconds, then copy a password and wait | The clipboard is cleared after 30 seconds; the choice is still set after restarting the app |
+| Copy a password, then press Win+V (clipboard history) | The password is not listed in the history; after the wait it is also gone from the clipboard itself |
 | Copy a password, wait 2 minutes, paste somewhere | Nothing is pasted: the clipboard was cleared |
 | Copy a password, then 1 minute later copy a code, then wait 1.5 minutes | The code is still on the clipboard (the wait restarted); 2 minutes after the code was copied it is gone |
 | Copy a password, then copy some other text yourself, wait 2 minutes | Your own text is still on the clipboard |

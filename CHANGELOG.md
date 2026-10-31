@@ -2,12 +2,14 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.3.2 (2026-11-01)
 
 ### Security
+- **Copied secrets are kept out of the Windows clipboard history and the cloud clipboard.** Before, a copied password could stay in Windows' clipboard history (Win+V) and be synced to your other devices even after MasterSafe cleared the clipboard. Copies now carry the markers that tell Windows not to remember them (and, on Linux, that they come from a password manager, which KDE's clipboard manager respects).
 - The repository now has rulesets so that only the owner can change `main` or create, move or delete `v*` release tags, and force-pushes to `main` are blocked. Workflows from outside contributors always need approval, and secret scanning push protection is on. See SECURITY.md.
 
 ### Changed
+- Updated libraries: ZXing.Net 0.16.11, and the GitHub Actions used by the build and release workflows (checkout 7, download-artifact 8, dependency-review 5).
 - New setting "Clear the clipboard after copying a password or code": **30 seconds, 1 minute or 2 minutes**. Copied passwords, codes and recovery passphrases now stay on the clipboard for 2 minutes unless you choose otherwise (it was 30 seconds). Copying another secret restarts the wait, so the newest copy always gets the full time, and the clipboard is only cleared if it still holds the secret, so anything else you copied is left alone.
 
 ## 1.3.1 (2026-11-01)

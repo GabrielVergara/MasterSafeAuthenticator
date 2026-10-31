@@ -33,7 +33,8 @@ internal static class ClipboardHelper
         {
             try
             {
-                await clipboard.SetTextAsync(text);
+                // Not SetTextAsync: the markers keep Windows from putting the secret in its clipboard history.
+                await clipboard.SetDataAsync(SecretClipboard.Create(text));
                 Scheduler.Schedule(text, () => clipboard.TryGetTextAsync(), () => clipboard.ClearAsync());
                 return true;
             }

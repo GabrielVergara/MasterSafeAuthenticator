@@ -2,7 +2,7 @@
 ; Build with installer\build-windows.ps1, which publishes the app and passes the defines below.
 
 #ifndef AppVersion
-  #define AppVersion "1.3.1"
+  #define AppVersion "1.3.2"
 #endif
 #ifndef SourceDir
   #define SourceDir "..\..\artifacts\win-x64"
