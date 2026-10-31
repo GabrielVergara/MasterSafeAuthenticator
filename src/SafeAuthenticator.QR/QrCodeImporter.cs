@@ -1,3 +1,8 @@
+// File:    QrCodeImporter.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using SafeAuthenticator.Core;
 using SkiaSharp;
 using ZXing;

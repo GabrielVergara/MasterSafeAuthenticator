@@ -1,3 +1,8 @@
+// File:    QrImportException.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.QR;
 
 /// <summary>

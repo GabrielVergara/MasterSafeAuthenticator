@@ -1,3 +1,8 @@
+// File:    AvaloniaSystemTrayTests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using FluentAssertions;
 using SafeAuthenticator.App;
 using SafeAuthenticator.Platform;

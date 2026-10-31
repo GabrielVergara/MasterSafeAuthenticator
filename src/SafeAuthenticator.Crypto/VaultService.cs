@@ -1,3 +1,8 @@
+// File:    VaultService.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.IO.Compression;
 using System.Text.Json;
 using SafeAuthenticator.Core;
@@ -29,10 +34,21 @@ public sealed class VaultService : IVaultService
 
     /// <inheritdoc />
     public Task CreateAsync(string masterPassword, CancellationToken cancellationToken = default)
-        => SaveAsync(masterPassword, [], cancellationToken);
+        => SaveContentsAsync(masterPassword, new VaultContents(), cancellationToken);
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<OtpAccount>> OpenAsync(string masterPassword, CancellationToken cancellationToken = default)
+    {
+        var contents = await OpenContentsAsync(masterPassword, cancellationToken).ConfigureAwait(false);
+        return contents.Accounts;
+    }
+
+    /// <inheritdoc />
+    public Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
+        => _repository.ExistsAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<VaultContents> OpenContentsAsync(string masterPassword, CancellationToken cancellationToken = default)
     {
         var vault = await _repository.LoadAsync(cancellationToken).ConfigureAwait(false)
             ?? throw new InvalidOperationException("No vault exists. Call CreateAsync first.");
@@ -48,8 +64,14 @@ public sealed class VaultService : IVaultService
         var decrypted = _encryption.Decrypt(payload, key);
         var json = vault.Compressed ? Decompress(decrypted) : decrypted;
 
+        if (vault.Version >= 2)
+        {
+            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+        }
+
+        // Format v1: a bare JSON array of OTP accounts.
         var accounts = JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [];
-        return accounts;
+        return new VaultContents { Accounts = accounts };
     }
 
     /// <inheritdoc />
@@ -57,17 +79,46 @@ public sealed class VaultService : IVaultService
     {
         ArgumentNullException.ThrowIfNull(accounts);
 
+        // Preserve any stored passwords when only accounts are being saved.
+        IReadOnlyList<PasswordEntry> passwords = [];
+        if (await _repository.ExistsAsync(cancellationToken).ConfigureAwait(false))
+        {
+            try
+            {
+                passwords = (await OpenContentsAsync(masterPassword, cancellationToken).ConfigureAwait(false)).Passwords;
+            }
+            catch (InvalidPasswordException)
+            {
+                throw;
+            }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                throw new InvalidPasswordException();
+            }
+        }
+
+        await SaveContentsAsync(
+            masterPassword,
+            new VaultContents { Accounts = accounts.ToList(), Passwords = passwords },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task SaveContentsAsync(string masterPassword, VaultContents contents, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(contents);
+
         var salt = _masterPassword.GenerateSalt();
         var key = _masterPassword.DeriveKey(masterPassword, salt, _kdfParameters);
 
-        var json = JsonSerializer.SerializeToUtf8Bytes(accounts.ToList());
+        var json = JsonSerializer.SerializeToUtf8Bytes(contents);
         var plaintext = Compress(json);
 
         var payload = _encryption.Encrypt(plaintext, key);
 
         var vault = new VaultFile
         {
-            Version = 1,
+            Version = 2,
             Salt = Convert.ToBase64String(salt),
             KdfParameters = _kdfParameters,
             Nonce = Convert.ToBase64String(payload.Nonce),
@@ -82,8 +133,8 @@ public sealed class VaultService : IVaultService
     /// <inheritdoc />
     public async Task RotateMasterPasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default)
     {
-        var accounts = await OpenAsync(currentPassword, cancellationToken).ConfigureAwait(false);
-        await SaveAsync(newPassword, accounts, cancellationToken).ConfigureAwait(false);
+        var contents = await OpenContentsAsync(currentPassword, cancellationToken).ConfigureAwait(false);
+        await SaveContentsAsync(newPassword, contents, cancellationToken).ConfigureAwait(false);
     }
 
     private static byte[] Compress(byte[] data)

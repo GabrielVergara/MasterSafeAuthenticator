@@ -1,3 +1,8 @@
+// File:    MasterPasswordService.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Security.Cryptography;
 using Konscious.Security.Cryptography;
 

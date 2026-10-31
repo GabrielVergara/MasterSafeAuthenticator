@@ -1,3 +1,8 @@
+// File:    BackupViewModel.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Headers;

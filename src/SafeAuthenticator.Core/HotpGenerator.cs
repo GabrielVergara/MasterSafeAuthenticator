@@ -1,3 +1,8 @@
+// File:    HotpGenerator.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Security.Cryptography;
 
 namespace SafeAuthenticator.Core;

@@ -1,3 +1,8 @@
+// File:    QrCodeGenerator.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using SkiaSharp;
 using ZXing;
 using ZXing.Common;

@@ -1,3 +1,8 @@
+// File:    BackupProviderKindConverterTests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Globalization;
 using FluentAssertions;
 using SafeAuthenticator.App.Converters;

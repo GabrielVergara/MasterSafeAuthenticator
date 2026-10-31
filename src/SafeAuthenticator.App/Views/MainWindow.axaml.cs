@@ -1,3 +1,8 @@
+// File:    MainWindow.axaml.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using Avalonia.Controls;
 using SafeAuthenticator.App.ViewModels;
 

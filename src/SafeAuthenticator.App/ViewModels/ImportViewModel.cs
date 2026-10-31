@@ -1,3 +1,8 @@
+// File:    ImportViewModel.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using SafeAuthenticator.Core;
 using SafeAuthenticator.QR;

@@ -1,3 +1,8 @@
+// File:    ViewModelTests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System;
 using FluentAssertions;
 using SafeAuthenticator.App;

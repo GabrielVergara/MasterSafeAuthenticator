@@ -1,3 +1,8 @@
+// File:    FileVaultRepository.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Text.Json;
 
 namespace SafeAuthenticator.Crypto;

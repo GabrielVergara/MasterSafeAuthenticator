@@ -1,3 +1,8 @@
+// File:    OtpAuthParser.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Globalization;
 
 namespace SafeAuthenticator.Core;

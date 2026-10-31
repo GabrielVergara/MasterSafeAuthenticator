@@ -1,3 +1,8 @@
+// File:    LoginViewModel.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,6 +19,20 @@ public sealed partial class LoginViewModel : ViewModelBase
     private string _masterPassword = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title), nameof(ButtonText))]
+    private bool _isCreateMode;
+
+    [ObservableProperty]
+    private string _confirmPassword = string.Empty;
+
+    /// <summary>Minimum master password length when creating a vault.</summary>
+    public const int MinPasswordLength = 8;
+
+    public string Title => IsCreateMode ? "Create your vault" : "Unlock your vault";
+
+    public string ButtonText => IsCreateMode ? "Create vault" : "Unlock";
+
+    [ObservableProperty]
     private string? _error;
 
     [ObservableProperty]
@@ -28,6 +47,21 @@ public sealed partial class LoginViewModel : ViewModelBase
     private void Unlock()
     {
         Error = null;
+        if (IsCreateMode)
+        {
+            if (MasterPassword.Length < MinPasswordLength)
+            {
+                Error = $"Master password must be at least {MinPasswordLength} characters.";
+                return;
+            }
+
+            if (MasterPassword != ConfirmPassword)
+            {
+                Error = "Passwords do not match.";
+                return;
+            }
+        }
+
         UnlockRequested?.Invoke(this, MasterPassword);
     }
 }

@@ -1,3 +1,8 @@
+// File:    Base32.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.Core;
 
 /// <summary>

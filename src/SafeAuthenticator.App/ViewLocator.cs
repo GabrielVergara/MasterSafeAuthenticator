@@ -1,3 +1,8 @@
+// File:    ViewLocator.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using SafeAuthenticator.App.ViewModels;
@@ -5,7 +10,7 @@ using SafeAuthenticator.App.ViewModels;
 namespace SafeAuthenticator.App;
 
 /// <summary>
-/// Maps a view model instance to its view by naming convention (…ViewModel → …View).
+/// Maps a view model instance to its view by naming convention (â€¦ViewModel â†’ â€¦View).
 /// </summary>
 public sealed class ViewLocator : IDataTemplate
 {

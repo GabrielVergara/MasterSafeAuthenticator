@@ -1,3 +1,8 @@
+// File:    AccountRepository.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using Microsoft.EntityFrameworkCore;
 using SafeAuthenticator.Core;
 using SafeAuthenticator.Data.Entities;

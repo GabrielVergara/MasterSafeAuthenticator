@@ -1,3 +1,8 @@
+// File:    DpapiProtector.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 

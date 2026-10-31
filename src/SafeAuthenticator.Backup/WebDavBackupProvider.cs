@@ -1,3 +1,8 @@
+// File:    WebDavBackupProvider.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Net;
 using System.Xml.Linq;
 

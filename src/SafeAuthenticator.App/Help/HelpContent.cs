@@ -1,3 +1,8 @@
+// File:    HelpContent.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Collections.Generic;
 
 namespace SafeAuthenticator.App.Help;

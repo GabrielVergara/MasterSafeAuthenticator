@@ -1,3 +1,8 @@
+// File:    IBackupService.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using SafeAuthenticator.Core;
 
 namespace SafeAuthenticator.Backup;

@@ -1,3 +1,8 @@
+// File:    Base32Tests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Text;
 using FluentAssertions;
 using SafeAuthenticator.Core;

@@ -3,7 +3,7 @@
         xmlns:vm="clr-namespace:SafeAuthenticator.App.ViewModels"
         x:Class="SafeAuthenticator.App.Views.AboutWindow"
         x:DataType="vm:AboutViewModel"
-        Width="420" Height="300"
+        Width="420" Height="340"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Title="About SafeAuthenticator">
@@ -11,6 +11,7 @@
     <TextBlock Text="{Binding ProductName}" FontSize="26" FontWeight="SemiBold" />
     <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" Opacity="0.8" />
     <TextBlock Text="{Binding Version, StringFormat='Version {0}'}" />
+    <TextBlock Text="{Binding Author, StringFormat='By {0}'}" />
     <TextBlock Text="{Binding Copyright}" Opacity="0.7" />
     <Button Content="Project on GitHub" Command="{Binding OpenProjectCommand}" />
     <Button Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />

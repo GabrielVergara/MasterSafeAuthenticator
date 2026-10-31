@@ -1,3 +1,8 @@
+// File:    UnavailableMlKemProvider.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.PostQuantum;
 
 /// <summary>

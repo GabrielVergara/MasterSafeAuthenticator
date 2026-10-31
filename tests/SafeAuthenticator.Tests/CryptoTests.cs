@@ -1,3 +1,8 @@
+// File:    CryptoTests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using FluentAssertions;
 using Moq;
 using SafeAuthenticator.Core;

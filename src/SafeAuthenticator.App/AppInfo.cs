@@ -1,3 +1,8 @@
+// File:    AppInfo.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Reflection;
 
 namespace SafeAuthenticator.App;
@@ -14,8 +19,11 @@ public static class AppInfo
     /// <summary>Project home page.</summary>
     public const string ProjectUrl = "https://github.com/gabrielezcurdia-lgtm/SafeAuthenticator";
 
+    /// <summary>Author of the application.</summary>
+    public const string Author = "Gabriel Vergara Ezcurdia";
+
     /// <summary>Copyright line.</summary>
-    public static string Copyright => $"© {DateTime.Now.Year} SafeAuthenticator contributors";
+    public static string Copyright => $"Ã‚Â© {DateTime.Now.Year} SafeAuthenticator contributors";
 
     /// <summary>The informational or assembly version of the running application.</summary>
     public static string Version

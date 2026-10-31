@@ -1,3 +1,8 @@
+// File:    BackupTests.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using FluentAssertions;
 using SafeAuthenticator.Backup;
 using SafeAuthenticator.Core;

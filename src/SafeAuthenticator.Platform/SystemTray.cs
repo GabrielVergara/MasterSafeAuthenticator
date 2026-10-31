@@ -1,3 +1,8 @@
+// File:    SystemTray.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.Platform;
 
 /// <summary>

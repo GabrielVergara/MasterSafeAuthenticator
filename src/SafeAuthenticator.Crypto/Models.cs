@@ -1,3 +1,8 @@
+// File:    Models.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.Crypto;
 
 /// <summary>
@@ -51,4 +56,17 @@ public sealed class VaultFile
 
     /// <summary>Indicates the ciphertext payload is GZip-compressed before encryption.</summary>
     public bool Compressed { get; init; } = true;
+}
+
+/// <summary>
+/// Decrypted vault contents (payload format v2): OTP accounts plus KeePass-style password entries.
+/// Format v1 stored only a JSON array of OTP accounts; it is still readable.
+/// </summary>
+public sealed class VaultContents
+{
+    /// <summary>OTP accounts.</summary>
+    public IReadOnlyList<SafeAuthenticator.Core.OtpAccount> Accounts { get; init; } = [];
+
+    /// <summary>Stored password entries.</summary>
+    public IReadOnlyList<SafeAuthenticator.Core.PasswordEntry> Passwords { get; init; } = [];
 }

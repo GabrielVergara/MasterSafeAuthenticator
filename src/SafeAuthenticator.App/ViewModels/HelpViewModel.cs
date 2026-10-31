@@ -1,3 +1,8 @@
+// File:    HelpViewModel.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SafeAuthenticator.App.Help;

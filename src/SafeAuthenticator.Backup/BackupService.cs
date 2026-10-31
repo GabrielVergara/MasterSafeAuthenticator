@@ -1,3 +1,8 @@
+// File:    BackupService.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.IO.Compression;
 using System.Text.Json;
 using SafeAuthenticator.Core;

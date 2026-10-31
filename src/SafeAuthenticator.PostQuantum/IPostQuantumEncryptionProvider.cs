@@ -1,3 +1,8 @@
+// File:    IPostQuantumEncryptionProvider.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.PostQuantum;
 
 /// <summary>
@@ -16,7 +21,7 @@ public sealed record PqKeyPair(byte[] PublicKey, byte[] PrivateKey);
 
 /// <summary>
 /// Abstraction over a post-quantum key-encapsulation mechanism (KEM), designed around ML-KEM-768.
-/// Concrete implementations must be backed by a vetted cryptographic library — never a mock.
+/// Concrete implementations must be backed by a vetted cryptographic library â€” never a mock.
 /// </summary>
 public interface IPostQuantumEncryptionProvider
 {

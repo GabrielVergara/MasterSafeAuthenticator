@@ -1,3 +1,8 @@
+// File:    VaultDbContext.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using Microsoft.EntityFrameworkCore;
 using SafeAuthenticator.Data.Entities;
 

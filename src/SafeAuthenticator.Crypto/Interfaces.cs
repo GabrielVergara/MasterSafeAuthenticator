@@ -1,3 +1,8 @@
+// File:    Interfaces.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 namespace SafeAuthenticator.Crypto;
 
 /// <summary>
@@ -52,7 +57,16 @@ public interface IVaultService
     /// <summary>Opens the vault, decrypting all records. Throws <see cref="InvalidPasswordException"/> on bad password.</summary>
     Task<IReadOnlyList<SafeAuthenticator.Core.OtpAccount>> OpenAsync(string masterPassword, CancellationToken cancellationToken = default);
 
-    /// <summary>Encrypts and persists the supplied records.</summary>
+    /// <summary>True when a vault has already been created.</summary>
+    Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Opens the vault returning OTP accounts and password entries.</summary>
+    Task<VaultContents> OpenContentsAsync(string masterPassword, CancellationToken cancellationToken = default);
+
+    /// <summary>Encrypts and persists the full vault contents (accounts and passwords).</summary>
+    Task SaveContentsAsync(string masterPassword, VaultContents contents, CancellationToken cancellationToken = default);
+
+    /// <summary>Encrypts and persists the supplied OTP records, preserving stored passwords.</summary>
     Task SaveAsync(string masterPassword, IEnumerable<SafeAuthenticator.Core.OtpAccount> accounts, CancellationToken cancellationToken = default);
 
     /// <summary>Re-encrypts the vault under a new master password (key rotation).</summary>

@@ -1,3 +1,8 @@
+// File:    BackupProviderKindConverter.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System;
 using System.Globalization;
 using Avalonia.Data.Converters;

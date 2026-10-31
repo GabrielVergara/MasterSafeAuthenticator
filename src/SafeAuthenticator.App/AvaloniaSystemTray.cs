@@ -1,3 +1,8 @@
+// File:    AvaloniaSystemTray.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System;
 using System.Collections.Generic;
 using Avalonia.Controls;

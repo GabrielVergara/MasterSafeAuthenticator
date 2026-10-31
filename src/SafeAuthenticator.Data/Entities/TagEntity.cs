@@ -1,3 +1,8 @@
+// File:    TagEntity.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.ComponentModel.DataAnnotations;
 
 namespace SafeAuthenticator.Data.Entities;

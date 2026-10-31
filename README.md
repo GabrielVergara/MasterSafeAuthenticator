@@ -7,7 +7,7 @@ A privacy-first, offline-first authenticator for TOTP/HOTP with an encrypted vau
 | Area | State |
 | --- | --- |
 | Build | `dotnet build -c Release` — 0 warnings, 0 errors (TreatWarningsAsErrors) |
-| Tests | 108 passing (xUnit + FluentAssertions + Moq) |
+| Tests | 115 passing (xUnit + FluentAssertions + Moq) |
 | Security Core (TOTP/HOTP/otpauth) | Implemented |
 | Encrypted Vault (Argon2id + AES-256-GCM) | Implemented |
 | Post-Quantum abstraction | Abstraction + honest unavailable provider |
@@ -79,3 +79,4 @@ All brief phases are implemented. Backups support both an encrypted local-folder
 WebDAV cloud provider (`WebDavBackupProvider`) that works with Nextcloud/ownCloud/generic WebDAV
 endpoints via `HttpClient` — no vendor SDK, only encrypted bytes leave the device. Additional
 vendor-specific providers can be added by implementing `IBackupProvider`.
+

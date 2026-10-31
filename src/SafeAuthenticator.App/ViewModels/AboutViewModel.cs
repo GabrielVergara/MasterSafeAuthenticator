@@ -1,3 +1,8 @@
+// File:    AboutViewModel.cs
+// Project: SafeAuthenticator
+// Author:  Gabriel Vergara Ezcurdia
+// License: See README.md
+
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,6 +19,10 @@ public sealed partial class AboutViewModel : ViewModelBase
 
     public string Version => AppInfo.Version;
 
+    /// <summary>Author shown in the About dialog.</summary>
+    public string Author => AppInfo.Author;
+
+    /// <summary>Copyright line.</summary>
     public string Copyright => AppInfo.Copyright;
 
     public string ProjectUrl => AppInfo.ProjectUrl;

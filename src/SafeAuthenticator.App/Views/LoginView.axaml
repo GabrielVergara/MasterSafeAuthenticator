@@ -4,10 +4,13 @@
              x:Class="SafeAuthenticator.App.Views.LoginView"
              x:DataType="vm:LoginViewModel">
   <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Width="320">
-    <TextBlock Text="Unlock your vault" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
-    <TextBox Watermark="Master password" PasswordChar="•"
+    <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+    <TextBox Watermark="Master password" PasswordChar="*"
              Text="{Binding MasterPassword, Mode=TwoWay}" />
-    <Button Content="Unlock" HorizontalAlignment="Stretch"
+    <TextBox Watermark="Confirm master password" PasswordChar="*"
+             IsVisible="{Binding IsCreateMode}"
+             Text="{Binding ConfirmPassword, Mode=TwoWay}" />
+    <Button Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
             Command="{Binding UnlockCommand}" />
     <TextBlock Text="{Binding Error}" Foreground="IndianRed"
                IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
