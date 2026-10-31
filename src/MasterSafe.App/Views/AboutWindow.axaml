@@ -3,23 +3,68 @@
         xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
         x:Class="MasterSafe.App.Views.AboutWindow"
         x:DataType="vm:AboutViewModel"
-        Width="440" Height="360"
-        CanResize="False"
+        Width="560" Height="720"
+        MinWidth="480" MinHeight="520"
         WindowStartupLocation="CenterOwner"
         Title="About MasterSafe Authenticator">
-  <StackPanel Margin="24" Spacing="12" VerticalAlignment="Center">
-    <StackPanel Orientation="Horizontal" Spacing="14">
-      <Image Source="/Assets/logo-256.png" Width="56" Height="56" />
-      <TextBlock Text="{Binding ProductName}" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
-    </StackPanel>
-    <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" Opacity="0.8" />
-    <TextBlock Text="{Binding Version, StringFormat='Version {0}'}" />
-    <TextBlock Text="{Binding Author, StringFormat='By {0}'}" />
-    <TextBlock Text="{Binding Copyright}" Opacity="0.7" />
-    <StackPanel Orientation="Horizontal" Spacing="8">
-      <Button Content="Website" Command="{Binding OpenWebsiteCommand}" ToolTip.Tip="{Binding WebsiteUrl}" />
-      <Button Content="Project on GitHub" Command="{Binding OpenProjectCommand}" ToolTip.Tip="{Binding ProjectUrl}" />
-    </StackPanel>
-    <Button Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />
-  </StackPanel>
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" Padding="20,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardBorderBrush}">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel VerticalAlignment="Center" Spacing="2">
+          <TextBlock Text="{Binding Copyright}" Opacity="0.85" />
+          <TextBlock Text="{Binding LicenseText}" Opacity="0.65" FontSize="12" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="1" Content="Close" Click="OnCloseClick" VerticalAlignment="Center" />
+      </Grid>
+    </Border>
+
+    <ScrollViewer>
+      <StackPanel Margin="24,24,24,16" Spacing="16">
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <Image Source="/Assets/logo-256.png" Width="72" Height="72" />
+          <StackPanel VerticalAlignment="Center" Spacing="2">
+            <TextBlock Text="{Binding ProductName}" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding VersionText}" Opacity="0.8" />
+          </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" Opacity="0.85" />
+        <TextBlock Text="{Binding Author, StringFormat='Written by {0}'}" Opacity="0.85" />
+
+        <Button Classes="accent" HorizontalAlignment="Left" Content="Read the article about MasterSafe"
+                Command="{Binding OpenArticleCommand}" ToolTip.Tip="{Binding ArticleUrl}" />
+
+        <Border Classes="card" Padding="16">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Learn more" FontWeight="SemiBold" FontSize="15" />
+            <ItemsControl ItemsSource="{Binding Links}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:AboutLink">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                      <TextBlock Text="{Binding Description}" Opacity="0.7" FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                            Command="{Binding $parent[ItemsControl].((vm:AboutViewModel)DataContext).OpenLinkCommand}"
+                            ToolTip.Tip="{Binding Url}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="card" Padding="16">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Check your download" FontWeight="SemiBold" FontSize="15" />
+            <TextBlock TextWrapping="Wrap" Opacity="0.8"
+                       Text="Every release is signed with the post-quantum signature ML-DSA-65. This is the SHA-256 fingerprint of the signing key. It must match the one in the project's README and security policy." />
+            <TextBox Text="{Binding SigningKeyFingerprint, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                     FontFamily="Consolas, Menlo, monospace" FontSize="12" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
 </Window>

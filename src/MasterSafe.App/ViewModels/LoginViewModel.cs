@@ -6,6 +6,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.Core;
 using MasterSafe.Crypto;
 
 namespace MasterSafe.App.ViewModels;
@@ -49,9 +50,24 @@ public sealed partial class LoginViewModel : ViewModelBase
     private void ShowForgot() => Forgot.IsOpen = true;
 
     /// <summary>Guidance shown while a new master password is typed.</summary>
-    public string PasswordHint => MasterPassword.Length >= MinPasswordLength
-        ? "Length is good. A phrase of several words is easier to remember than random characters."
-        : $"At least {MinPasswordLength} characters ({MinPasswordLength - MasterPassword.Length} more). A phrase of several words works well.";
+    public string PasswordHint
+    {
+        get
+        {
+            if (MasterPassword.Length < MinPasswordLength)
+            {
+                return $"At least {MinPasswordLength} characters ({MinPasswordLength - MasterPassword.Length} more). A phrase of several words works well.";
+            }
+
+            var strength = PasswordStrength.Evaluate(MasterPassword);
+            return strength.Score <= MinCreateScore - 1
+                ? $"{strength.Label}. {strength.Hint}"
+                : $"{strength.Label}. {(strength.Hint ?? "A phrase of several words is easier to remember than random characters.")}";
+        }
+    }
+
+    /// <summary>The lowest strength score (0 to 4) accepted for a new master password: "Fair".</summary>
+    public const int MinCreateScore = 2;
 
     /// <summary>Minimum master password length when creating a vault.</summary>
     public const int MinPasswordLength = 12;
@@ -90,6 +106,12 @@ public sealed partial class LoginViewModel : ViewModelBase
             if (MasterPassword.Length < MinPasswordLength)
             {
                 Error = $"Master password must be at least {MinPasswordLength} characters.";
+                return;
+            }
+
+            if (PasswordStrength.Evaluate(MasterPassword).Score < MinCreateScore)
+            {
+                Error = "That master password is too easy to guess. Use a longer phrase of several words, or a longer mix of letters, digits and symbols.";
                 return;
             }
 

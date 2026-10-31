@@ -65,7 +65,14 @@ public partial class App : Application
     private static (IVaultService Vault, AppServices Services) CreateServices(Window owner)
     {
         var paths = AppPaths.Default;
-        Directory.CreateDirectory(paths.DataFolder);
+        if (OperatingSystem.IsWindows())
+        {
+            Directory.CreateDirectory(paths.DataFolder);
+        }
+        else
+        {
+            Directory.CreateDirectory(paths.DataFolder, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
 
         var settings = new SettingsStore(paths.SettingsPath);
         var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);

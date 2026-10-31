@@ -67,7 +67,7 @@ public sealed class FileVaultRepository : IVaultRepository
         var directory = Path.GetDirectoryName(_path);
         if (!string.IsNullOrEmpty(directory))
         {
-            Directory.CreateDirectory(directory);
+            CreatePrivateDirectory(directory);
         }
 
         var temp = _path + ".tmp";
@@ -91,6 +91,19 @@ public sealed class FileVaultRepository : IVaultRepository
         else
         {
             File.Move(temp, _path);
+        }
+    }
+
+    /// <summary>Creates the folder; on Linux only its owner can open it, so other users cannot even list the vault.</summary>
+    internal static void CreatePrivateDirectory(string directory)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Directory.CreateDirectory(directory);
+        }
+        else
+        {
+            Directory.CreateDirectory(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         }
     }
 

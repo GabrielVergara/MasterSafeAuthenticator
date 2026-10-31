@@ -45,6 +45,20 @@ public static class PasswordStrength
             return new PasswordStrengthResult(0, "Very weak", 3, "This is one of the most common passwords. Use something long and unique.");
         }
 
+        // Something short repeated ("passwordpassword", "abc123abc123") is only as strong as the part that repeats.
+        var block = RepeatedBlock(password);
+        if (block is not null)
+        {
+            var inner = Evaluate(block, related);
+            var bitsRepeated = Math.Min(inner.Bits + 1, 40);
+            var cap = bitsRepeated < 28 ? 0 : bitsRepeated < 36 ? 1 : 2;
+            return new PasswordStrengthResult(
+                Math.Min(inner.Score, cap),
+                Math.Min(inner.Score, cap) == 0 ? "Very weak" : "Weak",
+                Math.Round(bitsRepeated, 1),
+                "Repeating something short does not make a password stronger. Use different words or characters.");
+        }
+
         var length = password.Length;
         var pool = 0;
         if (password.Any(char.IsLower))
@@ -132,6 +146,26 @@ public static class PasswordStrength
         };
 
         return new PasswordStrengthResult(score, label, Math.Round(bits, 1), hint);
+    }
+
+    /// <summary>The shortest block that, repeated two or more times, makes up the whole password; null when there is none.</summary>
+    private static string? RepeatedBlock(string password)
+    {
+        for (var size = 1; size <= password.Length / 2; size++)
+        {
+            if (password.Length % size != 0)
+            {
+                continue;
+            }
+
+            var block = password[..size];
+            if (password.Length / size >= 2 && string.Concat(Enumerable.Repeat(block, password.Length / size)) == password)
+            {
+                return block;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Counts characters that continue an ascending, descending or repeated run (three or more in a row).</summary>
