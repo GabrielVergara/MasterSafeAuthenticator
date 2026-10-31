@@ -11,7 +11,7 @@
           <DataTemplate x:DataType="vm:OtpItemViewModel">
             <Border Margin="0,0,0,8" Padding="16" CornerRadius="8"
                     Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
-              <Grid ColumnDefinitions="*,Auto,Auto">
+              <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                 <StackPanel Grid.Column="0" Spacing="2">
                   <TextBlock Text="{Binding Issuer}" FontWeight="SemiBold" FontSize="16" />
                   <TextBlock Text="{Binding Label}" Opacity="0.7" />
@@ -25,6 +25,9 @@
                 </StackPanel>
                 <Button Grid.Column="2" Content="Copy" VerticalAlignment="Center"
                         Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).CopyCodeCommand}"
+                        CommandParameter="{Binding}" />
+                <Button Grid.Column="3" Content="Delete" VerticalAlignment="Center" Margin="8,0,0,0"
+                        Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).DeleteCommand}"
                         CommandParameter="{Binding}" />
               </Grid>
             </Border>

@@ -57,6 +57,15 @@ public interface IVaultService
     /// <summary>Opens the vault, decrypting all records. Throws <see cref="InvalidPasswordException"/> on bad password.</summary>
     Task<IReadOnlyList<SafeAuthenticator.Core.OtpAccount>> OpenAsync(string masterPassword, CancellationToken cancellationToken = default);
 
+    /// <summary>Derives and verifies the vault key for the password (throws <see cref="InvalidPasswordException"/> if wrong).</summary>
+    Task<byte[]> DeriveKeyAsync(string masterPassword, CancellationToken cancellationToken = default);
+
+    /// <summary>Opens the vault with an already derived key (quick unlock).</summary>
+    Task<VaultContents> OpenWithKeyAsync(byte[] key, CancellationToken cancellationToken = default);
+
+    /// <summary>Saves contents using an already derived key and the existing salt.</summary>
+    Task SaveWithKeyAsync(byte[] key, VaultContents contents, CancellationToken cancellationToken = default);
+
     /// <summary>True when a vault has already been created.</summary>
     Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
 

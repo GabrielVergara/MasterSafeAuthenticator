@@ -23,6 +23,22 @@ public sealed partial class LoginViewModel : ViewModelBase
     private bool _isCreateMode;
 
     [ObservableProperty]
+    private bool _rememberMe;
+
+    [ObservableProperty]
+    private bool _hasQuickUnlock;
+
+    /// <summary>Raised when the user chooses to unlock with the saved Credential Manager key.</summary>
+    public event EventHandler? QuickUnlockRequested;
+
+    [RelayCommand]
+    private void QuickUnlock()
+    {
+        Error = null;
+        QuickUnlockRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [ObservableProperty]
     private string _confirmPassword = string.Empty;
 
     /// <summary>Minimum master password length when creating a vault.</summary>

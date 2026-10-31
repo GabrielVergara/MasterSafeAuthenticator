@@ -50,28 +50,38 @@ public sealed class VaultService : IVaultService
     /// <inheritdoc />
     public async Task<VaultContents> OpenContentsAsync(string masterPassword, CancellationToken cancellationToken = default)
     {
-        var vault = await _repository.LoadAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException("No vault exists. Call CreateAsync first.");
+        var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
+        var key = _masterPassword.DeriveKey(masterPassword, Convert.FromBase64String(vault.Salt), vault.KdfParameters);
+        return Decode(vault, key);
+    }
 
-        var salt = Convert.FromBase64String(vault.Salt);
-        var key = _masterPassword.DeriveKey(masterPassword, salt, vault.KdfParameters);
+    /// <inheritdoc />
+    public async Task<byte[]> DeriveKeyAsync(string masterPassword, CancellationToken cancellationToken = default)
+    {
+        var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
+        var key = _masterPassword.DeriveKey(masterPassword, Convert.FromBase64String(vault.Salt), vault.KdfParameters);
 
-        var payload = new EncryptedPayload(
-            Convert.FromBase64String(vault.Nonce),
-            Convert.FromBase64String(vault.Ciphertext),
-            Convert.FromBase64String(vault.Tag));
+        // Verify the password is correct before handing the key out.
+        Decode(vault, key);
+        return key;
+    }
 
-        var decrypted = _encryption.Decrypt(payload, key);
-        var json = vault.Compressed ? Decompress(decrypted) : decrypted;
+    /// <inheritdoc />
+    public async Task<VaultContents> OpenWithKeyAsync(byte[] key, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
+        return Decode(vault, key);
+    }
 
-        if (vault.Version >= 2)
-        {
-            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
-        }
+    /// <inheritdoc />
+    public async Task SaveWithKeyAsync(byte[] key, VaultContents contents, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(contents);
 
-        // Format v1: a bare JSON array of OTP accounts.
-        var accounts = JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [];
-        return new VaultContents { Accounts = accounts };
+        var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
+        await WriteAsync(key, Convert.FromBase64String(vault.Salt), vault.KdfParameters, contents, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -110,24 +120,7 @@ public sealed class VaultService : IVaultService
 
         var salt = _masterPassword.GenerateSalt();
         var key = _masterPassword.DeriveKey(masterPassword, salt, _kdfParameters);
-
-        var json = JsonSerializer.SerializeToUtf8Bytes(contents);
-        var plaintext = Compress(json);
-
-        var payload = _encryption.Encrypt(plaintext, key);
-
-        var vault = new VaultFile
-        {
-            Version = 2,
-            Salt = Convert.ToBase64String(salt),
-            KdfParameters = _kdfParameters,
-            Nonce = Convert.ToBase64String(payload.Nonce),
-            Tag = Convert.ToBase64String(payload.Tag),
-            Ciphertext = Convert.ToBase64String(payload.Ciphertext),
-            Compressed = true,
-        };
-
-        await _repository.SaveAsync(vault, cancellationToken).ConfigureAwait(false);
+        await WriteAsync(key, salt, _kdfParameters, contents, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -135,6 +128,49 @@ public sealed class VaultService : IVaultService
     {
         var contents = await OpenContentsAsync(currentPassword, cancellationToken).ConfigureAwait(false);
         await SaveContentsAsync(newPassword, contents, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<VaultFile> LoadRequiredAsync(CancellationToken cancellationToken)
+        => await _repository.LoadAsync(cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("No vault exists. Call CreateAsync first.");
+
+    private VaultContents Decode(VaultFile vault, byte[] key)
+    {
+        var payload = new EncryptedPayload(
+            Convert.FromBase64String(vault.Nonce),
+            Convert.FromBase64String(vault.Ciphertext),
+            Convert.FromBase64String(vault.Tag));
+
+        var decrypted = _encryption.Decrypt(payload, key);
+        var json = vault.Compressed ? Decompress(decrypted) : decrypted;
+
+        if (vault.Version >= 2)
+        {
+            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+        }
+
+        // Format v1: a bare JSON array of OTP accounts.
+        var accounts = JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [];
+        return new VaultContents { Accounts = accounts };
+    }
+
+    private async Task WriteAsync(byte[] key, byte[] salt, Argon2Parameters kdf, VaultContents contents, CancellationToken cancellationToken)
+    {
+        var json = JsonSerializer.SerializeToUtf8Bytes(contents);
+        var payload = _encryption.Encrypt(Compress(json), key);
+
+        var vault = new VaultFile
+        {
+            Version = 2,
+            Salt = Convert.ToBase64String(salt),
+            KdfParameters = kdf,
+            Nonce = Convert.ToBase64String(payload.Nonce),
+            Tag = Convert.ToBase64String(payload.Tag),
+            Ciphertext = Convert.ToBase64String(payload.Ciphertext),
+            Compressed = true,
+        };
+
+        await _repository.SaveAsync(vault, cancellationToken).ConfigureAwait(false);
     }
 
     private static byte[] Compress(byte[] data)

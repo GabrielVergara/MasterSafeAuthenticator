@@ -4,6 +4,7 @@
 // License: See README.md
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SafeAuthenticator.Core;
 
 namespace SafeAuthenticator.App.ViewModels;
@@ -40,6 +41,23 @@ public sealed partial class AccountEditorViewModel : ViewModelBase
     public IReadOnlyList<int> DigitOptions { get; } = [6, 8];
 
     public IReadOnlyList<int> PeriodOptions { get; } = [30, 60];
+
+    /// <summary>Raised with the validated account when the user saves.</summary>
+    public event EventHandler<OtpAccount>? AccountSaved;
+
+    [RelayCommand]
+    private void Save()
+    {
+        if (!TryBuild(out var account) || account is null)
+        {
+            return;
+        }
+
+        AccountSaved?.Invoke(this, account);
+        Issuer = string.Empty;
+        Label = string.Empty;
+        Secret = string.Empty;
+    }
 
     /// <summary>Populates the editor from an existing account.</summary>
     public void LoadFrom(OtpAccount account)

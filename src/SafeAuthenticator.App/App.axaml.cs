@@ -37,6 +37,9 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    private static ICredentialStore CreateCredentialStore()
+        => OperatingSystem.IsWindows() ? new WindowsCredentialStore() : new HeadlessCredentialStore();
+
     private void SetupTray(
         IClassicDesktopStyleApplicationLifetime desktop,
         MainWindow window,

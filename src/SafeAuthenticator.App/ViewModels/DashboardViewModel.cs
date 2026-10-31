@@ -53,6 +53,31 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
         Refresh();
     }
 
+    /// <summary>Raised after an account is added or removed so the vault can be saved.</summary>
+    public event EventHandler? AccountsChanged;
+
+    /// <summary>Adds an account and notifies listeners.</summary>
+    public void Add(OtpAccount account)
+    {
+        ArgumentNullException.ThrowIfNull(account);
+        Accounts.Add(new OtpItemViewModel(account));
+        Refresh();
+        StatusMessage = $"Added {account.Issuer}.";
+        AccountsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void Delete(OtpItemViewModel? item)
+    {
+        if (item is null || !Accounts.Remove(item))
+        {
+            return;
+        }
+
+        StatusMessage = $"Deleted {item.Issuer}.";
+        AccountsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     /// <summary>Recomputes all codes for the current time.</summary>
     public void Refresh()
     {

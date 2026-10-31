@@ -10,9 +10,12 @@
     <TextBox Watermark="Confirm master password" PasswordChar="*"
              IsVisible="{Binding IsCreateMode}"
              Text="{Binding ConfirmPassword, Mode=TwoWay}" />
+    <CheckBox Content="Remember me (Windows Credential Manager)" IsChecked="{Binding RememberMe, Mode=TwoWay}" />
     <Button Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
             Command="{Binding UnlockCommand}" />
-    <TextBlock Text="{Binding Error}" Foreground="IndianRed"
+    <Button Content="Unlock with saved credentials" HorizontalAlignment="Stretch"
+            IsVisible="{Binding HasQuickUnlock}" Command="{Binding QuickUnlockCommand}" />
+    <TextBlock Text="{Binding Error}"
                IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
   </StackPanel>
 </UserControl>

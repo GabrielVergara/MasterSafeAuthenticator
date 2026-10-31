@@ -7,6 +7,7 @@
     <TextBlock Text="Import account" FontSize="22" FontWeight="SemiBold" />
     <TextBlock Text="Paste an otpauth:// URI" />
     <TextBox Watermark="otpauth://totp/..." Text="{Binding ManualUri, Mode=TwoWay}" />
+    <Button Content="Import" Command="{Binding ImportUriCommand}" />
     <TextBlock Text="Or drag a QR image (png/jpg/jpeg/bmp) onto the window." Opacity="0.7" />
     <TextBlock Text="{Binding Status}" />
   </StackPanel>

@@ -77,10 +77,11 @@ flowchart TD
     J[Master password changed] --> K[Delete credential]
 ```
 
-Status: the storage layer (`ICredentialStore`, `WindowsCredentialStore`) is implemented;
-the login "remember me" flow is planned.
+Status: implemented. The session holds only a derived key; "Remember me" stores it via
+`ICredentialStore`/`WindowsCredentialStore` (DPAPI-wrapped), and changing the master
+password replaces the stored key.
 
-## 5. Planned vault contents model
+## 5. Vault contents model (implemented: passwords page, generator, 30 s clipboard clear)
 
 ```mermaid
 classDiagram

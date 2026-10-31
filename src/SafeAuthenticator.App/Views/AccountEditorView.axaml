@@ -11,6 +11,7 @@
     <ComboBox ItemsSource="{Binding Algorithms}" SelectedItem="{Binding Algorithm, Mode=TwoWay}" />
     <ComboBox ItemsSource="{Binding DigitOptions}" SelectedItem="{Binding Digits, Mode=TwoWay}" />
     <ComboBox ItemsSource="{Binding PeriodOptions}" SelectedItem="{Binding Period, Mode=TwoWay}" />
+    <Button Content="Save account" Command="{Binding SaveCommand}" />
     <TextBlock Text="{Binding ValidationError}" Foreground="IndianRed"
                IsVisible="{Binding ValidationError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
   </StackPanel>

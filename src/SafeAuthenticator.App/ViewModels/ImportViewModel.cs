@@ -4,6 +4,7 @@
 // License: See README.md
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SafeAuthenticator.Core;
 using SafeAuthenticator.QR;
 
@@ -25,12 +26,25 @@ public sealed partial class ImportViewModel : ViewModelBase
     [ObservableProperty]
     private OtpAccount? _importedAccount;
 
+    /// <summary>Raised when an account was successfully imported.</summary>
+    public event EventHandler<OtpAccount>? AccountImported;
+
+    [RelayCommand]
+    private void ImportUri()
+    {
+        if (ImportFromUri())
+        {
+            ManualUri = string.Empty;
+        }
+    }
+
     /// <summary>Imports from a manually pasted otpauth URI.</summary>
     public bool ImportFromUri()
     {
         if (OtpAuthParser.TryParse(ManualUri.Trim(), out var account) && account is not null)
         {
             ImportedAccount = account;
+            AccountImported?.Invoke(this, account);
             Status = $"Imported {account.Issuer} ({account.Label}).";
             return true;
         }
@@ -45,6 +59,7 @@ public sealed partial class ImportViewModel : ViewModelBase
         if (_importer.TryImportFromFile(path, out var account) && account is not null)
         {
             ImportedAccount = account;
+            AccountImported?.Invoke(this, account);
             Status = $"Imported {account.Issuer} from image.";
             return true;
         }
@@ -59,6 +74,7 @@ public sealed partial class ImportViewModel : ViewModelBase
         try
         {
             ImportedAccount = _importer.ImportFromStream(stream);
+            AccountImported?.Invoke(this, ImportedAccount);
             Status = $"Imported {ImportedAccount.Issuer}.";
             return true;
         }
