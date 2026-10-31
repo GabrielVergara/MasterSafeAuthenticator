@@ -7,7 +7,6 @@ using FluentAssertions;
 using MasterSafe.App.ViewModels;
 using MasterSafe.Core;
 using MasterSafe.Crypto;
-using MasterSafe.Platform;
 using Xunit;
 
 namespace MasterSafe.Tests;
@@ -145,14 +144,14 @@ public class RemainingPhasesTests
         var path = TempPath();
         try
         {
-            var vm = new MainWindowViewModel(NewVault(path), new HeadlessCredentialStore());
+            var vm = new MainWindowViewModel(NewVault(path));
             await vm.UnlockVaultAsync("master-password");
             vm.Passwords.Title = "Mail";
             vm.Passwords.Password = "pw";
             vm.Passwords.SaveCommand.Execute(null);
             await vm.PersistAsync();
 
-            var vm2 = new MainWindowViewModel(NewVault(path), new HeadlessCredentialStore());
+            var vm2 = new MainWindowViewModel(NewVault(path));
             await vm2.UnlockVaultAsync("master-password");
 
             vm2.Passwords.Snapshot().Should().ContainSingle().Which.Title.Should().Be("Mail");
@@ -170,7 +169,7 @@ public class RemainingPhasesTests
         try
         {
             var vault = NewVault(path);
-            var vm = new MainWindowViewModel(vault, new HeadlessCredentialStore());
+            var vm = new MainWindowViewModel(vault);
             await vm.UnlockVaultAsync("old-password");
             vm.Passwords.Title = "Mail";
             vm.Passwords.Password = "pw";
@@ -203,7 +202,7 @@ public class RemainingPhasesTests
         var path = TempPath();
         try
         {
-            var vm = new MainWindowViewModel(NewVault(path), new HeadlessCredentialStore());
+            var vm = new MainWindowViewModel(NewVault(path));
             await vm.UnlockVaultAsync("old-password");
 
             var error = await vm.ChangeMasterPasswordAsync("wrong", "new-password");
@@ -233,76 +232,5 @@ public class RemainingPhasesTests
         vm.ConfirmNewPassword = "long-enough-1";
         await vm.ChangePasswordCommand.ExecuteAsync(null);
         vm.PasswordChangeStatus.Should().Contain("changed");
-    }
-
-    [Fact]
-    public async Task QuickUnlock_UsesStoredKey_AndRevokesOnChange()
-    {
-        var path = TempPath();
-        try
-        {
-            var vault = NewVault(path);
-            var store = new FakeSupportedStore();
-            var vm = new MainWindowViewModel(vault, store);
-            vm.Login.RememberMe = true;
-            await vm.UnlockVaultAsync("master-password");
-            store.Read(MainWindowViewModel.QuickUnlockTarget).Should().NotBeNull();
-
-            vm.LockCommand.Execute(null);
-            vm.IsUnlocked.Should().BeFalse();
-            vm.Login.HasQuickUnlock.Should().BeTrue();
-
-            await vm.QuickUnlockAsync();
-            vm.IsUnlocked.Should().BeTrue();
-
-            var oldKey = store.Read(MainWindowViewModel.QuickUnlockTarget);
-            await vm.ChangeMasterPasswordAsync("master-password", "another-password");
-            store.Read(MainWindowViewModel.QuickUnlockTarget).Should().NotEqual(oldKey);
-
-            vm.LockCommand.Execute(null);
-            await vm.QuickUnlockAsync();
-            vm.IsUnlocked.Should().BeTrue();
-        }
-        finally
-        {
-            File.Delete(path);
-        }
-    }
-
-    [Fact]
-    public async Task QuickUnlock_StaleKey_IsDeleted()
-    {
-        var path = TempPath();
-        try
-        {
-            var vault = NewVault(path);
-            await vault.CreateAsync("master-password");
-            var store = new FakeSupportedStore();
-            store.Save(MainWindowViewModel.QuickUnlockTarget, new byte[32]);
-            var vm = new MainWindowViewModel(vault, store);
-
-            await vm.QuickUnlockAsync();
-
-            vm.IsUnlocked.Should().BeFalse();
-            store.Read(MainWindowViewModel.QuickUnlockTarget).Should().BeNull();
-            vm.Login.Error.Should().Contain("expired");
-        }
-        finally
-        {
-            File.Delete(path);
-        }
-    }
-
-    private sealed class FakeSupportedStore : ICredentialStore
-    {
-        private readonly Dictionary<string, byte[]> _items = [];
-
-        public bool IsSupported => true;
-
-        public void Save(string target, byte[] secret) => _items[target] = (byte[])secret.Clone();
-
-        public byte[]? Read(string target) => _items.TryGetValue(target, out var v) ? (byte[])v.Clone() : null;
-
-        public bool Delete(string target) => _items.Remove(target);
     }
 }

@@ -45,6 +45,15 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>Entries matching the current search.</summary>
     public ObservableCollection<PasswordEntry> Entries { get; } = [];
 
+    /// <summary>True when no entries match, so the view can show its empty state.</summary>
+    public bool IsEmpty => Entries.Count == 0;
+
+    /// <summary>Creates the view model and keeps <see cref="IsEmpty"/> in sync with the entries.</summary>
+    public PasswordsViewModel()
+    {
+        Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
+    }
+
     /// <summary>Raised after an entry is added, updated or deleted so the vault can be saved.</summary>
     public event EventHandler? EntriesChanged;
 

@@ -186,14 +186,24 @@ public sealed partial class BackupViewModel : ViewModelBase
             return false;
         }
 
-        var client = new HttpClient();
+        var client = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
         if (!string.IsNullOrEmpty(WebDavUser))
         {
             var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{WebDavUser}:{WebDavPassword}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
         }
 
-        provider = new WebDavBackupProvider(client, uri);
+        try
+        {
+            provider = new WebDavBackupProvider(client, uri);
+        }
+        catch (ArgumentException ex)
+        {
+            client.Dispose();
+            error = ex.Message.Split(" (Parameter", 2)[0];
+            return false;
+        }
+
         return true;
     }
 }

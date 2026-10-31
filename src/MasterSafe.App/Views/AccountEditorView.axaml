@@ -3,16 +3,49 @@
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.AccountEditorView"
              x:DataType="vm:AccountEditorViewModel">
-  <StackPanel Spacing="10" MaxWidth="420" HorizontalAlignment="Left">
-    <TextBlock Text="Account" FontSize="22" FontWeight="SemiBold" />
-    <TextBox Watermark="Issuer" Text="{Binding Issuer, Mode=TwoWay}" />
-    <TextBox Watermark="Label" Text="{Binding Label, Mode=TwoWay}" />
-    <TextBox Watermark="Secret (Base32)" Text="{Binding Secret, Mode=TwoWay}" />
-    <ComboBox ItemsSource="{Binding Algorithms}" SelectedItem="{Binding Algorithm, Mode=TwoWay}" />
-    <ComboBox ItemsSource="{Binding DigitOptions}" SelectedItem="{Binding Digits, Mode=TwoWay}" />
-    <ComboBox ItemsSource="{Binding PeriodOptions}" SelectedItem="{Binding Period, Mode=TwoWay}" />
-    <Button Content="Save account" Command="{Binding SaveCommand}" />
-    <TextBlock Text="{Binding ValidationError}" Foreground="IndianRed"
-               IsVisible="{Binding ValidationError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-  </StackPanel>
+  <ScrollViewer>
+    <StackPanel Spacing="14" MaxWidth="460" HorizontalAlignment="Left">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Add account" Classes="h1" />
+        <TextBlock Classes="hint" Text="Enter the details shown when the website or app set up two-factor authentication." />
+      </StackPanel>
+
+      <StackPanel>
+        <TextBlock Text="Issuer (service name)" Classes="label" />
+        <TextBox Watermark="e.g. GitHub" Text="{Binding Issuer, Mode=TwoWay}" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="Account label (user name or e-mail)" Classes="label" />
+        <TextBox Watermark="e.g. name@example.com" Text="{Binding Label, Mode=TwoWay}" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="Secret key (Base32)" Classes="label" />
+        <TextBox Classes="revealPasswordButton" PasswordChar="●" Watermark="e.g. JBSWY3DPEHPK3PXP"
+                 Text="{Binding Secret, Mode=TwoWay}" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,12,*,12,*">
+        <StackPanel Grid.Column="0">
+          <TextBlock Text="Algorithm" Classes="label" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Algorithms}"
+                    SelectedItem="{Binding Algorithm, Mode=TwoWay}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Text="Digits" Classes="label" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding DigitOptions}"
+                    SelectedItem="{Binding Digits, Mode=TwoWay}" />
+        </StackPanel>
+        <StackPanel Grid.Column="4">
+          <TextBlock Text="Period (seconds)" Classes="label" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding PeriodOptions}"
+                    SelectedItem="{Binding Period, Mode=TwoWay}" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Classes="hint" Text="Leave algorithm, digits and period unchanged unless the service tells you otherwise." />
+
+      <TextBlock Classes="error" Text="{Binding ValidationError}"
+                 IsVisible="{Binding ValidationError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <Button Classes="accent" Content="Save account" HorizontalAlignment="Left" Command="{Binding SaveCommand}" />
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

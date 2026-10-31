@@ -3,19 +3,51 @@
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.LoginView"
              x:DataType="vm:LoginViewModel">
-  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Width="320">
-    <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
-    <TextBox Watermark="Master password" PasswordChar="*"
-             Text="{Binding MasterPassword, Mode=TwoWay}" />
-    <TextBox Watermark="Confirm master password" PasswordChar="*"
-             IsVisible="{Binding IsCreateMode}"
-             Text="{Binding ConfirmPassword, Mode=TwoWay}" />
-    <CheckBox Content="Remember me (Windows Credential Manager)" IsChecked="{Binding RememberMe, Mode=TwoWay}" />
-    <Button Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
-            Command="{Binding UnlockCommand}" />
-    <Button Content="Unlock with saved credentials" HorizontalAlignment="Stretch"
-            IsVisible="{Binding HasQuickUnlock}" Command="{Binding QuickUnlockCommand}" />
-    <TextBlock Text="{Binding Error}"
-               IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-  </StackPanel>
+  <Border Classes="card" Width="380" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="28">
+    <StackPanel Spacing="14">
+      <Image Source="/Assets/logo-256.png" Width="72" Height="72" HorizontalAlignment="Center" />
+      <StackPanel Spacing="2">
+        <TextBlock Text="{Binding Title}" Classes="h1" HorizontalAlignment="Center" />
+        <TextBlock Text="MasterSafe Authenticator" Classes="hint" HorizontalAlignment="Center" />
+      </StackPanel>
+
+      <StackPanel>
+        <TextBlock Text="Master password" Classes="label" />
+        <TextBox x:Name="PasswordBox" Classes="revealPasswordButton" PasswordChar="●"
+                 Text="{Binding MasterPassword, Mode=TwoWay}">
+          <TextBox.KeyBindings>
+            <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
+          </TextBox.KeyBindings>
+        </TextBox>
+      </StackPanel>
+
+      <StackPanel IsVisible="{Binding IsCreateMode}">
+        <TextBlock Text="Confirm master password" Classes="label" />
+        <TextBox Classes="revealPasswordButton" PasswordChar="●"
+                 Text="{Binding ConfirmPassword, Mode=TwoWay}">
+          <TextBox.KeyBindings>
+            <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
+          </TextBox.KeyBindings>
+        </TextBox>
+        <TextBlock Classes="hint" Margin="0,8,0,0"
+                   Text="Use a long passphrase (at least 8 characters). It cannot be recovered if you forget it." />
+      </StackPanel>
+
+      <TextBlock Classes="error" Text="{Binding Error}"
+                 IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+      <Button Classes="accent" Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center" Command="{Binding UnlockCommand}" />
+      <ItemsControl ItemsSource="{Binding UnlockMethods}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:UnlockMethodViewModel">
+            <Button Content="{Binding Text}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Margin="0,0,0,8"
+                    Command="{Binding $parent[ItemsControl].((vm:LoginViewModel)DataContext).UnlockWithMethodCommand}"
+                    CommandParameter="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
 </UserControl>

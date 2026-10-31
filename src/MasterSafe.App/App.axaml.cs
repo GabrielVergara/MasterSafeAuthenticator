@@ -31,7 +31,7 @@ public partial class App : Application
             desktop.MainWindow = splash;
             splash.Show();
 
-            var mainViewModel = new MainWindowViewModel(CreateVault(), CreateCredentialStore());
+            var mainViewModel = new MainWindowViewModel(CreateVault(), PlatformServices.CreateUnlockProviders(), startIdleTimer: true);
             var mainWindow = new MainWindow
             {
                 DataContext = mainViewModel,
@@ -57,9 +57,6 @@ public partial class App : Application
     }
 
     private static readonly TimeSpan SplashDuration = TimeSpan.FromMilliseconds(2000);
-
-    private static ICredentialStore CreateCredentialStore()
-        => OperatingSystem.IsWindows() ? new WindowsCredentialStore() : new HeadlessCredentialStore();
 
     private static IVaultService CreateVault()
     {

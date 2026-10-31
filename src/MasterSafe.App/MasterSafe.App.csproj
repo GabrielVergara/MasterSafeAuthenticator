@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework Condition="'$(MasterSafeWindowsTarget)' == 'true'">net10.0-windows10.0.19041.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>MasterSafe.App</RootNamespace>
     <AssemblyName>MasterSafe.App</AssemblyName>
@@ -17,14 +18,11 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <!-- Avalonia 11.2.3 brings Tmds.DBus.Protocol 0.20.0 (Linux only), which has advisory GHSA-xrw6-gwf8-vvr9.
+         0.21.3 is the patched backport. Remove this line once Avalonia depends on a fixed version. -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- Tmds.DBus.Protocol is a Linux-only transitive of Avalonia and is never loaded by this
-         Windows desktop app. No patched version clears the advisory yet, so suppress the audit
-         for this specific advisory. Tracked for removal once Avalonia ships a patched dependency. -->
-    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-xrw6-gwf8-vvr9" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <ProjectReference Include="..\MasterSafe.Core\MasterSafe.Core.csproj" />
     <ProjectReference Include="..\MasterSafe.Crypto\MasterSafe.Crypto.csproj" />
     <ProjectReference Include="..\MasterSafe.QR\MasterSafe.QR.csproj" />

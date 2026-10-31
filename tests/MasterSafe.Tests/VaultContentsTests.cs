@@ -30,7 +30,7 @@ public class VaultContentsTests
         var loaded = await vault.OpenContentsAsync("pw");
         loaded.Accounts.Should().HaveCount(1);
         loaded.Passwords.Should().ContainSingle().Which.Password.Should().Be("p@ss");
-        (await repo.LoadAsync())!.Version.Should().Be(2);
+        (await repo.LoadAsync())!.Version.Should().Be(3);
     }
 
     [Fact]

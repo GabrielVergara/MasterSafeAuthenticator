@@ -1,0 +1,3 @@
+# Scripts and desktop entries run on Linux and must keep Unix line endings.
+*.sh text eol=lf
+*.desktop text eol=lf

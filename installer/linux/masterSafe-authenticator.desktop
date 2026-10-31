@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=MasterSafe Authenticator
+GenericName=Authenticator
+Comment=Privacy-first, offline-first authenticator and password vault
+Exec=@EXEC@
+Icon=masterSafe-authenticator
+Terminal=false
+Categories=Utility;Security;
+Keywords=2FA;TOTP;OTP;authenticator;password;vault;
+StartupWMClass=MasterSafe.App

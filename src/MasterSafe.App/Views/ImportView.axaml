@@ -3,12 +3,19 @@
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.ImportView"
              x:DataType="vm:ImportViewModel">
-  <StackPanel Spacing="12" MaxWidth="520" HorizontalAlignment="Left">
-    <TextBlock Text="Import account" FontSize="22" FontWeight="SemiBold" />
-    <TextBlock Text="Paste an otpauth:// URI" />
-    <TextBox Watermark="otpauth://totp/..." Text="{Binding ManualUri, Mode=TwoWay}" />
-    <Button Content="Import" Command="{Binding ImportUriCommand}" />
-    <TextBlock Text="Or drag a QR image (png/jpg/jpeg/bmp) onto the window." Opacity="0.7" />
-    <TextBlock Text="{Binding Status}" />
+  <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
+    <StackPanel Spacing="2">
+      <TextBlock Text="Import account" Classes="h1" />
+      <TextBlock Classes="hint" Text="Add an account from the link behind its QR code, or drop a QR image onto this window." />
+    </StackPanel>
+    <StackPanel>
+      <TextBlock Text="Setup link (otpauth://)" Classes="label" />
+      <TextBox Watermark="otpauth://totp/Example:name@example.com?secret=..." Text="{Binding ManualUri, Mode=TwoWay}" />
+    </StackPanel>
+    <Button Classes="accent" Content="Import" HorizontalAlignment="Left" Command="{Binding ImportUriCommand}" />
+    <Border Classes="card" Padding="20">
+      <TextBlock Text="Drag a QR code image (png, jpg, jpeg or bmp) onto the window to import it." Classes="hint" />
+    </Border>
+    <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
   </StackPanel>
 </UserControl>

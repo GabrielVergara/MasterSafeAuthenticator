@@ -17,7 +17,7 @@ public static class AppInfo
     public const string Tagline = "A privacy-first, offline-first authenticator for TOTP/HOTP.";
 
     /// <summary>Project home page.</summary>
-    public const string ProjectUrl = "https://github.com/gabrielezcurdia-lgtm/MasterSafe";
+    public const string ProjectUrl = "https://github.com/GabrielVergara/MasterSafeAuthenticator";
 
     /// <summary>Author of the application.</summary>
     public const string Author = "Gabriel Vergara Ezcurdia";

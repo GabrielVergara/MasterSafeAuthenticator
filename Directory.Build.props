@@ -1,4 +1,9 @@
 <Project>
+  <!-- Windows builds use the Windows 10 API set (Windows Hello). Set -p:MasterSafeTargetOs=linux to build for Linux from any system. -->
+  <PropertyGroup>
+    <MasterSafeWindowsTarget Condition="'$(MasterSafeTargetOs)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">true</MasterSafeWindowsTarget>
+    <MasterSafeWindowsTarget Condition="'$(MasterSafeTargetOs)' == 'windows'">true</MasterSafeWindowsTarget>
+  </PropertyGroup>
   <PropertyGroup>
 	<TargetFramework>net10.0</TargetFramework>
 	<LangVersion>latest</LangVersion>

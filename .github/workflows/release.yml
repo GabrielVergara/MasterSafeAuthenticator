@@ -1,0 +1,101 @@
+name: release
+
+# Run by pushing a tag such as v1.2.0. Builds the installers, signs them with the ML-DSA release key
+# and attaches them to a draft GitHub release for you to review before publishing.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test MasterSafe.slnx --configuration Release
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Write signing key
+        shell: pwsh
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          if ($env:RELEASE_SIGNING_KEY) {
+            Set-Content -Path "$env:RUNNER_TEMP\release.key" -Value $env:RELEASE_SIGNING_KEY -NoNewline
+          }
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $key = if (Test-Path "$env:RUNNER_TEMP\release.key") { "$env:RUNNER_TEMP\release.key" } else { "" }
+          ./installer/build-windows.ps1 -Version $version -SigningKey $key
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            artifacts/*-setup.exe
+            artifacts/*-setup.exe.sha256
+            artifacts/*-setup.exe.sig
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test MasterSafe.slnx --configuration Release
+
+      - name: Build packages
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          bash installer/linux/build-linux.sh "$version" linux-x64
+          bash installer/linux/build-linux.sh "$version" linux-arm64
+
+      - name: Sign packages
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -n "$RELEASE_SIGNING_KEY" ]; then
+            printf '%s' "$RELEASE_SIGNING_KEY" > "$RUNNER_TEMP/release.key"
+            for f in artifacts/*.tar.gz; do
+              dotnet run --project src/MasterSafe.Cli -c Release -- sign "$f" "$RUNNER_TEMP/release.key"
+            done
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            artifacts/*.tar.gz
+            artifacts/*.tar.gz.sha256
+            artifacts/*.tar.gz.sig
+
+  publish:
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: dist/*

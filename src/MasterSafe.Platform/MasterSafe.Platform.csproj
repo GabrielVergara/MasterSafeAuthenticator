@@ -2,8 +2,10 @@
   <PropertyGroup>
     <RootNamespace>MasterSafe.Platform</RootNamespace>
     <AssemblyName>MasterSafe.Platform</AssemblyName>
+    <!-- Windows builds target the Windows 10 API set (Windows Hello); other systems use plain net10.0. -->
+    <TargetFramework Condition="'$(MasterSafeWindowsTarget)' == 'true'">net10.0-windows10.0.19041.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
+    <ProjectReference Include="..\MasterSafe.Crypto\MasterSafe.Crypto.csproj" />
   </ItemGroup>
 </Project>

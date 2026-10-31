@@ -4,32 +4,50 @@
 // License: See LICENSE
 
 using System;
+using System.Security.Cryptography;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.Core;
 using MasterSafe.Crypto;
-using MasterSafe.Platform;
 
 namespace MasterSafe.App.ViewModels;
 
 /// <summary>
-/// Root view model: owns navigation, the unlocked vault session, quick unlock and persistence.
+/// Root view model: owns navigation, the unlocked vault session, unlock methods, auto-lock and persistence.
 /// </summary>
 public sealed partial class MainWindowViewModel : ViewModelBase
 {
-    /// <summary>Credential Manager target holding the DPAPI-wrapped vault key.</summary>
-    public const string QuickUnlockTarget = "MasterSafe.QuickUnlock";
-
     private readonly IVaultService? _vault;
-    private readonly ICredentialStore? _credentials;
+    private readonly IReadOnlyList<ISecretProvider> _providers;
+    private readonly Func<DateTimeOffset> _clock;
     private readonly SemaphoreSlim _saveLock = new(1, 1);
+    private readonly DispatcherTimer? _idleTimer;
     private byte[]? _sessionKey;
+    private DateTimeOffset _lastActivity;
 
     [ObservableProperty]
     private bool _isUnlocked;
 
     [ObservableProperty]
     private object _currentPage;
+
+    /// <summary>Name of the navigation section matching <see cref="CurrentPage"/> (drives the sidebar highlight).</summary>
+    [ObservableProperty]
+    private string _activeSection = string.Empty;
+
+    partial void OnCurrentPageChanged(object value)
+        => ActiveSection = value switch
+        {
+            DashboardViewModel => "Dashboard",
+            PasswordsViewModel => "Passwords",
+            AccountEditorViewModel => "Add",
+            ImportViewModel => "Import",
+            BackupViewModel => "Backup",
+            SettingsViewModel => "Settings",
+            HelpViewModel => "Help",
+            _ => string.Empty,
+        };
 
     public LoginViewModel Login { get; } = new();
 
@@ -53,10 +71,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Creates the shell. With no vault service a demo account is shown (design/test mode).
     /// </summary>
-    public MainWindowViewModel(IVaultService? vault = null, ICredentialStore? credentials = null)
+    /// <param name="vault">The vault, or null for demo mode.</param>
+    /// <param name="providers">Hardware or OS unlock methods offered on this platform.</param>
+    /// <param name="clock">Time source (replaced in tests).</param>
+    /// <param name="startIdleTimer">Starts the auto-lock timer; needs the UI thread.</param>
+    public MainWindowViewModel(
+        IVaultService? vault = null,
+        IEnumerable<ISecretProvider>? providers = null,
+        Func<DateTimeOffset>? clock = null,
+        bool startIdleTimer = false)
     {
         _vault = vault;
-        _credentials = credentials;
+        _providers = providers?.ToList() ?? [];
+        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _lastActivity = _clock();
         Dashboard = new DashboardViewModel();
         _currentPage = Login;
 
@@ -71,7 +99,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         else
         {
             Login.UnlockRequested += async (_, password) => await UnlockVaultAsync(password);
-            Login.QuickUnlockRequested += async (_, _) => await QuickUnlockAsync();
+            Login.MethodUnlockRequested += async (_, provider) => await UnlockWithMethodAsync(provider);
             _ = InitializeLoginAsync();
         }
 
@@ -90,6 +118,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             CurrentPage = Dashboard;
         };
         Settings.ChangePasswordHandler = ChangeMasterPasswordAsync;
+        Settings.AddMethodHandler = AddUnlockMethodAsync;
+        Settings.RemoveMethodHandler = RemoveUnlockMethodAsync;
+
+        if (startIdleTimer && Dispatcher.UIThread.CheckAccess())
+        {
+            _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+            _idleTimer.Tick += (_, _) => LockIfIdle();
+            _idleTimer.Start();
+        }
+    }
+
+    /// <summary>Records user activity so the auto-lock countdown restarts.</summary>
+    public void NotifyActivity() => _lastActivity = _clock();
+
+    /// <summary>Locks the vault when there has been no activity for the configured time.</summary>
+    public void LockIfIdle()
+    {
+        if (IsUnlocked && _vault is not null
+            && _clock() - _lastActivity >= TimeSpan.FromMinutes(Math.Max(1, Settings.AutoLockMinutes)))
+        {
+            Lock();
+        }
     }
 
     /// <summary>Creates (first run) or opens the vault with the master password and shows the dashboard.</summary>
@@ -104,10 +154,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             }
 
             var key = await _vault.DeriveKeyAsync(password);
-            var contents = await _vault.OpenWithKeyAsync(key);
-            _sessionKey = key;
-            ApplyQuickUnlockPreference(key);
-            CompleteUnlock(contents);
+            await CompleteUnlockWithKeyAsync(key);
         }
         catch (InvalidPasswordException)
         {
@@ -123,34 +170,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Opens the vault using the key stored in Windows Credential Manager.</summary>
-    public async Task QuickUnlockAsync()
+    /// <summary>Opens the vault with a hardware or OS unlock method such as Windows Hello.</summary>
+    public async Task UnlockWithMethodAsync(ISecretProvider provider)
     {
-        var key = _credentials?.Read(QuickUnlockTarget);
-        if (key is null)
-        {
-            Login.HasQuickUnlock = false;
-            Login.Error = "No saved quick unlock. Enter your master password.";
-            return;
-        }
+        ArgumentNullException.ThrowIfNull(provider);
 
         Login.IsBusy = true;
         try
         {
-            var contents = await _vault!.OpenWithKeyAsync(key);
-            _sessionKey = key;
-            CompleteUnlock(contents);
+            var key = await _vault!.UnlockWithProviderAsync(provider);
+            await CompleteUnlockWithKeyAsync(key);
         }
         catch (InvalidPasswordException)
         {
-            // The master password changed elsewhere; the stored key is stale.
-            _credentials!.Delete(QuickUnlockTarget);
-            Login.HasQuickUnlock = false;
-            Login.Error = "Quick unlock expired. Enter your master password.";
+            Login.Error = $"{provider.DisplayName} could not unlock the vault. Use your master password.";
+        }
+        catch (OperationCanceledException)
+        {
+            Login.Error = $"{provider.DisplayName} was cancelled.";
         }
         catch (Exception ex)
         {
-            Login.Error = $"Could not open vault: {ex.Message}";
+            Login.Error = $"{provider.DisplayName} failed: {ex.Message}";
         }
         finally
         {
@@ -169,7 +210,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         await _saveLock.WaitAsync();
         try
         {
-            await _vault.SaveWithKeyAsync(_sessionKey, BuildContents());
+            if (_sessionKey is not null)
+            {
+                await _vault.SaveWithKeyAsync(_sessionKey, BuildContents());
+            }
         }
         catch (Exception ex)
         {
@@ -183,7 +227,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>
     /// Changes the master password. Returns null on success or an error message.
-    /// The quick unlock credential is revoked and, if it was enabled, replaced with the new key.
+    /// Other unlock methods (Windows Hello, security keys) keep working.
     /// </summary>
     public async Task<string?> ChangeMasterPasswordAsync(string currentPassword, string newPassword)
     {
@@ -195,18 +239,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         await _saveLock.WaitAsync();
         try
         {
-            await _vault.DeriveKeyAsync(currentPassword);
-            await _vault.SaveContentsAsync(newPassword, BuildContents());
-            var newKey = await _vault.DeriveKeyAsync(newPassword);
-
-            var hadQuickUnlock = _credentials?.Read(QuickUnlockTarget) is not null;
-            _credentials?.Delete(QuickUnlockTarget);
-            if (hadQuickUnlock && _credentials is { IsSupported: true })
-            {
-                _credentials.Save(QuickUnlockTarget, newKey);
-            }
-
-            _sessionKey = newKey;
+            await _vault.RotateMasterPasswordAsync(currentPassword, newPassword);
             return null;
         }
         catch (InvalidPasswordException)
@@ -223,10 +256,100 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Adds a hardware or OS unlock method. Returns null on success or an error message.</summary>
+    public async Task<string?> AddUnlockMethodAsync(ISecretProvider provider)
+    {
+        if (_vault is null || _sessionKey is null)
+        {
+            return "Unlock the vault first.";
+        }
+
+        await _saveLock.WaitAsync();
+        try
+        {
+            await _vault.AddSlotAsync(_sessionKey, provider, provider.DisplayName);
+            await RefreshUnlockMethodsAsync();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return $"Could not add {provider.DisplayName}: {ex.Message}";
+        }
+        finally
+        {
+            _saveLock.Release();
+        }
+    }
+
+    /// <summary>Removes an unlock method. Returns null on success or an error message.</summary>
+    public async Task<string?> RemoveUnlockMethodAsync(string slotId)
+    {
+        if (_vault is null || _sessionKey is null)
+        {
+            return "Unlock the vault first.";
+        }
+
+        await _saveLock.WaitAsync();
+        try
+        {
+            var slots = await _vault.ListSlotsAsync();
+            var slot = slots.FirstOrDefault(s => s.Id == slotId);
+            var provider = _providers.FirstOrDefault(p => p.SlotType == slot?.Type);
+            await _vault.RemoveSlotAsync(_sessionKey, slotId, provider);
+            await RefreshUnlockMethodsAsync();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return $"Could not remove it: {ex.Message}";
+        }
+        finally
+        {
+            _saveLock.Release();
+        }
+    }
+
+    /// <summary>Reloads the lists of unlock methods shown on the login screen and in Settings.</summary>
+    public async Task RefreshUnlockMethodsAsync()
+    {
+        Login.UnlockMethods.Clear();
+        Settings.UnlockMethods.Clear();
+        Settings.AddableMethods.Clear();
+
+        if (_vault is null || !await _vault.ExistsAsync())
+        {
+            return;
+        }
+
+        var slots = await _vault.ListSlotsAsync();
+        foreach (var slot in slots)
+        {
+            Settings.UnlockMethods.Add(new UnlockMethodRowViewModel(slot));
+        }
+
+        foreach (var provider in _providers)
+        {
+            if (!await provider.IsAvailableAsync())
+            {
+                continue;
+            }
+
+            if (slots.Any(s => s.Type == provider.SlotType))
+            {
+                Login.UnlockMethods.Add(new UnlockMethodViewModel(provider));
+            }
+            else
+            {
+                Settings.AddableMethods.Add(new AddMethodOptionViewModel(provider));
+            }
+        }
+    }
+
     [RelayCommand]
     private void Unlock()
     {
         IsUnlocked = true;
+        NotifyActivity();
         CurrentPage = Dashboard;
     }
 
@@ -254,19 +377,44 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ShowAbout() => AboutRequested?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>Locks the vault: wipes the session key and removes decrypted data from memory-backed view models.</summary>
     [RelayCommand]
     private void Lock()
     {
+        if (_sessionKey is not null)
+        {
+            CryptographicOperations.ZeroMemory(_sessionKey);
+            _sessionKey = null;
+        }
+
         IsUnlocked = false;
-        _sessionKey = null;
-        Login.HasQuickUnlock = _credentials?.Read(QuickUnlockTarget) is not null;
         CurrentPage = Login;
+
+        // The key is gone, so clearing these cannot trigger a save.
+        Dashboard.Load([]);
+        Passwords.Load([]);
+        Passwords.ClearFormCommand.Execute(null);
+        AccountEditor.Secret = string.Empty;
+        Import.ManualUri = string.Empty;
+        Backup.MasterPassword = string.Empty;
+        Backup.WebDavPassword = string.Empty;
+        Settings.CurrentPassword = string.Empty;
+        Settings.NewPassword = string.Empty;
+        Settings.ConfirmNewPassword = string.Empty;
+        Login.MasterPassword = string.Empty;
+        Login.ConfirmPassword = string.Empty;
+        Login.Error = null;
+
+        if (_vault is not null)
+        {
+            _ = RefreshUnlockMethodsAsync();
+        }
     }
 
     private async Task InitializeLoginAsync()
     {
         Login.IsCreateMode = !await _vault!.ExistsAsync();
-        Login.HasQuickUnlock = !Login.IsCreateMode && _credentials?.Read(QuickUnlockTarget) is not null;
+        await RefreshUnlockMethodsAsync();
     }
 
     private VaultContents BuildContents() => new()
@@ -275,20 +423,19 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Passwords = Passwords.Snapshot(),
     };
 
-    private void ApplyQuickUnlockPreference(byte[] key)
+    private async Task CompleteUnlockWithKeyAsync(byte[] key)
     {
-        if (_credentials is not { IsSupported: true })
+        try
         {
-            return;
+            var contents = await _vault!.OpenWithKeyAsync(key);
+            _sessionKey = key;
+            CompleteUnlock(contents);
+            await RefreshUnlockMethodsAsync();
         }
-
-        if (Login.RememberMe)
+        catch
         {
-            _credentials.Save(QuickUnlockTarget, key);
-        }
-        else
-        {
-            _credentials.Delete(QuickUnlockTarget);
+            CryptographicOperations.ZeroMemory(key);
+            throw;
         }
     }
 

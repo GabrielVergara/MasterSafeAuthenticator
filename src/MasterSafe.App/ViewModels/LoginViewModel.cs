@@ -3,9 +3,10 @@
 // Author:  Gabriel Vergara Ezcurdia
 // License: See LICENSE
 
-using System.ComponentModel.DataAnnotations;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.Crypto;
 
 namespace MasterSafe.App.ViewModels;
 
@@ -22,20 +23,18 @@ public sealed partial class LoginViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(Title), nameof(ButtonText))]
     private bool _isCreateMode;
 
-    [ObservableProperty]
-    private bool _rememberMe;
+    /// <summary>Hardware or OS unlock methods (Windows Hello, security key) set up for this vault.</summary>
+    public ObservableCollection<UnlockMethodViewModel> UnlockMethods { get; } = [];
 
-    [ObservableProperty]
-    private bool _hasQuickUnlock;
-
-    /// <summary>Raised when the user chooses to unlock with the saved Credential Manager key.</summary>
-    public event EventHandler? QuickUnlockRequested;
+    /// <summary>Raised when the user chooses an unlock method other than the master password.</summary>
+    public event EventHandler<ISecretProvider>? MethodUnlockRequested;
 
     [RelayCommand]
-    private void QuickUnlock()
+    private void UnlockWithMethod(UnlockMethodViewModel method)
     {
+        ArgumentNullException.ThrowIfNull(method);
         Error = null;
-        QuickUnlockRequested?.Invoke(this, EventArgs.Empty);
+        MethodUnlockRequested?.Invoke(this, method.Provider);
     }
 
     [ObservableProperty]
@@ -80,4 +79,14 @@ public sealed partial class LoginViewModel : ViewModelBase
 
         UnlockRequested?.Invoke(this, MasterPassword);
     }
+}
+
+/// <summary>A button on the login screen for one hardware or OS unlock method.</summary>
+public sealed class UnlockMethodViewModel(ISecretProvider provider)
+{
+    /// <summary>The provider that performs the unlock.</summary>
+    public ISecretProvider Provider { get; } = provider;
+
+    /// <summary>Button text.</summary>
+    public string Text => $"Unlock with {Provider.DisplayName}";
 }

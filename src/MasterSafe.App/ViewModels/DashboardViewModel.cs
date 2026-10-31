@@ -27,10 +27,14 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<OtpItemViewModel> Accounts { get; } = [];
 
+    /// <summary>True when there are no accounts, so the view can show its empty state.</summary>
+    public bool IsEmpty => Accounts.Count == 0;
+
     /// <summary>Creates a dashboard. The timer is only started when <paramref name="startTimer"/> is true.</summary>
     public DashboardViewModel(Func<DateTimeOffset>? timeProvider = null, bool startTimer = true)
     {
         _timeProvider = timeProvider ?? (() => DateTimeOffset.UtcNow);
+        Accounts.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
 
         if (startTimer && Dispatcher.UIThread.CheckAccess())
         {

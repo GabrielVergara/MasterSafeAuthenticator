@@ -29,9 +29,12 @@ public static class HelpContent
             MasterSafe keeps your two-factor accounts in an encrypted vault that is
             protected by your master password.
 
-            1. Enter your master password on the login screen and choose Unlock.
-            2. The dashboard lists each account with a live 6-digit code.
-            3. Each code refreshes automatically; the ring shows the time remaining.
+            1. The first time, choose a master password and create your vault. Use a long
+               passphrase. It cannot be recovered if you forget it.
+            2. Later, enter it on the login screen and choose Unlock, or use Windows Hello
+               if you have set it up in Settings.
+            3. The dashboard lists each account with a live 6-digit code.
+            4. Each code refreshes automatically; the countdown shows the time remaining.
 
             Your secrets never leave the device in plaintext and the vault is only decrypted
             in memory while the app is unlocked.
@@ -55,9 +58,11 @@ public static class HelpContent
             The dashboard shows a code for every account.
 
             - TOTP codes change on a fixed schedule (usually every 30 seconds). The progress
-              ring and countdown indicate when the next code appears.
+              bar and countdown indicate when the next code appears.
             - HOTP codes advance by a counter and are shown without a countdown.
-            - Use the Copy button to place the current code on your status line for quick entry.
+            - Use Copy code to place the current code on the clipboard.
+            - Delete removes an account from the vault immediately. Make sure you can still
+              sign in to the service some other way first.
 
             Supported algorithms include SHA-1, SHA-256, and SHA-512 with 6 or 8 digits.
             """),
@@ -70,8 +75,9 @@ public static class HelpContent
 
             Destinations:
             - Local Folder: choose a folder on this device.
-            - WebDAV Cloud: enter a collection URL plus username and password for a WebDAV
-              server such as Nextcloud or ownCloud.
+            - WebDAV Cloud: enter the folder address (it must start with https://) plus user
+              name and password for a WebDAV server such as Nextcloud or ownCloud. Use an app
+              password if your server offers one.
 
             Use Export to create a backup, Refresh to list existing backups, and Import
             selected to restore one. Backups are encrypted with Argon2id and AES-256-GCM.
@@ -85,7 +91,12 @@ public static class HelpContent
             - Theme: System, Light, or Dark, applied immediately.
             - Minimize to tray: closing the window hides it to the notification area instead
               of exiting.
-            - Auto-lock after: the number of minutes of inactivity before the vault locks.
+            - Lock the vault after: the number of minutes without keyboard or mouse use before
+              the vault locks. Locking wipes the decrypted data from memory.
+            - Unlock methods: add or remove Windows Hello. Your master password always keeps
+              working, and it cannot be removed.
+            - Change master password: re-protects your vault with a new password. Windows
+              Hello keeps working.
 
             The tray icon menu lets you show or hide the window, copy the most recent code,
             open About, and exit the application.
@@ -99,11 +110,15 @@ public static class HelpContent
             - Your master password is stretched with Argon2id into a 256-bit key.
             - Account records are compressed and encrypted with AES-256-GCM, which also
               authenticates the data to detect tampering.
-            - On Windows, an optional DPAPI layer adds defense in depth.
-            - A post-quantum abstraction is included and refuses to fake cryptography when a
-              real provider is unavailable.
+            - The vault is encrypted with one random key. That key is stored once for each way
+              of unlocking (master password, Windows Hello), each protected separately.
+            - Windows Hello uses a key held by Windows (the TPM when available) that only
+              works after you verify with your PIN or biometrics.
+            - Saving is crash-safe, and the previous version is kept as vault.sauth.bak.
+            - Backups sent to WebDAV travel over https and are already encrypted.
 
-            Secrets are never written to disk in plaintext.
+            Secrets are never written to disk in plaintext. No software can promise to be
+            unbreakable, so keep your computer updated and your master password long.
             """),
     ];
 }

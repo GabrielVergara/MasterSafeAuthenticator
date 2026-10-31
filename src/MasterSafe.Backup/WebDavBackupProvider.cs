@@ -15,6 +15,9 @@ namespace MasterSafe.Backup;
 /// </summary>
 public sealed class WebDavBackupProvider : IBackupProvider
 {
+    /// <summary>Largest backup that will be downloaded (32 MiB).</summary>
+    public const long MaxDownloadBytes = 32L * 1024 * 1024;
+
     private readonly HttpClient _client;
     private readonly Uri _baseUri;
 
@@ -28,6 +31,19 @@ public sealed class WebDavBackupProvider : IBackupProvider
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(collectionUri);
+
+        if (!collectionUri.IsAbsoluteUri
+            || (collectionUri.Scheme != Uri.UriSchemeHttps && !(collectionUri.Scheme == Uri.UriSchemeHttp && collectionUri.IsLoopback)))
+        {
+            throw new ArgumentException(
+                "The WebDAV address must start with https:// so the login and backups are protected in transit.",
+                nameof(collectionUri));
+        }
+
+        if (!string.IsNullOrEmpty(collectionUri.UserInfo))
+        {
+            throw new ArgumentException("Do not put a user name or password in the address.", nameof(collectionUri));
+        }
 
         _client = client;
         var text = collectionUri.AbsoluteUri;
@@ -65,7 +81,27 @@ public sealed class WebDavBackupProvider : IBackupProvider
         }
 
         EnsureSuccess(response, $"Download of '{fileName}' failed");
-        return await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+
+        if (response.Content.Headers.ContentLength > MaxDownloadBytes)
+        {
+            throw new InvalidDataException("The backup is larger than the allowed limit.");
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var buffer = new MemoryStream();
+        var chunk = new byte[81920];
+        int read;
+        while ((read = await stream.ReadAsync(chunk, cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            if (buffer.Length + read > MaxDownloadBytes)
+            {
+                throw new InvalidDataException("The backup is larger than the allowed limit.");
+            }
+
+            buffer.Write(chunk, 0, read);
+        }
+
+        return buffer.ToArray();
     }
 
     /// <inheritdoc />

@@ -3,30 +3,50 @@
         xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
         x:Class="MasterSafe.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="900" Height="640"
+        Width="1000" Height="680"
+        MinWidth="820" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
         Icon="/Assets/app.ico"
         Title="MasterSafe Authenticator">
-  <Grid RowDefinitions="Auto,Auto,*">
-    <Menu Grid.Row="0">
-      <MenuItem Header="_Help">
-        <MenuItem Header="_Help Contents" Command="{Binding ShowHelpCommand}" />
-        <Separator />
-        <MenuItem Header="_About MasterSafe Authenticator" Command="{Binding ShowAboutCommand}" />
-      </MenuItem>
-    </Menu>
-    <Border Grid.Row="1" Padding="12" IsVisible="{Binding IsUnlocked}"
-            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-      <StackPanel Orientation="Horizontal" Spacing="8">
-        <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" />
-        <Button Content="Passwords" Command="{Binding ShowPasswordsCommand}" />
-        <Button Content="Add" Command="{Binding ShowAddAccountCommand}" />
-        <Button Content="Import" Command="{Binding ShowImportCommand}" />
-        <Button Content="Backup" Command="{Binding ShowBackupCommand}" />
-        <Button Content="Settings" Command="{Binding ShowSettingsCommand}" />
-        <Button Content="Help" Command="{Binding ShowHelpCommand}" />
-        <Button Content="Lock" Command="{Binding LockCommand}" />
-      </StackPanel>
+  <Grid ColumnDefinitions="Auto,*">
+
+    <!-- Sidebar: only shown while the vault is unlocked -->
+    <Border Grid.Column="0" Width="224" Background="#12263A" IsVisible="{Binding IsUnlocked}">
+      <DockPanel Margin="12,16,12,12">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="6,0,0,20">
+          <Image Source="/Assets/logo-256.png" Width="36" Height="36" />
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="MasterSafe" Foreground="#FFFFFF" FontWeight="Bold" FontSize="16" />
+            <TextBlock Text="Authenticator" Foreground="#8FA6B8" FontSize="12" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="2">
+          <Button Classes="nav" Content="About" Command="{Binding ShowAboutCommand}" />
+          <Button Classes="nav" Content="Lock vault" Command="{Binding LockCommand}"
+                  ToolTip.Tip="Lock the vault and require your master password again" />
+        </StackPanel>
+
+        <StackPanel Spacing="2">
+          <Button Classes="nav" Content="Authenticator codes" Command="{Binding ShowDashboardCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Dashboard}" />
+          <Button Classes="nav" Content="Passwords" Command="{Binding ShowPasswordsCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Passwords}" />
+          <Button Classes="nav" Content="Add account" Command="{Binding ShowAddAccountCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Add}" />
+          <Button Classes="nav" Content="Import" Command="{Binding ShowImportCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Import}" />
+          <Button Classes="nav" Content="Backup" Command="{Binding ShowBackupCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Backup}" />
+          <Button Classes="nav" Content="Settings" Command="{Binding ShowSettingsCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Settings}" />
+          <Button Classes="nav" Content="Help" Command="{Binding ShowHelpCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Help}" />
+        </StackPanel>
+      </DockPanel>
     </Border>
-    <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" Margin="12" />
+
+    <!-- Page content -->
+    <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" Margin="28,24" />
   </Grid>
 </Window>

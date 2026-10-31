@@ -20,21 +20,34 @@ public sealed class MasterPasswordService : IMasterPasswordService
         ArgumentNullException.ThrowIfNull(salt);
 
         var p = parameters ?? Argon2Parameters.Default;
-        var passwordBytes = System.Text.Encoding.UTF8.GetBytes(masterPassword);
+        p.Validate();
 
-        using var argon2 = new Argon2id(passwordBytes)
+        if (salt.Length < 8)
         {
-            Salt = salt,
-            MemorySize = p.MemorySizeKib,
-            Iterations = p.Iterations,
-            DegreeOfParallelism = p.DegreeOfParallelism,
-        };
+            throw new InvalidDataException("The key-derivation salt is too short.");
+        }
 
-        return argon2.GetBytes(p.KeyLength);
+        var passwordBytes = System.Text.Encoding.UTF8.GetBytes(masterPassword);
+        try
+        {
+            using var argon2 = new Argon2id(passwordBytes)
+            {
+                Salt = salt,
+                MemorySize = p.MemorySizeKib,
+                Iterations = p.Iterations,
+                DegreeOfParallelism = p.DegreeOfParallelism,
+            };
+
+            return argon2.GetBytes(p.KeyLength);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(passwordBytes);
+        }
     }
 
     /// <inheritdoc />
-    public byte[] GenerateSalt(int length = 16)
+    public byte[] GenerateSalt(int length = 32)
     {
         if (length <= 0)
         {

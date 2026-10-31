@@ -119,4 +119,40 @@ public class WebDavBackupProviderTests
 
         await act.Should().ThrowAsync<BackupProviderException>();
     }
+
+    [Theory]
+    [InlineData("http://cloud.example.com/dav/")]
+    [InlineData("ftp://cloud.example.com/dav/")]
+    [InlineData("https://user:secret@cloud.example.com/dav/")]
+    public void Constructor_RejectsInsecureOrCredentialedAddresses(string address)
+    {
+        using var client = new HttpClient();
+        var act = () => new WebDavBackupProvider(client, new Uri(address));
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Constructor_AllowsPlainHttpOnlyOnTheLocalMachine()
+    {
+        using var client = new HttpClient();
+        var act = () => new WebDavBackupProvider(client, new Uri("http://localhost:8080/dav/"));
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public async Task Download_RefusesOversizedBackups()
+    {
+        var handler = new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StreamContent(new MemoryStream(new byte[1024]))
+            {
+                Headers = { ContentLength = WebDavBackupProvider.MaxDownloadBytes + 1 },
+            },
+        });
+        using var client = new HttpClient(handler);
+        var provider = new WebDavBackupProvider(client, Collection);
+
+        var act = () => provider.DownloadAsync("vault.sauth");
+        await act.Should().ThrowAsync<InvalidDataException>();
+    }
 }

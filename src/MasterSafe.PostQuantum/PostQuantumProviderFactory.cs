@@ -5,30 +5,21 @@
 
 namespace MasterSafe.PostQuantum;
 
-/// <summary>
-/// Resolves the best available <see cref="IPostQuantumEncryptionProvider"/> for the current platform.
-/// </summary>
+/// <summary>Chooses a post-quantum provider for the current platform.</summary>
 public static class PostQuantumProviderFactory
 {
     /// <summary>
-    /// Returns a usable provider. Today this is the unavailable placeholder; when a real ML-KEM
-    /// backend is integrated it will be selected here based on <see cref="IPostQuantumEncryptionProvider.IsAvailable"/>.
+    /// Returns native ML-KEM-768 when the operating system supports it. Otherwise it returns a
+    /// provider that reports <see cref="IPostQuantumEncryptionProvider.IsAvailable"/> as false and throws,
+    /// rather than returning insecure output.
     /// </summary>
     public static IPostQuantumEncryptionProvider Create()
-    {
-        var candidates = new IPostQuantumEncryptionProvider[]
-        {
-            new UnavailableMlKemProvider(),
-        };
+        => new MlKemProvider().IsAvailable ? new MlKemProvider() : new UnavailableMlKemProvider();
 
-        foreach (var candidate in candidates)
-        {
-            if (candidate.IsAvailable)
-            {
-                return candidate;
-            }
-        }
-
-        return candidates[^1];
-    }
+    /// <summary>
+    /// Returns the hybrid ECDH-P384 + ML-KEM-768 provider when supported. Use this one for new
+    /// encryption, because it stays secure if either algorithm is later broken.
+    /// </summary>
+    public static IPostQuantumEncryptionProvider CreateHybrid()
+        => new HybridKemProvider().IsAvailable ? new HybridKemProvider() : new UnavailableMlKemProvider();
 }

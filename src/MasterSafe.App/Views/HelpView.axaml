@@ -6,7 +6,7 @@
              x:DataType="vm:HelpViewModel">
   <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,*">
     <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
-               Text="Help" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,12" />
+               Text="Help" Classes="h1" Margin="0,0,0,12" />
 
     <ListBox Grid.Row="1" Grid.Column="0"
              ItemsSource="{Binding Topics}"

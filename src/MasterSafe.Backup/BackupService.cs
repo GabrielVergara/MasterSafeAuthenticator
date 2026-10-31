@@ -3,7 +3,6 @@
 // Author:  Gabriel Vergara Ezcurdia
 // License: See LICENSE
 
-using System.IO.Compression;
 using System.Text.Json;
 using MasterSafe.Core;
 using MasterSafe.Crypto;
@@ -44,7 +43,7 @@ public sealed class BackupService : IBackupService
         var key = _masterPassword.DeriveKey(masterPassword, salt, _kdf);
 
         var json = JsonSerializer.SerializeToUtf8Bytes(accounts.ToList());
-        var compressed = Compress(json);
+        var compressed = BoundedGzip.Compress(json);
         var payload = _encryption.Encrypt(compressed, key);
 
         var envelope = new VaultFile
@@ -85,28 +84,8 @@ public sealed class BackupService : IBackupService
             Convert.FromBase64String(envelope.Tag));
 
         var decrypted = _encryption.Decrypt(payload, key);
-        var json = envelope.Compressed ? Decompress(decrypted) : decrypted;
+        var json = envelope.Compressed ? BoundedGzip.Decompress(decrypted) : decrypted;
 
         return JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [];
-    }
-
-    private static byte[] Compress(byte[] data)
-    {
-        using var output = new MemoryStream();
-        using (var gzip = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
-        {
-            gzip.Write(data, 0, data.Length);
-        }
-
-        return output.ToArray();
-    }
-
-    private static byte[] Decompress(byte[] data)
-    {
-        using var input = new MemoryStream(data);
-        using var gzip = new GZipStream(input, CompressionMode.Decompress);
-        using var output = new MemoryStream();
-        gzip.CopyTo(output);
-        return output.ToArray();
     }
 }

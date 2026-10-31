@@ -6,5 +6,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MasterSafe.Core\MasterSafe.Core.csproj" />
     <ProjectReference Include="..\MasterSafe.Crypto\MasterSafe.Crypto.csproj" />
+    <ProjectReference Include="..\MasterSafe.PostQuantum\MasterSafe.PostQuantum.csproj" />
   </ItemGroup>
 </Project>

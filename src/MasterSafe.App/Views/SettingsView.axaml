@@ -4,21 +4,81 @@
              x:Class="MasterSafe.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
-      <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" />
-      <TextBlock Text="Theme" />
-      <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
-      <CheckBox Content="Minimize to tray" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
-      <TextBlock Text="Auto-lock after (minutes)" />
-      <NumericUpDown Minimum="1" Maximum="120" Value="{Binding AutoLockMinutes, Mode=TwoWay}" />
+    <StackPanel Spacing="18" MaxWidth="520" HorizontalAlignment="Left">
+      <TextBlock Text="Settings" Classes="h1" />
 
-      <Separator Margin="0,12" />
-      <TextBlock Text="Change master password" FontSize="18" FontWeight="SemiBold" />
-      <TextBox Watermark="Current password" PasswordChar="*" Text="{Binding CurrentPassword, Mode=TwoWay}" />
-      <TextBox Watermark="New password" PasswordChar="*" Text="{Binding NewPassword, Mode=TwoWay}" />
-      <TextBox Watermark="Confirm new password" PasswordChar="*" Text="{Binding ConfirmNewPassword, Mode=TwoWay}" />
-      <Button Content="Change password" Command="{Binding ChangePasswordCommand}" />
-      <TextBlock Text="{Binding PasswordChangeStatus}" TextWrapping="Wrap" Opacity="0.8" />
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Text="General" Classes="h2" />
+          <StackPanel>
+            <TextBlock Text="Theme" Classes="label" />
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Themes}"
+                      SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+          </StackPanel>
+          <CheckBox Content="Minimize to the system tray instead of closing"
+                    IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
+          <StackPanel>
+            <TextBlock Text="Lock the vault after (minutes of inactivity)" Classes="label" />
+            <NumericUpDown Minimum="1" Maximum="120" HorizontalAlignment="Left" Width="160"
+                           Value="{Binding AutoLockMinutes, Mode=TwoWay}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Unlock methods" Classes="h2" />
+          <TextBlock Classes="hint"
+                     Text="Besides your master password you can unlock with Windows Hello. The master password always keeps working." />
+          <ItemsControl ItemsSource="{Binding UnlockMethods}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:UnlockMethodRowViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Label}" />
+                    <TextBlock Text="{Binding Added}" Classes="hint" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Classes="danger" Content="Remove" IsVisible="{Binding CanRemove}"
+                          Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).RemoveMethodCommand}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <ItemsControl ItemsSource="{Binding AddableMethods}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AddMethodOptionViewModel">
+                <Button Content="{Binding Text}" HorizontalAlignment="Left" Margin="0,0,0,6"
+                        Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).AddMethodCommand}"
+                        CommandParameter="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="{Binding UnlockMethodStatus}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Change master password" Classes="h2" />
+          <TextBlock Classes="hint" Text="The new password protects your vault key from now on. Windows Hello keeps working. Choose a long passphrase you will remember." />
+          <StackPanel>
+            <TextBlock Text="Current password" Classes="label" />
+            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding CurrentPassword, Mode=TwoWay}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Text="New password" Classes="label" />
+            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding NewPassword, Mode=TwoWay}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Text="Confirm new password" Classes="label" />
+            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding ConfirmNewPassword, Mode=TwoWay}" />
+          </StackPanel>
+          <Button Classes="accent" Content="Change password" HorizontalAlignment="Left"
+                  Command="{Binding ChangePasswordCommand}" />
+          <TextBlock Text="{Binding PasswordChangeStatus}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

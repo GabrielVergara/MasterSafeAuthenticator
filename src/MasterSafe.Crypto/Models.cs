@@ -10,8 +10,17 @@ namespace MasterSafe.Crypto;
 /// </summary>
 public sealed record Argon2Parameters
 {
-    /// <summary>Memory cost in kibibytes. Default 64 MiB.</summary>
-    public int MemorySizeKib { get; init; } = 65536;
+    /// <summary>Largest memory cost accepted from a file (1 GiB). Protects against crafted vaults.</summary>
+    public const int MaxMemorySizeKib = 1_048_576;
+
+    /// <summary>Largest time cost accepted from a file.</summary>
+    public const int MaxIterations = 20;
+
+    /// <summary>Largest parallelism accepted from a file.</summary>
+    public const int MaxParallelism = 32;
+
+    /// <summary>Memory cost in kibibytes. Default 128 MiB.</summary>
+    public int MemorySizeKib { get; init; } = 131072;
 
     /// <summary>Number of iterations (time cost). Default 3.</summary>
     public int Iterations { get; init; } = 3;
@@ -22,9 +31,76 @@ public sealed record Argon2Parameters
     /// <summary>Derived key length in bytes. Default 32 (AES-256).</summary>
     public int KeyLength { get; init; } = 32;
 
-    /// <summary>Default OWASP-aligned parameters.</summary>
+    /// <summary>Default parameters (above the OWASP minimum for Argon2id).</summary>
     public static Argon2Parameters Default { get; } = new();
+
+    /// <summary>
+    /// Rejects values that are invalid for Argon2id or large enough to exhaust memory or CPU.
+    /// Parameters read from a vault or backup file are untrusted, so they are checked before use.
+    /// </summary>
+    /// <exception cref="InvalidDataException">A value is outside the accepted range.</exception>
+    public void Validate()
+    {
+        if (DegreeOfParallelism is < 1 or > MaxParallelism
+            || Iterations is < 1 or > MaxIterations
+            || MemorySizeKib < 8 * DegreeOfParallelism
+            || MemorySizeKib > MaxMemorySizeKib
+            || KeyLength != 32)
+        {
+            throw new InvalidDataException("The key-derivation parameters in this file are outside the accepted range.");
+        }
+    }
 }
+
+/// <summary>Well-known <see cref="KeySlot.Type"/> values.</summary>
+public static class SlotTypes
+{
+    /// <summary>The master password (Argon2id).</summary>
+    public const string Password = "password";
+
+    /// <summary>A Windows Hello credential.</summary>
+    public const string WindowsHello = "windows-hello";
+
+    /// <summary>A FIDO2 security key using the hmac-secret extension.</summary>
+    public const string Fido2 = "fido2-hmac-secret";
+}
+
+/// <summary>
+/// One way to unlock the vault. Each slot stores the vault's random data key, encrypted
+/// under a key that only that unlock method can produce.
+/// </summary>
+public sealed class KeySlot
+{
+    /// <summary>Random slot identifier (Base64).</summary>
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>One of <see cref="SlotTypes"/>.</summary>
+    public string Type { get; init; } = string.Empty;
+
+    /// <summary>Name shown to the user, for example "Windows Hello" or "YubiKey".</summary>
+    public string Label { get; init; } = string.Empty;
+
+    /// <summary>UTC creation time (ISO 8601).</summary>
+    public string CreatedUtc { get; init; } = string.Empty;
+
+    /// <summary>Password slots: Argon2 salt. Hardware slots: provider enrollment data (Base64).</summary>
+    public string Salt { get; init; } = string.Empty;
+
+    /// <summary>Password slots only: Argon2 parameters.</summary>
+    public Argon2Parameters? Kdf { get; init; }
+
+    /// <summary>AES-GCM nonce of the wrapped data key (Base64).</summary>
+    public string Nonce { get; init; } = string.Empty;
+
+    /// <summary>AES-GCM tag of the wrapped data key (Base64).</summary>
+    public string Tag { get; init; } = string.Empty;
+
+    /// <summary>The wrapped data key (Base64).</summary>
+    public string WrappedKey { get; init; } = string.Empty;
+}
+
+/// <summary>Display information about a <see cref="KeySlot"/>.</summary>
+public sealed record KeySlotInfo(string Id, string Type, string Label, string CreatedUtc);
 
 /// <summary>
 /// Result of an AES-256-GCM encryption operation.
@@ -36,8 +112,14 @@ public sealed record EncryptedPayload(byte[] Nonce, byte[] Ciphertext, byte[] Ta
 /// </summary>
 public sealed class VaultFile
 {
-    /// <summary>File format version.</summary>
+    /// <summary>File format version. 1 and 2 are read-only legacy formats; 3 uses key slots.</summary>
     public int Version { get; init; } = 1;
+
+    /// <summary>Format 3: random vault identifier (Base64), bound into every encryption as associated data.</summary>
+    public string VaultId { get; init; } = string.Empty;
+
+    /// <summary>Format 3: the unlock methods. Each wraps the same random data key.</summary>
+    public IReadOnlyList<KeySlot> Slots { get; init; } = [];
 
     /// <summary>Argon2id salt (Base64).</summary>
     public string Salt { get; init; } = string.Empty;

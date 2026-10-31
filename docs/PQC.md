@@ -1,27 +1,53 @@
-# Post-Quantum Cryptography (PQC)
+# Post-Quantum Cryptography
 
-## Goal
+## What is and is not at risk
 
-Prepare MasterSafe for a hybrid classical + post-quantum scheme based on **ML-KEM-768**
-(FIPS 203) without shipping fake cryptography.
+| Part | Quantum computer impact | Status |
+| --- | --- | --- |
+| Vault at rest (AES-256-GCM, Argon2id) | Shor's algorithm does not apply. Grover's algorithm only halves AES-256 to about 128-bit strength, which is still out of reach | Already safe with a strong passphrase |
+| Public-key steps (anything encrypted *to* a key) | Broken by Shor's algorithm for RSA and elliptic curves | Protected with a hybrid scheme |
+| Release files | A signature scheme based on RSA or ECDSA would be forgeable | Signed with ML-DSA-65 |
+| TLS to a WebDAV server | Controlled by the operating system | Not under this application's control |
 
-## Current state
+## What is implemented
 
-`MasterSafe.PostQuantum` defines `IPostQuantumEncryptionProvider` (key generation,
-encapsulation, decapsulation). The only shipped implementation, `UnavailableMlKemProvider`, reports
-`IsAvailable == false` and **throws** `NotSupportedException` rather than returning insecure output.
+`MasterSafe.PostQuantum` uses the post-quantum algorithms built into .NET 10, which call the operating system's
+cryptography provider (Windows CNG or OpenSSL 3.5+). Nothing is hand-written. Where the provider is missing,
+`IsAvailable` is false and the code throws instead of returning insecure output.
 
-## Integration path
+- **ML-KEM-768 (FIPS 203)**: `MlKemProvider`.
+- **Hybrid ECDH P-384 + ML-KEM-768**: `HybridKemProvider`. The two shared secrets are combined with HKDF-SHA-384
+  together with both public keys and both ciphertexts, so the result stays secret if *either* algorithm survives.
+  Use `PostQuantumProviderFactory.CreateHybrid()` for new encryption.
+- **ML-DSA-65 (FIPS 204)**: `ReleaseSigner` signs release files. The public key is published with the project;
+  anyone can check a download with `MasterSafe.Cli verify <file> <publickey>`.
 
-.NET 10 exposes `System.Security.Cryptography.MLKem` where the platform cryptographic backend
-(OpenSSL 3.5+ / Windows CNG) supports it. To enable real PQC:
+## Recovery-key backups
 
-1. Add a `MLKemProvider : IPostQuantumEncryptionProvider` backed by `MLKem.GenerateKey(MLKemAlgorithm.MLKem768)`.
-2. Set `IsAvailable` based on `MLKem.IsSupported`.
-3. Register it ahead of the placeholder in `PostQuantumProviderFactory`.
-4. Use it in a **hybrid** construction (ML-KEM shared secret X/HKDF-combined with the AES-256 KEK).
+`RecipientBackupService` creates backups encrypted to a **recovery public key**, with no password.
 
-## Why hybrid
+```mermaid
+flowchart LR
+    PUB[Recovery public key] -->|hybrid encapsulation| SS[Shared secret]
+    SS -->|wraps| DEK[Random data key]
+    DEK -->|AES-256-GCM| FILE[recovery-*.sauth]
+```
 
-Until ML-KEM is broadly vetted in deployment, combine it with the existing AES-256-GCM scheme so the
-system is never weaker than today's classical baseline.
+Any device holding the public key (a second computer, later a phone) can write a backup. Only the holder of the
+private recovery key can open it, and keep it offline. The backup id and algorithm are bound into the encryption.
+
+## Platform support
+
+`MLKem.IsSupported` and `MLDsa.IsSupported` depend on the operating system. They are true on this project's
+Windows 11 development machine. On Linux they need OpenSSL 3.5 or newer. Features that need them are
+checked at run time, and the vault itself never depends on them, so vaults stay portable.
+
+## Not done yet
+
+- A screen in the app to create the recovery key pair and to export or import recovery backups
+  (the library and tests exist).
+- A post-quantum design for the Windows Hello unlock slot. Hello uses an RSA key held in the TPM, and RSA is
+  breakable by a quantum computer. The slot is still safe against someone who only has the vault file, because
+  the RSA public key is not stored in it, and the master-password slot does not use RSA at all. An attacker
+  who could also read the public key from your computer and had a large quantum computer could in theory
+  forge the Hello signature. If that matters to you, do not add Windows Hello to the vault.

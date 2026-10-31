@@ -16,7 +16,7 @@ public interface IMasterPasswordService
     byte[] DeriveKey(string masterPassword, byte[] salt, Argon2Parameters? parameters = null);
 
     /// <summary>Generates a cryptographically secure random salt.</summary>
-    byte[] GenerateSalt(int length = 16);
+    byte[] GenerateSalt(int length = 32);
 }
 
 /// <summary>
@@ -80,4 +80,16 @@ public interface IVaultService
 
     /// <summary>Re-encrypts the vault under a new master password (key rotation).</summary>
     Task RotateMasterPasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default);
+
+    /// <summary>Lists the unlock methods of the vault (empty for legacy vaults).</summary>
+    Task<IReadOnlyList<KeySlotInfo>> ListSlotsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Adds (or replaces) a hardware or OS unlock method using the unlocked data key.</summary>
+    Task AddSlotAsync(byte[] dataKey, ISecretProvider provider, string label, CancellationToken cancellationToken = default);
+
+    /// <summary>Unlocks the vault with a hardware or OS method and returns the data key.</summary>
+    Task<byte[]> UnlockWithProviderAsync(ISecretProvider provider, CancellationToken cancellationToken = default);
+
+    /// <summary>Removes an unlock method. The master password slot cannot be removed.</summary>
+    Task RemoveSlotAsync(byte[] dataKey, string slotId, ISecretProvider? provider = null, CancellationToken cancellationToken = default);
 }
