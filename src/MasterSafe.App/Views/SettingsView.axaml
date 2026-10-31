@@ -15,7 +15,7 @@
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Themes}"
                       SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
           </StackPanel>
-          <CheckBox Content="Minimize to the system tray instead of closing"
+          <CheckBox Content="Keep running in the system tray when the window is closed or minimized"
                     IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
           <StackPanel>
             <TextBlock Text="Lock the vault after (minutes of inactivity)" Classes="label" />

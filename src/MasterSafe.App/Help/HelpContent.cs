@@ -89,8 +89,9 @@ public static class HelpContent
             The Settings screen controls appearance and behavior.
 
             - Theme: System, Light, or Dark, applied immediately.
-            - Minimize to tray: closing the window hides it to the notification area instead
-              of exiting.
+            - Keep running in the tray: closing or minimizing the window hides it to the notification
+              area instead of exiting. Open it again by clicking the tray icon, and use its menu
+              to show the window, open About or exit.
             - Lock the vault after: the number of minutes without keyboard or mouse use before
               the vault locks. Locking wipes the decrypted data from memory.
             - Unlock methods: add or remove Windows Hello or a FIDO2 security key. Your master
@@ -100,8 +101,9 @@ public static class HelpContent
             - Change master password: re-protects your vault with a new password. Windows
               Hello keeps working.
 
-            The tray icon menu lets you show or hide the window, copy the most recent code,
-            open About, and exit the application.
+            On Windows 11, a new tray icon starts in the hidden-icons area (the arrow next to the
+            clock). To keep it always visible, drag it out onto the taskbar, or turn it on under
+            Settings, Personalization, Taskbar, Other system tray icons.
             """),
         new(
             "Forgotten master password",

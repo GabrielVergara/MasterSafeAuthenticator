@@ -36,7 +36,7 @@ public sealed class AvaloniaSystemTray : ISystemTray
 
         OnUiThread(() =>
         {
-            _trayIcon?.Dispose();
+            DetachIcon();
 
             var nativeMenu = new NativeMenu();
             foreach (var item in menu)
@@ -56,6 +56,13 @@ public sealed class AvaloniaSystemTray : ISystemTray
             };
 
             _trayIcon.Clicked += (_, _) => MenuItemClicked?.Invoke(this, TrayCommands.ShowWindow);
+
+            // Avalonia only shows a tray icon that belongs to the application. Without this the icon object exists
+            // but Windows never receives it.
+            if (Application.Current is { } application)
+            {
+                TrayIcon.SetIcons(application, new TrayIcons { _trayIcon });
+            }
         });
     }
 
@@ -101,11 +108,19 @@ public sealed class AvaloniaSystemTray : ISystemTray
         }
 
         _disposed = true;
-        OnUiThread(() =>
+        OnUiThread(DetachIcon);
+    }
+
+    // Removes the icon from the application (which removes it from the notification area) and releases it.
+    private void DetachIcon()
+    {
+        if (Application.Current is { } application)
         {
-            _trayIcon?.Dispose();
-            _trayIcon = null;
-        });
+            TrayIcon.SetIcons(application, new TrayIcons());
+        }
+
+        _trayIcon?.Dispose();
+        _trayIcon = null;
     }
 
     // Tray icons must be changed on the UI thread. When there is no running application (tests, or after shutdown)

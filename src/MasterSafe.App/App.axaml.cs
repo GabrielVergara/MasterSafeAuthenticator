@@ -122,12 +122,23 @@ public partial class App : Application
             }
         };
 
-        // Minimize to tray instead of closing when the preference is enabled.
+        // Keep running in the tray when the preference is enabled: closing the window hides it...
         window.Closing += (_, e) =>
         {
             if (viewModel.Settings.MinimizeToTray && _tray.IsSupported && !_shuttingDown)
             {
                 e.Cancel = true;
+                window.Hide();
+            }
+        };
+
+        // ...and so does minimizing it, which also removes its button from the taskbar.
+        window.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Avalonia.Controls.Window.WindowStateProperty
+                && window.WindowState == Avalonia.Controls.WindowState.Minimized
+                && viewModel.Settings.MinimizeToTray && _tray.IsSupported && !_shuttingDown)
+            {
                 window.Hide();
             }
         };

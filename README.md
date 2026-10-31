@@ -26,7 +26,8 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - **Vaults page**: shows where your files are stored, opens any vault file (a USB stick, another folder), and
   deletes old vaults after a confirmation. Settings are saved between runs.
 - **Post-quantum**: hybrid ECDH-P384 + ML-KEM-768 recovery-key backups (library), ML-DSA-65 signed releases.
-- System tray, light/dark theme, in-app help.
+- System tray (the app keeps running there when the window is closed or minimized), light/dark theme, in-app help.
+  On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
 Planned: KeePass import, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
 a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).

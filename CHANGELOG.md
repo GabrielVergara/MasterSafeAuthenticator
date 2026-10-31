@@ -4,6 +4,10 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ## Unreleased
 
+### Fixed
+- The system tray icon did not appear after the Avalonia 12 update. It is now attached to the application so Windows shows it.
+- Minimizing the window now also sends it to the tray when "Keep running in the system tray" is on.
+
 ### Added
 - `MasterSafe-Cli` standalone verification tool, attached to releases (Windows and Linux, no .NET needed). Its
   `verify-release` command checks every installer and package in a folder against its checksum and signature in one step.
