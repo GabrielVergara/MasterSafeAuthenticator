@@ -45,6 +45,105 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>Entries matching the current search.</summary>
     public ObservableCollection<PasswordEntry> Entries { get; } = [];
 
+    /// <summary>The same entries as rows with a check box, which is what the page shows.</summary>
+    public ObservableCollection<PasswordRow> Rows { get; } = [];
+
+    private readonly HashSet<Guid> _selected = [];
+
+    /// <summary>How many of the shown entries are ticked.</summary>
+    public int SelectedCount => _selected.Count;
+
+    /// <summary>True when at least one entry is ticked.</summary>
+    public bool HasSelection => _selected.Count > 0;
+
+    /// <summary>True while deleting the ticked entries waits for confirmation.</summary>
+    [ObservableProperty]
+    private bool _isConfirmingBulkDelete;
+
+    /// <summary>Question shown while deleting the ticked entries waits for confirmation.</summary>
+    public string BulkDeleteQuestion => $"Delete {SelectedCount} selected {(SelectedCount == 1 ? "password" : "passwords")}? This cannot be undone.";
+
+    /// <summary>Ticks all the entries that are currently shown.</summary>
+    [RelayCommand]
+    private void SelectAll()
+    {
+        foreach (var row in Rows)
+        {
+            row.IsSelected = true;
+        }
+    }
+
+    /// <summary>Unticks everything.</summary>
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        foreach (var row in Rows)
+        {
+            row.IsSelected = false;
+        }
+
+        _selected.Clear();
+        NotifySelectionChanged();
+    }
+
+    [RelayCommand]
+    private void RequestDeleteSelected()
+    {
+        if (HasSelection)
+        {
+            PendingDelete = null;
+            IsConfirmingBulkDelete = true;
+            OnPropertyChanged(nameof(BulkDeleteQuestion));
+        }
+    }
+
+    [RelayCommand]
+    private void CancelDeleteSelected() => IsConfirmingBulkDelete = false;
+
+    [RelayCommand]
+    private void ConfirmDeleteSelected()
+    {
+        IsConfirmingBulkDelete = false;
+        var ids = _selected.ToHashSet();
+        var removed = _all.RemoveAll(e => ids.Contains(e.Id));
+        _selected.Clear();
+        if (removed == 0)
+        {
+            NotifySelectionChanged();
+            return;
+        }
+
+        Status = $"Deleted {removed} {(removed == 1 ? "password" : "passwords")}.";
+        ApplyFilter();
+        EntriesChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void SelectionChanged(PasswordRow row)
+    {
+        if (row.IsSelected)
+        {
+            _selected.Add(row.Entry.Id);
+        }
+        else
+        {
+            _selected.Remove(row.Entry.Id);
+        }
+
+        if (_selected.Count == 0)
+        {
+            IsConfirmingBulkDelete = false;
+        }
+
+        NotifySelectionChanged();
+    }
+
+    private void NotifySelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+        OnPropertyChanged(nameof(BulkDeleteQuestion));
+    }
+
     /// <summary>The entry waiting for the user to confirm its deletion.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPendingDelete))]
@@ -88,6 +187,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         ArgumentNullException.ThrowIfNull(entries);
         _all.Clear();
         _all.AddRange(entries);
+        _selected.Clear();
+        IsConfirmingBulkDelete = false;
         ClearForm();
         ApplyFilter();
     }
@@ -108,7 +209,13 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>Returns a copy of all entries for persistence.</summary>
     public IReadOnlyList<PasswordEntry> Snapshot() => _all.ToList();
 
-    partial void OnSearchTextChanged(string value) => ApplyFilter();
+    partial void OnSearchTextChanged(string value)
+    {
+        // A tick on an entry that the new search hides could delete something the user can no longer see.
+        _selected.Clear();
+        IsConfirmingBulkDelete = false;
+        ApplyFilter();
+    }
 
     [RelayCommand]
     private void Generate() => Password = PasswordGenerator.Generate();
@@ -216,6 +323,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         var q = SearchText.Trim();
         Entries.Clear();
+        Rows.Clear();
+        _selected.IntersectWith(_all.Select(e => e.Id));
         foreach (var e in _all
             .Where(e => q.Length == 0
                 || e.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
@@ -225,6 +334,22 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             .OrderBy(e => e.Title, StringComparer.OrdinalIgnoreCase))
         {
             Entries.Add(e);
+            Rows.Add(new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged));
         }
+
+        NotifySelectionChanged();
     }
+}
+
+/// <summary>One entry in the list with its check box.</summary>
+public sealed partial class PasswordRow(PasswordEntry entry, bool isSelected, Action<PasswordRow> changed) : ObservableObject
+{
+    /// <summary>The entry.</summary>
+    public PasswordEntry Entry { get; } = entry;
+
+    /// <summary>True while the entry is ticked.</summary>
+    [ObservableProperty]
+    private bool _isSelected = isSelected;
+
+    partial void OnIsSelectedChanged(bool value) => changed(this);
 }

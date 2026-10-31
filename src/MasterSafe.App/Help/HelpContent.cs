@@ -64,6 +64,19 @@ public static class HelpContent
             or non-otpauth codes are rejected safely.
             """),
         new(
+            "Passwords",
+            "Store logins, copy them safely and delete several at once.",
+            """
+            The Passwords screen keeps logins in your encrypted vault.
+
+            - Fill in the form and choose Save. Use Generate for a strong password.
+            - Copy user and Copy password put the value on the clipboard; it is cleared after 30 seconds.
+            - Search matches the title, user name, URL and tags.
+            - To delete several entries, tick their boxes (or choose Select all shown), then choose
+              Delete selected. You are asked to confirm, and it cannot be undone.
+            - Changing the search clears the ticks, so you never delete entries that are out of sight.
+            """),
+        new(
             "Codes and the dashboard",
             "How TOTP and HOTP codes are shown.",
             """
