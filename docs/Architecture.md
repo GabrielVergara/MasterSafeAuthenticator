@@ -18,7 +18,7 @@ flowchart LR
         Crypto[Crypto: Argon2id + AES-GCM + key slots]
         Repo[FileVaultRepository<br/>atomic save + .bak]
         PQ[PostQuantum: ML-KEM, hybrid KEM, ML-DSA]
-        Plat[Platform: tray, Windows Hello]
+        Plat[Platform: tray, Windows Hello, FIDO2 key]
         Cloud[(Local folder / WebDAV)]
     end
 
@@ -46,7 +46,7 @@ flowchart LR
 | **MasterSafe.Backup** | Password and recovery-key `.sauth` backups; local folder and WebDAV (https only) providers | net10.0 |
 | **MasterSafe.QR** | QR decode and generation | net10.0 |
 | **MasterSafe.Data** | EF Core SQLite persistence; not used by the app at present | net10.0 |
-| **MasterSafe.Platform** | Tray abstraction; `WindowsHelloProvider` and `PlatformServices` | net10.0 (Linux) or net10.0-windows10.0.19041.0 (Windows) |
+| **MasterSafe.Platform** | Tray abstraction; `WindowsHelloProvider`, `Fido2HmacSecretProvider` (Windows WebAuthn) and `PlatformServices` | net10.0 (Linux) or net10.0-windows10.0.19041.0 (Windows) |
 | **MasterSafe.App** | Avalonia desktop app: sidebar, screens, splash, view models | same as Platform |
 | **MasterSafe.Cli** | Demo and release signing commands | net10.0 |
 | **MasterSafe.Tests** | xUnit tests | same as Platform |
@@ -60,7 +60,7 @@ any host with `-p:MasterSafeTargetOs=linux`. Windows-only code sits behind `#if 
 - Offline-first: no network dependency to generate codes.
 - Dependency direction: Core has no outward dependencies; Crypto depends on Core; Backup depends on Crypto and PostQuantum;
   Platform depends on Crypto; the app depends on all of them.
-- Hardware and OS unlock methods implement `ISecretProvider` (Windows Hello today, FIDO2 later), so the vault format
+- Hardware and OS unlock methods implement `ISecretProvider` (Windows Hello and FIDO2 security keys; Linux backends later), so the vault format
   and view models do not depend on a platform.
 - Interfaces (`IVaultService`, `IVaultRepository`, `IEncryptionService`, `IMasterPasswordService`,
   `ISecretProvider`) enable dependency injection and testing.

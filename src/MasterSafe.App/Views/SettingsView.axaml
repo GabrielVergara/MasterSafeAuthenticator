@@ -29,7 +29,7 @@
         <StackPanel Spacing="12">
           <TextBlock Text="Unlock methods" Classes="h2" />
           <TextBlock Classes="hint"
-                     Text="Besides your master password you can unlock with Windows Hello. The master password always keeps working." />
+                     Text="Besides your master password you can unlock with Windows Hello or a FIDO2 security key. The master password always keeps working." />
           <ItemsControl ItemsSource="{Binding UnlockMethods}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:UnlockMethodRowViewModel">

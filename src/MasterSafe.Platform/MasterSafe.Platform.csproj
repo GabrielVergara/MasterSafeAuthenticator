@@ -4,7 +4,12 @@
     <AssemblyName>MasterSafe.Platform</AssemblyName>
     <!-- Windows builds target the Windows 10 API set (Windows Hello); other systems use plain net10.0. -->
     <TargetFramework Condition="'$(MasterSafeWindowsTarget)' == 'true'">net10.0-windows10.0.19041.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup Condition="'$(MasterSafeWindowsTarget)' == 'true'">
+    <!-- Generates the Windows WebAuthn (FIDO2) bindings at build time from Microsoft's metadata. Nothing is shipped. -->
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.367" PrivateAssets="all" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MasterSafe.Crypto\MasterSafe.Crypto.csproj" />
   </ItemGroup>

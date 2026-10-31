@@ -30,6 +30,9 @@ public sealed class WindowsHelloProvider : ISecretProvider
     public string DisplayName => "Windows Hello";
 
     /// <inheritdoc />
+    public string EnrollmentHint => "Windows will ask you to verify with your PIN, fingerprint or face.";
+
+    /// <inheritdoc />
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
     {
         try

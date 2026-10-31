@@ -33,7 +33,9 @@ Avalonia and SkiaSharp. The SBOM above lists the NuGet packages; the runtime ver
 | coverlet.collector | 6.0.2 | MIT |
 
 ML-KEM and ML-DSA come from the .NET 10 runtime and the operating system's cryptography provider, not from a
-NuGet package. Windows Hello uses the Windows 10 APIs projected by the .NET SDK (Windows builds only).
+NuGet package. Windows Hello uses the Windows 10 APIs projected by the .NET SDK, and security keys use the Windows
+WebAuthn API with bindings generated at build time by Microsoft.Windows.CsWin32 (0.3.367, MIT, build-time only,
+nothing from it is shipped). Both apply to Windows builds only.
 
 ## Advisories
 

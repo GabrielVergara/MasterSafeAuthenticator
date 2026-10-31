@@ -12,8 +12,8 @@ by Gabriel Vergara Ezcurdia
   `otpauth://` link or a QR code image.
 - Encrypted vault for authenticator accounts and KeePass-style password entries, with a password generator
   and clipboard auto-clear after 30 seconds.
-- Unlock with the master password (**Argon2id**) or **Windows Hello**. Each method is a separate key slot, so
-  changing the master password never re-encrypts the vault.
+- Unlock with the master password (**Argon2id**), **Windows Hello** or a **FIDO2 security key** (tested with a
+  Thales SafeNet key). Each method is a separate key slot, so changing the master password never re-encrypts the vault.
 - Vault contents encrypted with **AES-256-GCM**; the header and slots are authenticated; saves are atomic and
   keep a `.bak` copy.
 - Auto-lock after inactivity; locking wipes the key and decrypted data from memory.
@@ -21,8 +21,8 @@ by Gabriel Vergara Ezcurdia
 - **Post-quantum**: hybrid ECDH-P384 + ML-KEM-768 recovery-key backups (library), ML-DSA-65 signed releases.
 - System tray, light/dark theme, in-app help.
 
-Not done yet: FIDO2 security keys as an unlock method, a recovery-key screen in the app, hardware unlock on
-Linux, and a mobile app. See [docs/ThreatModel.md](docs/ThreatModel.md) for the full list.
+Not done yet: a recovery-key screen in the app, hardware unlock (Hello, security keys) on Linux, more than one
+security key per vault, and a mobile app. See [docs/ThreatModel.md](docs/ThreatModel.md) for the full list.
 
 ## Download and install
 
@@ -89,7 +89,7 @@ MasterSafe.slnx
 ├─ src/MasterSafe.QR           # ZXing.Net + SkiaSharp QR decode/generate
 ├─ src/MasterSafe.Data         # EF Core SQLite persistence (not used by the app at present)
 ├─ src/MasterSafe.Backup       # Encrypted .sauth backups (password or recovery key), local + WebDAV
-├─ src/MasterSafe.Platform     # System tray abstraction, Windows Hello unlock provider
+├─ src/MasterSafe.Platform     # System tray abstraction, Windows Hello and FIDO2 security-key unlock providers
 ├─ src/MasterSafe.App          # Avalonia 11 MVVM desktop UI
 ├─ src/MasterSafe.Cli          # Demo plus release signing commands (keygen, sign, verify)
 ├─ tests/MasterSafe.Tests      # Unit tests (RFC vectors, vault security, view models)
@@ -100,7 +100,7 @@ MasterSafe.slnx
 ## Security model (summary)
 
 - Vault contents are encrypted with a random 256-bit data key (AES-256-GCM).
-- The data key is wrapped once per unlock method: master password (Argon2id) and Windows Hello.
+- The data key is wrapped once per unlock method: master password (Argon2id), Windows Hello and a FIDO2 security key.
 - Files read from disk or the network are treated as untrusted: Argon2 parameters, file sizes and
   decompressed sizes are limited before use.
 - Secrets are never written to disk in plaintext. No software is unbreakable; read the
@@ -121,6 +121,7 @@ See [docs/Security.md](docs/Security.md), [docs/ThreatModel.md](docs/ThreatModel
 | xunit / FluentAssertions / Moq / coverlet | Testing |
 
 Post-quantum algorithms (ML-KEM, ML-DSA) come from .NET 10 and the operating system's cryptography provider.
+The Windows WebAuthn (FIDO2) bindings are generated at build time by Microsoft.Windows.CsWin32 (Windows builds only).
 
 ## Reporting a security problem
 

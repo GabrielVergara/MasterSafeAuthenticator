@@ -70,7 +70,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             return;
         }
 
-        UnlockMethodStatus = $"Waiting for {option.Provider.DisplayName}...";
+        UnlockMethodStatus = $"Waiting for {option.Provider.DisplayName}... {option.Provider.EnrollmentHint}".TrimEnd();
         var error = await AddMethodHandler(option.Provider);
         UnlockMethodStatus = error ?? $"{option.Provider.DisplayName} added.";
     }

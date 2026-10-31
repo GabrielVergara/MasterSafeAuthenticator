@@ -1,0 +1,8 @@
+WebAuthNGetApiVersionNumber
+WebAuthNAuthenticatorMakeCredential
+WebAuthNAuthenticatorGetAssertion
+WebAuthNFreeCredentialAttestation
+WebAuthNFreeAssertion
+WebAuthNGetErrorName
+GetForegroundWindow
+GetDesktopWindow

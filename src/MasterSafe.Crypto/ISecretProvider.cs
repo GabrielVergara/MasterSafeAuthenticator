@@ -22,6 +22,9 @@ public interface ISecretProvider
     /// <summary>Name shown to the user.</summary>
     string DisplayName { get; }
 
+    /// <summary>Short instruction shown while enrolling, for example what the operating system will ask for.</summary>
+    string EnrollmentHint => string.Empty;
+
     /// <summary>True when the factor can be used on this computer right now.</summary>
     Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default);
 

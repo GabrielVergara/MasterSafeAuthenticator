@@ -31,8 +31,8 @@ public static class HelpContent
 
             1. The first time, choose a master password and create your vault. Use a long
                passphrase. It cannot be recovered if you forget it.
-            2. Later, enter it on the login screen and choose Unlock, or use Windows Hello
-               if you have set it up in Settings.
+            2. Later, enter it on the login screen and choose Unlock, or use Windows Hello or
+               your security key if you have set them up in Settings.
             3. The dashboard lists each account with a live 6-digit code.
             4. Each code refreshes automatically; the countdown shows the time remaining.
 
@@ -93,8 +93,10 @@ public static class HelpContent
               of exiting.
             - Lock the vault after: the number of minutes without keyboard or mouse use before
               the vault locks. Locking wipes the decrypted data from memory.
-            - Unlock methods: add or remove Windows Hello. Your master password always keeps
-              working, and it cannot be removed.
+            - Unlock methods: add or remove Windows Hello or a FIDO2 security key. Your master
+              password always keeps working, and it cannot be removed. A security key needs
+              the hmac-secret feature (most current keys have it) and asks for its PIN and a
+              touch. One security key can be set up per vault.
             - Change master password: re-protects your vault with a new password. Windows
               Hello keeps working.
 
@@ -114,6 +116,9 @@ public static class HelpContent
               of unlocking (master password, Windows Hello), each protected separately.
             - Windows Hello uses a key held by Windows (the TPM when available) that only
               works after you verify with your PIN or biometrics.
+            - A security key computes a secret inside the key that never leaves it, and needs
+              the key's PIN and a touch. Without the physical key the vault cannot be opened
+              this way.
             - Saving is crash-safe, and the previous version is kept as vault.sauth.bak.
             - Backups sent to WebDAV travel over https and are already encrypted.
 

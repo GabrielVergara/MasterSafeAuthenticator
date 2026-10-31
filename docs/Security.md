@@ -9,11 +9,13 @@ promise that the software cannot be attacked. See [ThreatModel.md](ThreatModel.m
 flowchart TD
     MP[Master password] -->|Argon2id + salt| KEK1[Password key]
     HELLO[Windows Hello] -->|signed challenge + HKDF| KEK2[Hello key]
-    FIDO[Security key] -.->|planned: hmac-secret| KEK3[Key from the token]
+    FIDO[FIDO2 security key] -->|hmac-secret + HKDF| KEK3[Key from the token]
     KEK1 -->|AES-256-GCM wrap| SLOT1[Password slot]
     KEK2 -->|AES-256-GCM wrap| SLOT2[Hello slot]
+    KEK3 -->|AES-256-GCM wrap| SLOT3[Security key slot]
     SLOT1 --> DEK[Random 256-bit data key]
     SLOT2 --> DEK
+    SLOT3 --> DEK
     DEK -->|AES-256-GCM| VAULT[Accounts and passwords]
 ```
 
@@ -21,8 +23,8 @@ The vault contents are encrypted with one random 256-bit **data key**. That key 
 method (a "slot"), wrapped under a key that only that method can produce. Consequences:
 
 - Changing the master password, or adding or removing Windows Hello, never re-encrypts the contents.
-- Windows Hello (and later security keys) are real second ways to unlock. Nothing stored on disk can open
-  the vault without the Hello prompt, and the master password always keeps working.
+- Windows Hello and FIDO2 security keys are real additional ways to unlock. Nothing stored on disk can open
+  the vault without the Hello prompt or the physical key (and its PIN), and the master password always keeps working.
 - Every encryption binds the vault identifier as associated data, and every slot also binds its own id and
   type. Pieces of one vault cannot be swapped into another, and a slot cannot be relabelled.
 
@@ -33,6 +35,7 @@ method (a "slot"), wrapped under a key that only that method can produce. Conseq
 | Password KDF | Argon2id | Default 128 MiB, 3 iterations, 4 lanes, 32-byte salt. Read from the file but limited to 1 GiB, 20 iterations and 32 lanes |
 | Symmetric | AES-256-GCM | 12-byte random nonce, 16-byte tag, authenticated |
 | Windows Hello | RSA PKCS#1 signature of a stored challenge, then HKDF-SHA-256 | The private key stays in the TPM or Windows' protected store and needs the Hello prompt |
+| FIDO2 security key | CTAP2 `hmac-secret` through the Windows WebAuthn API, then HKDF-SHA-256 | A secret inside the key is combined with a random salt. Needs the key, its PIN (user verification is required) and a touch. One key per vault; the credential is not stored on the key |
 | Hybrid post-quantum KEM | ECDH P-384 + ML-KEM-768, HKDF-SHA-384 | Used for recovery-key backups, see [PQC.md](PQC.md) |
 | Release signatures | ML-DSA-65 (FIPS 204) | `MasterSafe.Cli sign` and `verify` |
 | OTP | RFC 6238 / RFC 4226 | SHA-1, SHA-256, SHA-512 |

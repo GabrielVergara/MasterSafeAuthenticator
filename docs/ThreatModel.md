@@ -26,6 +26,7 @@ flowchart TD
 | Runs malware as you while the vault is **locked** | No | Nothing on disk opens the vault without the password or the Hello prompt. The data key is not stored |
 | Runs malware as you while the vault is **unlocked** | Yes | See below |
 | Has your computer and your Windows PIN | Yes, via Windows Hello | Hello is as strong as your PIN or biometrics |
+| Has your security key but not its PIN | No | The vault asks the key for a secret, and the key requires its PIN and a touch. Too many wrong PINs lock the key |
 | Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https |
 
 ## Mitigations for the unlocked state
@@ -45,7 +46,8 @@ locks, and clears copied passwords from the clipboard after 30 seconds.
 
 ## Known gaps (planned)
 
-- FIDO2 security keys as an unlock method (the vault format already supports them; the Windows and Linux
-  token integration is not implemented yet).
-- Linux has no hardware unlock method yet; the master password works everywhere.
+- Linux has no hardware unlock method yet (Windows Hello and the FIDO2 integration use Windows APIs); the master
+  password works everywhere. A Linux FIDO2 backend (libfido2) is planned.
+- Only one security key can be set up per vault. Adding a second key replaces the first.
+- A security key must support the CTAP2 `hmac-secret` extension. Older U2F-only keys do not.
 - A confirmation step before deleting an account.

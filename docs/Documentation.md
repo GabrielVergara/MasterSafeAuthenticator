@@ -32,7 +32,7 @@ sequenceDiagram
     participant L as LoginViewModel
     participant M as MainWindowViewModel
     participant V as VaultService
-    participant P as ISecretProvider (Windows Hello)
+    participant P as ISecretProvider (Hello or security key)
     U->>L: Master password
     L->>M: UnlockRequested(password)
     M->>V: DeriveKeyAsync(password)
@@ -40,11 +40,11 @@ sequenceDiagram
     V-->>M: data key
     M->>V: OpenWithKeyAsync(data key)
     V-->>M: accounts and passwords
-    U->>L: Unlock with Windows Hello
+    U->>L: Unlock with Windows Hello or security key
     L->>M: MethodUnlockRequested(provider)
     M->>V: UnlockWithProviderAsync(provider)
     V->>P: DeriveAsync(slot id, challenge)
-    P-->>V: key after the Hello prompt
+    P-->>V: key after the Hello prompt or key touch + PIN
     V-->>M: data key
 ```
 
@@ -57,10 +57,13 @@ Locking (button or auto-lock) zeroes the data key and clears decrypted data from
 flowchart LR
     MP[Master password] -->|Argon2id + salt| KEK1[Password key]
     HE[Windows Hello] -->|signed challenge, HKDF| KEK2[Hello key]
+    FK[FIDO2 key] -->|hmac-secret, HKDF| KEK3[Key-token key]
     KEK1 -->|AES-GCM wrap| S1[Password slot]
     KEK2 -->|AES-GCM wrap| S2[Hello slot]
+    KEK3 -->|AES-GCM wrap| S3[Security key slot]
     S1 --> DEK[Random 256-bit data key]
     S2 --> DEK
+    S3 --> DEK
     C[VaultContents JSON<br/>Accounts + Passwords] -->|GZip| Z[Compressed bytes]
     Z -->|AES-256-GCM with data key| E[Nonce + Ciphertext + Tag]
     DEK --> E
@@ -73,8 +76,9 @@ the next time the vault is unlocked with the master password. Details: [Security
 ## 4. Unlock methods
 
 Settings lists the unlock methods. The master password is always present and cannot be removed. Windows
-Hello can be added or removed. FIDO2 security keys use the same slot design and are planned. Changing the master
-password replaces only the password slot, so other methods keep working.
+Hello and a FIDO2 security key can be added or removed. A security key must support the CTAP2 `hmac-secret`
+extension; adding it takes a PIN and a touch twice and unlocking takes them once. One key can be set up per vault.
+Changing the master password replaces only the password slot, so other methods keep working.
 
 ## 5. Vault contents model
 
@@ -125,7 +129,24 @@ request, and checks packages for known vulnerabilities. CodeQL, SBOM generation 
 workflows. Other targets (macOS, mobile) are not built yet; the core libraries are plain `net10.0` and the
 Windows-only code is isolated in `MasterSafe.Platform`.
 
-## 8. Conventions
+## 8. Manual hardware checks
+
+Windows Hello and security keys cannot be tested in CI, so run this list on a real PC before a release.
+Unit tests cover the vault logic with a fake provider; these steps cover the real devices.
+
+| Step | Expected |
+| --- | --- |
+| Settings, Add Windows Hello, then Lock vault | Hello prompt; login shows "Unlock with Windows Hello" and it opens the vault |
+| Settings, Add Security key (key plugged in) | Windows asks for the key PIN and a touch twice; "Security key" appears in the list |
+| Lock vault, Unlock with Security key | PIN and touch once; the vault opens with the same accounts |
+| Unlock with Security key, then cancel the prompt | A "cancelled" message; the master password still works |
+| Remove the security key in Settings | The login button disappears; the master password still works |
+| Change the master password | Hello and the security key still unlock the vault |
+
+Tested on Windows 11 build 26100 (WebAuthn API version 9) with a Thales SafeNet eToken FIDO key.
+A key must support the CTAP2 `hmac-secret` extension and have a PIN (Windows offers to set one).
+
+## 9. Conventions
 
 - Every source file starts with a header naming the project and author.
 - Public types and members carry XML documentation comments.
