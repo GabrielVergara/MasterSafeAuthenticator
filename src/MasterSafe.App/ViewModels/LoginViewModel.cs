@@ -64,12 +64,22 @@ public sealed partial class LoginViewModel : ViewModelBase
     private string? _error;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
     private bool _isBusy;
+
+    /// <summary>True while sign-in with the master password is paused after too many wrong passwords.</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UnlockCommand))]
+    private bool _isLockedOut;
+
+    /// <summary>Tells how long the pause lasts, for example "Too many wrong passwords. Try again in 27 seconds."</summary>
+    [ObservableProperty]
+    private string? _lockoutMessage;
 
     /// <summary>Raised with the entered password when the user requests unlock.</summary>
     public event EventHandler<string>? UnlockRequested;
 
-    private bool CanUnlock => !IsBusy && MasterPassword.Length >= 1;
+    private bool CanUnlock => !IsBusy && !IsLockedOut && MasterPassword.Length >= 1;
 
     [RelayCommand(CanExecute = nameof(CanUnlock))]
     private void Unlock()

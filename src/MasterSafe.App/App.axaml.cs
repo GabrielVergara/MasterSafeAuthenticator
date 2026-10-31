@@ -122,6 +122,35 @@ public partial class App : Application
             }
         };
 
+        // Lock the vault when Windows is locked or goes to sleep, and optionally when the window is minimized.
+        _session = new SessionMonitor();
+        _session.SessionLocking += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            if (viewModel.Settings.LockOnSessionLock)
+            {
+                viewModel.LockNow();
+            }
+        });
+        window.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Avalonia.Controls.Window.WindowStateProperty
+                && window.WindowState == Avalonia.Controls.WindowState.Minimized
+                && viewModel.Settings.LockOnMinimize)
+            {
+                viewModel.LockNow();
+            }
+        };
+
+        // Keep the window out of screenshots and screen sharing unless the user turned that off.
+        window.Opened += (_, _) => WindowCaptureProtection.Apply(window, viewModel.Settings.BlockScreenCapture);
+        viewModel.Settings.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SettingsViewModel.BlockScreenCapture))
+            {
+                WindowCaptureProtection.Apply(window, viewModel.Settings.BlockScreenCapture);
+            }
+        };
+
         // Keep running in the tray when the preference is enabled: closing the window hides it...
         window.Closing += (_, e) =>
         {
@@ -143,9 +172,14 @@ public partial class App : Application
             }
         };
 
-        desktop.ShutdownRequested += (_, _) => _tray?.Dispose();
+        desktop.ShutdownRequested += (_, _) =>
+        {
+            _tray?.Dispose();
+            _session?.Dispose();
+        };
     }
 
+    private SessionMonitor? _session;
     private bool _shuttingDown;
 
     /// <summary>Applies the selected theme (Light/Dark/System).</summary>

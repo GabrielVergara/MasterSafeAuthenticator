@@ -39,6 +39,11 @@
       <TextBlock Classes="error" Text="{Binding Error}"
                  IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
+      <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" Padding="12"
+              IsVisible="{Binding IsLockedOut}">
+        <TextBlock Classes="error" TextWrapping="Wrap" Text="{Binding LockoutMessage}" />
+      </Border>
+
       <Button Classes="accent" Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
               HorizontalContentAlignment="Center" Command="{Binding UnlockCommand}" />
       <ItemsControl ItemsSource="{Binding UnlockMethods}">

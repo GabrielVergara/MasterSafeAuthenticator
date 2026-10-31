@@ -21,6 +21,24 @@ public sealed class AppSettings
     /// <summary>Minutes without activity before the vault locks (1 to 120).</summary>
     public int AutoLockMinutes { get; set; } = 5;
 
+    /// <summary>Wrong master passwords in a row since the last correct one.</summary>
+    public int UnlockFailures { get; set; }
+
+    /// <summary>Until when sign-in with the master password is paused (ISO 8601, UTC), or empty.</summary>
+    public string? UnlockBlockedUntilUtc { get; set; }
+
+    /// <summary>Lock the vault when Windows is locked or goes to sleep.</summary>
+    public bool LockOnSessionLock { get; set; } = true;
+
+    /// <summary>Lock the vault when the window is minimized.</summary>
+    public bool LockOnMinimize { get; set; }
+
+    /// <summary>Keep the window out of screenshots and screen sharing (Windows).</summary>
+    public bool BlockScreenCapture { get; set; } = true;
+
+    /// <summary>Width of the folder list on the Passwords page in pixels; 0 means fit it to the folder names.</summary>
+    public double FolderPaneWidth { get; set; }
+
     /// <summary>Seconds a copied secret stays on the clipboard before it is cleared: 30, 60 or 120.</summary>
     public int ClipboardClearSeconds { get; set; } = ClipboardPolicy.DefaultSeconds;
 

@@ -34,6 +34,20 @@
 
       <Border Classes="card">
         <StackPanel Spacing="12">
+          <TextBlock Text="Privacy and locking" Classes="h2" />
+          <CheckBox Content="Lock the vault when Windows is locked or the computer goes to sleep"
+                    IsChecked="{Binding LockOnSessionLock, Mode=TwoWay}" />
+          <CheckBox Content="Lock the vault when the window is minimized"
+                    IsChecked="{Binding LockOnMinimize, Mode=TwoWay}" />
+          <CheckBox Content="Keep this window out of screenshots and screen sharing (Windows)"
+                    IsChecked="{Binding BlockScreenCapture, Mode=TwoWay}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Screenshots and screen sharing show this window as black while this is on. Turn it off if you need to capture the window." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
           <TextBlock Text="Unlock methods" Classes="h2" />
           <TextBlock Classes="hint"
                      Text="Besides your master password you can unlock with Windows Hello or a FIDO2 security key. The master password always keeps working." />

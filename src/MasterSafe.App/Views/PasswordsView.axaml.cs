@@ -28,8 +28,49 @@ public partial class PasswordsView : UserControl
             if (_vm is not null)
             {
                 _vm.CopyRequested += OnCopyRequested;
+                _vm.FolderNodes.CollectionChanged += (_, _) => ApplyFolderPaneWidth();
+                _vm.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(PasswordsViewModel.UserFolderPaneWidth))
+                    {
+                        ApplyFolderPaneWidth();
+                    }
+                };
+                ApplyFolderPaneWidth();
             }
         };
+
+        SizeChanged += (_, _) => ApplyFolderPaneWidth();
+
+        // Remember a width the user dragged to; a double-click goes back to fitting the folder names.
+        FolderSplitter.DragCompleted += (_, _) =>
+        {
+            if (_vm is not null)
+            {
+                _vm.UserFolderPaneWidth = MainGrid.ColumnDefinitions[0].ActualWidth;
+            }
+        };
+        FolderSplitter.DoubleTapped += (_, _) =>
+        {
+            if (_vm is not null)
+            {
+                _vm.UserFolderPaneWidth = null;
+            }
+        };
+    }
+
+    private void ApplyFolderPaneWidth()
+    {
+        if (_vm is null)
+        {
+            return;
+        }
+
+        // The list of passwords and the entry form need their room too, so the folder list never takes more than
+        // what is left after them (the form is 340 wide and the list needs about 380).
+        var room = Bounds.Width > 0 ? Bounds.Width - 340 - 380 - 30 : double.MaxValue;
+        var width = Math.Min(_vm.EffectiveFolderPaneWidth, Math.Max(150, room));
+        MainGrid.ColumnDefinitions[0].Width = new GridLength(width);
     }
 
     /// <summary>Closes the icon picker once an icon was chosen.</summary>

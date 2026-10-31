@@ -25,6 +25,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private readonly SemaphoreSlim _saveLock = new(1, 1);
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly DispatcherTimer? _idleTimer;
+    private readonly DispatcherTimer? _lockoutTimer;
+    private readonly UnlockThrottle _throttle;
     private byte[]? _sessionKey;
     private DateTimeOffset _lastActivity;
 
@@ -97,6 +99,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         _lastActivity = _clock();
         Dashboard = new DashboardViewModel();
         Settings = new SettingsViewModel(services?.SettingsStore);
+        _throttle = new UnlockThrottle(_clock, services?.SettingsStore);
         Vaults = new VaultsViewModel(services, _providers);
         Recovery = new RecoveryViewModel(services, BuildContents);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
@@ -124,6 +127,23 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Import.Dialogs = services?.Dialogs;
         Import.KeePass.Dialogs = services?.Dialogs;
         Passwords.Dialogs = services?.Dialogs;
+        if (services is not null)
+        {
+            Passwords.RestoreFolderPaneWidth(services.SettingsStore.Load().FolderPaneWidth);
+            Passwords.FolderPaneWidthChanged += (_, _) =>
+            {
+                try
+                {
+                    var settings = services.SettingsStore.Load();
+                    settings.FolderPaneWidth = Passwords.UserFolderPaneWidth ?? 0;
+                    services.SettingsStore.Save(settings);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    // The width is a convenience; it is simply not remembered.
+                }
+            };
+        }
         Import.KeePass.ExistingPasswords = () => Passwords.Snapshot();
         Import.KeePass.ExistingAccounts = () => Dashboard.Accounts.Select(a => a.Account).ToList();
         Import.KeePass.Confirmed += (_, e) =>
@@ -163,7 +183,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
             _idleTimer.Tick += (_, _) => LockIfIdle();
             _idleTimer.Start();
+
+            _lockoutTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _lockoutTimer.Tick += (_, _) => UpdateLockout();
         }
+
+        UpdateLockout();
     }
 
     /// <summary>
@@ -219,9 +244,56 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Locks the vault now (for example when Windows locks). Does nothing when it is already locked.</summary>
+    public void LockNow()
+    {
+        if (IsUnlocked)
+        {
+            Lock();
+        }
+    }
+
+    /// <summary>Shows or clears the pause after too many wrong passwords, and keeps the countdown going.</summary>
+    public void UpdateLockout()
+    {
+        var blocked = _throttle.IsBlocked;
+        Login.IsLockedOut = blocked;
+        Login.LockoutMessage = blocked
+            ? $"Too many wrong passwords. Try again in {UnlockThrottle.Describe(_throttle.Remaining)}."
+            : null;
+
+        if (blocked)
+        {
+            _lockoutTimer?.Start();
+        }
+        else
+        {
+            _lockoutTimer?.Stop();
+        }
+    }
+
+    /// <summary>Resets the failure counter after a correct unlock and tells the user about any wrong attempts before it.</summary>
+    private void AfterSuccessfulUnlock()
+    {
+        var failed = _throttle.RecordSuccess();
+        UpdateLockout();
+        if (failed > 0)
+        {
+            Dashboard.StatusMessage = failed == 1
+                ? "1 wrong password was entered since your last sign-in."
+                : $"{failed} wrong passwords were entered since your last sign-in. If that was not you, change your master password.";
+        }
+    }
+
     /// <summary>Creates (first run) or opens the vault with the master password and shows the dashboard.</summary>
     public async Task UnlockVaultAsync(string password)
     {
+        if (_throttle.IsBlocked)
+        {
+            UpdateLockout();
+            return;
+        }
+
         Login.IsBusy = true;
         try
         {
@@ -232,10 +304,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
             var key = await _vault.DeriveKeyAsync(password);
             await CompleteUnlockWithKeyAsync(key);
+            AfterSuccessfulUnlock();
         }
         catch (InvalidPasswordException)
         {
-            Login.Error = "Incorrect master password.";
+            _throttle.RecordFailure();
+            UpdateLockout();
+            Login.Error = _throttle.IsBlocked
+                ? null
+                : _throttle.AttemptsLeft > 0
+                    ? $"Incorrect master password. {_throttle.AttemptsLeft} {(_throttle.AttemptsLeft == 1 ? "try" : "tries")} left before sign-in pauses."
+                    : "Incorrect master password.";
         }
         catch (Exception ex)
         {
@@ -257,6 +336,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             var key = await _vault!.UnlockWithProviderAsync(provider);
             await CompleteUnlockWithKeyAsync(key);
+            AfterSuccessfulUnlock();
         }
         catch (InvalidPasswordException)
         {

@@ -26,6 +26,15 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private int _autoLockMinutes = 5;
 
     [ObservableProperty]
+    private bool _lockOnSessionLock = true;
+
+    [ObservableProperty]
+    private bool _lockOnMinimize;
+
+    [ObservableProperty]
+    private bool _blockScreenCapture = true;
+
+    [ObservableProperty]
     private ClipboardDelayOption _selectedClipboardDelay = ClipboardPolicy.Current;
 
     /// <summary>The waits offered for clearing the clipboard.</summary>
@@ -106,6 +115,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _selectedTheme = saved.Theme;
             _minimizeToTray = saved.MinimizeToTray;
             _autoLockMinutes = saved.AutoLockMinutes;
+            _lockOnSessionLock = saved.LockOnSessionLock;
+            _lockOnMinimize = saved.LockOnMinimize;
+            _blockScreenCapture = saved.BlockScreenCapture;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
         }
@@ -122,6 +134,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnMinimizeToTrayChanged(bool value) => SaveSettings();
 
     partial void OnAutoLockMinutesChanged(int value) => SaveSettings();
+
+    partial void OnLockOnSessionLockChanged(bool value) => SaveSettings();
+
+    partial void OnLockOnMinimizeChanged(bool value) => SaveSettings();
+
+    partial void OnBlockScreenCaptureChanged(bool value) => SaveSettings();
 
     partial void OnSelectedClipboardDelayChanged(ClipboardDelayOption value)
     {
@@ -144,6 +162,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.MinimizeToTray = MinimizeToTray;
             settings.AutoLockMinutes = AutoLockMinutes;
             settings.ClipboardClearSeconds = SelectedClipboardDelay.Seconds;
+            settings.LockOnSessionLock = LockOnSessionLock;
+            settings.LockOnMinimize = LockOnMinimize;
+            settings.BlockScreenCapture = BlockScreenCapture;
             _store.Save(settings);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

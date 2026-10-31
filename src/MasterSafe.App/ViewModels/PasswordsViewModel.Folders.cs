@@ -108,6 +108,54 @@ public sealed partial class PasswordsViewModel
     /// <summary>True when a real folder (not "All passwords") is selected.</summary>
     public bool HasFolderSelected => SelectedNode?.Path is not null;
 
+    /// <summary>Narrowest and widest the folder list is made automatically.</summary>
+    public const double MinAutoPaneWidth = 170;
+
+    /// <summary>Widest the folder list is made automatically.</summary>
+    public const double MaxAutoPaneWidth = 340;
+
+    /// <summary>Raised when the user drags the divider or resets the width, so the choice can be remembered.</summary>
+    public event EventHandler? FolderPaneWidthChanged;
+
+    private double? _userFolderPaneWidth;
+
+    /// <summary>The width the user chose for the folder list, or null to fit it to the folder names.</summary>
+    public double? UserFolderPaneWidth
+    {
+        get => _userFolderPaneWidth;
+        set
+        {
+            var clean = value is { } v && v >= 100 && v <= 800 ? v : (double?)null;
+            if (SetProperty(ref _userFolderPaneWidth, clean))
+            {
+                OnPropertyChanged(nameof(EffectiveFolderPaneWidth));
+                FolderPaneWidthChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+    }
+
+    /// <summary>The width that fits the longest folder line, so names are not cut off.</summary>
+    public double SuggestedFolderPaneWidth
+    {
+        get
+        {
+            // About 7.4 pixels per character, plus the icon, the indent and the padding around the list.
+            var widest = FolderNodes.Select(n => n.Depth * 14 + 26 + n.Display.Length * 7.4).DefaultIfEmpty(0).Max();
+            return Math.Clamp(Math.Ceiling(widest + 44), MinAutoPaneWidth, MaxAutoPaneWidth);
+        }
+    }
+
+    /// <summary>The width the folder list should have now: the user's choice, or the one that fits.</summary>
+    public double EffectiveFolderPaneWidth => UserFolderPaneWidth ?? SuggestedFolderPaneWidth;
+
+    /// <summary>Loads the remembered width without announcing a change.</summary>
+    public void RestoreFolderPaneWidth(double width)
+    {
+        _userFolderPaneWidth = width >= 100 && width <= 800 ? width : null;
+        OnPropertyChanged(nameof(UserFolderPaneWidth));
+        OnPropertyChanged(nameof(EffectiveFolderPaneWidth));
+    }
+
     /// <summary>The empty folders, for saving in the vault.</summary>
     public IReadOnlyList<string> FolderSnapshot() => _emptyFolders.Order(StringComparer.OrdinalIgnoreCase).ToList();
 
