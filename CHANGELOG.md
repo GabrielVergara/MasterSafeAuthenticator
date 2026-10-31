@@ -2,6 +2,16 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Added
+- Recovery: "Create recovery key automatically". MasterSafe chooses a strong random passphrase (30 characters, no look-alike letters), asks where to save the key file, and shows the passphrase once with a Copy button so it can be written down. Nothing is set up if the file is not saved. Choosing your own passphrase still works.
+
+### Fixed
+- Choosing an icon for a folder did nothing: the picker closed before the choice was applied. It now changes the icon and then closes.
+- Attached file names use the same strict rules on every system (no `:`, `*`, `?` and so on), so a name is safe wherever the vault is opened.
+- The release workflow signs the Linux packages on a Windows runner, because the Ubuntu runner cannot create ML-DSA signatures.
+
 ## 1.3.0 (2026-11-01)
 
 ### Added

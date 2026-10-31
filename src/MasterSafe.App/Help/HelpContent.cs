@@ -149,8 +149,11 @@ public static class HelpContent
             Nobody can reset a master password, because your data is encrypted with it. Prepare while you
             still remember it:
 
-            1. Open Recovery and create a recovery key. Save the key file somewhere safe and away from
-               this computer, and write down its passphrase separately.
+            1. Open Recovery and create a recovery key. The easiest way is "Create recovery key
+               automatically": MasterSafe chooses a strong passphrase, asks where to save the key file, and
+               then shows the passphrase once so you can write it down. Or type a passphrase of your own.
+               Save the key file somewhere safe and away from this computer, and keep the passphrase
+               written down separately.
             2. Create a recovery backup there now and then, especially after adding accounts or passwords.
                It holds your accounts and passwords, locked so that only your recovery key can open it.
 

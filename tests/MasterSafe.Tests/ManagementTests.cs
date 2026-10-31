@@ -407,6 +407,85 @@ public sealed class ManagementTests : IDisposable
     }
 
     [Fact]
+    public void Recovery_GeneratedPassphrases_AreLongRandomAndEasyToWriteDown()
+    {
+        var many = Enumerable.Range(0, 200).Select(_ => RecoveryViewModel.GeneratePassphrase()).ToList();
+
+        many.Should().OnlyHaveUniqueItems();
+        many.Should().OnlyContain(p => p.Length == 35 && p.Count(c => c == '-') == 5);
+        many.Should().OnlyContain(p => p.Length >= MasterSafe.Backup.RecoveryKeyService.MinPassphraseLength);
+        string.Concat(many).Where(char.IsLetterOrDigit).Should().OnlyContain(c => "ABCDEFGHJKMNPQRSTUVWXYZ23456789".Contains(c), "no 0, 1, I, L or O");
+    }
+
+    [Fact]
+    public async Task Recovery_CreateAutomatically_SavesTheKey_AndShowsThePassphraseOnce()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        var keyFile = Path.Combine(_root, "auto", "auto.msrk");
+        Directory.CreateDirectory(Path.GetDirectoryName(keyFile)!);
+        _dialogs.SaveResult = keyFile;
+        var page = new RecoveryViewModel(_services, () => Sample);
+
+        await page.CreateKeyAutomaticallyCommand.ExecuteAsync(null);
+
+        page.HasKey.Should().BeTrue();
+        File.Exists(keyFile).Should().BeTrue();
+        page.HasGeneratedPassphrase.Should().BeTrue();
+        page.GeneratedPassphrase.Should().HaveLength(35);
+        page.Passphrase.Should().BeEmpty("the form fields are cleared");
+        page.Status.Should().Contain("Write it down");
+
+        // The passphrase that is shown really opens the saved key file.
+        _services.RecoveryKeys.OpenPrivateKey(await File.ReadAllBytesAsync(keyFile), page.GeneratedPassphrase).Should().NotBeEmpty();
+
+        page.DismissGeneratedPassphraseCommand.Execute(null);
+        page.HasGeneratedPassphrase.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Recovery_CreateAutomatically_CancellingTheSave_LeavesNothingBehind()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        _dialogs.SaveResult = null;
+        var page = new RecoveryViewModel(_services, () => Sample);
+
+        await page.CreateKeyAutomaticallyCommand.ExecuteAsync(null);
+
+        page.HasKey.Should().BeFalse();
+        page.HasGeneratedPassphrase.Should().BeFalse();
+        page.Passphrase.Should().BeEmpty();
+        _settings.Load().RecoveryPublicKey.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Recovery_LockingTheVault_ForgetsAShownPassphrase()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        var keyFile = Path.Combine(_root, "auto2", "auto2.msrk");
+        Directory.CreateDirectory(Path.GetDirectoryName(keyFile)!);
+        _dialogs.SaveResult = keyFile;
+        var page = new RecoveryViewModel(_services, () => Sample);
+        await page.CreateKeyAutomaticallyCommand.ExecuteAsync(null);
+
+        page.ClearSecrets();
+
+        page.GeneratedPassphrase.Should().BeEmpty();
+        page.HasKey.Should().BeTrue("only the secret on screen is forgotten, not the key that was set up");
+    }
+
+    [Fact]
     public async Task Recovery_CancellingTheSaveDialog_DoesNotSetUpTheKey()
     {
         if (!MLKem.IsSupported)

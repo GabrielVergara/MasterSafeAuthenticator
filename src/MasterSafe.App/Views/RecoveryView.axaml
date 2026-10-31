@@ -34,8 +34,18 @@
           <TextBlock Text="{Binding KeyInfo}" TextWrapping="Wrap" />
 
           <StackPanel Spacing="12" IsVisible="{Binding CanCreateKey}">
-            <TextBlock Classes="hint"
-                       Text="The key file is protected by a passphrase you choose now. You need both the file and the passphrase to use it. Write the passphrase down and keep it separately from the file." />
+            <TextBlock Classes="hint" TextWrapping="Wrap"
+                       Text="The key file is protected by a passphrase. You need both the file and the passphrase to use it. Keep the passphrase written down, separately from the file." />
+            <Border Classes="card" Padding="14">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Easiest: let MasterSafe do it" Classes="h2" />
+                <TextBlock TextWrapping="Wrap" Classes="hint"
+                           Text="MasterSafe chooses a strong passphrase for you and asks where to save the key file. You then see the passphrase once, so you can write it down." />
+                <Button Classes="accent" Content="Create recovery key automatically..." HorizontalAlignment="Left"
+                        Command="{Binding CreateKeyAutomaticallyCommand}" IsEnabled="{Binding !IsBusy}" />
+              </StackPanel>
+            </Border>
+            <TextBlock Text="Or choose your own passphrase" Classes="h2" />
             <StackPanel>
               <TextBlock Text="Passphrase for the recovery key" Classes="label" />
               <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding Passphrase, Mode=TwoWay}" />
@@ -46,6 +56,19 @@
             </StackPanel>
             <Button Classes="accent" Content="Create and save recovery key..." HorizontalAlignment="Left"
                     Command="{Binding CreateKeyCommand}" IsEnabled="{Binding !IsBusy}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" IsVisible="{Binding HasGeneratedPassphrase}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Write down your recovery passphrase now" Classes="h2" />
+          <TextBlock TextWrapping="Wrap"
+                     Text="You need this passphrase together with the key file to recover your data. It is not shown again and is not stored anywhere in the app. Keep it somewhere other than the key file." />
+          <TextBox Text="{Binding GeneratedPassphrase, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas, Menlo, monospace" FontSize="20" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Copy passphrase" Click="OnCopyPassphrase" />
+            <Button Classes="accent" Content="I have written it down" Command="{Binding DismissGeneratedPassphraseCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>

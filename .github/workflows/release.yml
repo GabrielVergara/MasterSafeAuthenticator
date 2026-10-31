@@ -80,17 +80,8 @@ jobs:
           dotnet tool install --global CycloneDX
           dotnet CycloneDX MasterSafe.slnx -o artifacts -fn sbom.cyclonedx.json --json
 
-      - name: Sign packages
-        env:
-          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
-        run: |
-          if [ -n "$RELEASE_SIGNING_KEY" ]; then
-            printf '%s' "$RELEASE_SIGNING_KEY" > "$RUNNER_TEMP/release.key"
-            for f in artifacts/*.tar.gz artifacts/MasterSafe-Cli-*-linux-*; do
-              case "$f" in *.sha256|*.sig) continue;; esac
-              dotnet run --project src/MasterSafe.Cli -c Release -- sign "$f" "$RUNNER_TEMP/release.key"
-            done
-          fi
+      # The Linux packages are signed in the publish job below, on Windows: the Ubuntu runner's OpenSSL
+      # has no ML-DSA, and the Windows runner has.
 
       - uses: actions/upload-artifact@v7
         with:
@@ -104,14 +95,33 @@ jobs:
 
   publish:
     needs: [windows, linux]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+
+      - name: Sign the Linux packages
+        shell: bash
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -n "$RELEASE_SIGNING_KEY" ]; then
+            printf '%s' "$RELEASE_SIGNING_KEY" > "$RUNNER_TEMP/release.key"
+            for f in dist/*.tar.gz dist/MasterSafe-Cli-*-linux-*; do
+              case "$f" in *.sha256|*.sig) continue;; esac
+              dotnet run --project src/MasterSafe.Cli -c Release -- sign "$f" "$RUNNER_TEMP/release.key"
+            done
+            rm -f "$RUNNER_TEMP/release.key"
+          else
+            echo "::warning::No RELEASE_SIGNING_KEY secret: the Linux packages are not signed."
+          fi
 
       - name: Create draft release
         uses: softprops/action-gh-release@v3

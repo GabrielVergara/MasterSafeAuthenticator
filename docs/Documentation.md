@@ -126,7 +126,7 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Verify a whole downloaded release folder | `MasterSafe-Cli-<v>-win-x64.exe verify-release <folder> masterSafe-release.pub` | `./MasterSafe-Cli-<v>-linux-x64 verify-release <folder> masterSafe-release.pub` |
 | Verify one file | `MasterSafe.Cli verify <file> <pubkey>` | same command |
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
-| Release | push a tag `v<version>`; `.github/workflows/release.yml` builds Windows and Linux, signs and drafts a release | |
+| Release | push a tag `v<version>`; `.github/workflows/release.yml` builds Windows and Linux and drafts a release. The Windows files are signed on the Windows runner and the Linux packages in the publish job, also on Windows (the Ubuntu runner cannot make ML-DSA signatures) | |
 
 Continuous integration (`.github/workflows/build.yml`) builds and tests on Ubuntu and Windows for every push and pull
 request, and checks packages for known vulnerabilities. CodeQL, SBOM generation and release signing are separate
@@ -151,7 +151,8 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
 | Passwords, Edit an entry, Attach a file (a PDF under 5 MB), Save, then Lock and unlock | The entry shows "1 attached file"; Edit, then Save as writes an identical copy |
 | Attach a file over 5 MB | A message names the file and the limit; nothing is attached |
-| Select a folder, Change icon, pick one | The icon shows in the folder list and the folder pickers, and stays after Lock and unlock |
+| Select a folder, Change icon, click an icon | The picker closes, the icon shows in the folder list and the folder pickers, and stays after Lock and unlock |
+| Recovery, Create recovery key automatically, choose where to save | The key file is written and the passphrase is shown once; "I have written it down" hides it; the saved key opens with that passphrase |
 | Import a KeePass XML export that has attachments | The preview lists the attached files to add; they appear on the entries |
 | Passwords, type a folder name, New folder, then tick two entries and Move selected to that folder | The entries show "Folder: name" and appear under the folder; after Lock and unlock the folder is still there |
 | Delete a folder that holds passwords | The passwords are still listed, one level up |

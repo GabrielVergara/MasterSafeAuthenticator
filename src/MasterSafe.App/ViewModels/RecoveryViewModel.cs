@@ -4,6 +4,8 @@
 // License: See LICENSE
 
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Services;
@@ -43,6 +45,43 @@ public sealed partial class RecoveryViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isBusy;
 
+    /// <summary>The passphrase MasterSafe chose, shown until the user confirms they wrote it down.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasGeneratedPassphrase))]
+    private string _generatedPassphrase = string.Empty;
+
+    /// <summary>True while a generated passphrase is shown.</summary>
+    public bool HasGeneratedPassphrase => GeneratedPassphrase.Length > 0;
+
+    // Letters and digits that cannot be mistaken for each other when written down (no 0, 1, I, L, O).
+    private const string PassphraseAlphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+    /// <summary>
+    /// Makes a random passphrase for the recovery key: 30 characters from a 31-letter alphabet in six groups,
+    /// for example <c>K7QF2-M9XTD-W3HPA-8RCNB-4ZJYE-6VGUS</c> (about 148 bits).
+    /// </summary>
+    public static string GeneratePassphrase()
+    {
+        var builder = new StringBuilder(35);
+        for (var i = 0; i < 30; i++)
+        {
+            if (i > 0 && i % 5 == 0)
+            {
+                builder.Append('-');
+            }
+
+            builder.Append(PassphraseAlphabet[RandomNumberGenerator.GetInt32(PassphraseAlphabet.Length)]);
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>Forgets any passphrase that is still on screen or in the form (used when the vault is locked).</summary>
+    public void ClearSecrets()
+    {
+        Passphrase = ConfirmPassphrase = GeneratedPassphrase = string.Empty;
+    }
+
     /// <summary>Creates the page. With no services it shows that it is unavailable.</summary>
     public RecoveryViewModel(AppServices? services = null, Func<VaultContents>? contents = null)
     {
@@ -77,6 +116,38 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         OnPropertyChanged(nameof(CanCreateKey));
         OnPropertyChanged(nameof(IsAvailable));
     }
+
+    /// <summary>
+    /// The easy way: MasterSafe chooses a strong passphrase, then asks where to save the key file. The passphrase is
+    /// shown afterwards so it can be written down. Nothing is set up if the file is not saved.
+    /// </summary>
+    [RelayCommand]
+    private async Task CreateKeyAutomaticallyAsync()
+    {
+        if (_services is null || HasKey)
+        {
+            return;
+        }
+
+        var generated = GeneratePassphrase();
+        Passphrase = ConfirmPassphrase = generated;
+        GeneratedPassphrase = generated;
+
+        await CreateKeyAsync();
+
+        if (!HasKey)
+        {
+            Passphrase = ConfirmPassphrase = GeneratedPassphrase = string.Empty;
+        }
+        else
+        {
+            Status = $"{Status} The passphrase below is shown only now. Write it down and keep it apart from the key file.";
+        }
+    }
+
+    /// <summary>Hides the generated passphrase once the user has written it down.</summary>
+    [RelayCommand]
+    private void DismissGeneratedPassphrase() => GeneratedPassphrase = string.Empty;
 
     [RelayCommand]
     private async Task CreateKeyAsync()

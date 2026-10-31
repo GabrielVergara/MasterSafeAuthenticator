@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using Avalonia.Controls;
+using Avalonia.Threading;
 using MasterSafe.App.ViewModels;
 
 namespace MasterSafe.App.Views;
@@ -32,7 +33,10 @@ public partial class PasswordsView : UserControl
     }
 
     /// <summary>Closes the icon picker once an icon was chosen.</summary>
-    private void OnIconPicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => ChangeIconButton.Flyout?.Hide();
+    private void OnIconPicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        // The button runs its command after this handler. Closing the picker right now would detach the button
+        // (and its command) first, so the choice would be lost. Close it once the command has run.
+        => Dispatcher.UIThread.Post(() => ChangeIconButton.Flyout?.Hide(), DispatcherPriority.Background);
 
     private async void OnCopyRequested(object? sender, string text)
     {

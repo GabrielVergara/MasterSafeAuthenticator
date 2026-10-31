@@ -501,6 +501,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         AccountEditor.Secret = string.Empty;
         Import.ManualUri = string.Empty;
         Import.KeePass.Discard();
+        Recovery.ClearSecrets();
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;
