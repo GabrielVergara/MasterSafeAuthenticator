@@ -69,7 +69,8 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
     // crafted name can never reach outside the backup folder.
     private string SafePath(string fileName)
     {
-        if (fileName != Path.GetFileName(fileName) || fileName is "." or ".." || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        if (fileName != Path.GetFileName(fileName) || fileName is "." or ".." || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+            || fileName.IndexOfAny(['\\', ':']) >= 0)
         {
             throw new ArgumentException("The backup name must be a plain file name.", nameof(fileName));
         }

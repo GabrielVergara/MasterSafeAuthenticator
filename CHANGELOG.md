@@ -5,6 +5,9 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## 1.2.1 (2026-10-31)
 
 ### Fixed
+- Linux: the package shipped an older SkiaSharp native library that did not match the new SkiaSharp 4, so QR codes and drawing would fail. The matching native library is now included.
+- Backup names containing a backslash or colon are now refused on every platform, not only Windows.
+- The SBOM workflow uses the current CycloneDX option names.
 - Dragging a QR code image onto the window now imports it (it did nothing before). The Import page also has a "Choose an image..." button, accepts several images at once, explains why a file was refused, and no longer adds the same account twice.
 - The system tray icon did not appear after the Avalonia 12 update. It is now attached to the application so Windows shows it.
 - Minimizing the window now also sends it to the tray when "Keep running in the system tray" is on.

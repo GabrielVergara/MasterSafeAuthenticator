@@ -78,7 +78,7 @@ jobs:
       - name: Software bill of materials
         run: |
           dotnet tool install --global CycloneDX
-          dotnet CycloneDX MasterSafe.slnx -o artifacts -f sbom.cyclonedx.json --json
+          dotnet CycloneDX MasterSafe.slnx -o artifacts -fn sbom.cyclonedx.json --json
 
       - name: Sign packages
         env:

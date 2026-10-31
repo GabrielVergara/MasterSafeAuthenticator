@@ -23,7 +23,7 @@ jobs:
         run: dotnet tool install --global CycloneDX
 
       - name: Generate CycloneDX SBOM
-        run: dotnet CycloneDX MasterSafe.slnx -o sbom -f sbom.cyclonedx.json --json
+        run: dotnet CycloneDX MasterSafe.slnx -o sbom -fn sbom.cyclonedx.json --json
 
       - name: Generate SPDX SBOM
         uses: anchore/sbom-action@v0
