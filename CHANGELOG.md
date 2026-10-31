@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.2.1 (2026-10-31)
 
 ### Fixed
 - The system tray icon did not appear after the Avalonia 12 update. It is now attached to the application so Windows shows it.

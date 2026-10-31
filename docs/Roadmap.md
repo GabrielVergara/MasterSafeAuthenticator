@@ -9,7 +9,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - Recovery: recovery key file, recovery backups (hybrid post-quantum), restore from the sign-in screen.
 - Vault management: where files are stored, archive an old vault, open any vault file, delete old vaults.
 - Settings saved between runs. Confirmation before deleting accounts, passwords and vaults.
-- Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0.)
+- Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0 and 1.2.1.)
 
 ## Next (1.3)
 
