@@ -175,6 +175,23 @@ public sealed class ReleaseVerifierTests : IDisposable
     }
 
     [Fact]
+    public void ProgramsWithoutAnExtension_AreCheckedWhenTheyHaveASignature()
+    {
+        if (!ReleaseSigner.IsSupported)
+        {
+            return;
+        }
+
+        AddSigned("MasterSafe-Cli-1.2.0-linux-x64", "linux tool");
+        File.WriteAllText(Path.Combine(_folder, "README"), "not a release file");
+
+        var results = ReleaseVerifier.VerifyFolder(_folder, _publicKey);
+
+        results.Should().ContainSingle().Which.FileName.Should().Be("MasterSafe-Cli-1.2.0-linux-x64");
+        results[0].Passed.Should().BeTrue();
+    }
+
+    [Fact]
     public void MissingFolder_Throws()
     {
         var act = () => ReleaseVerifier.VerifyFolder(Path.Combine(_folder, "nope"), []);

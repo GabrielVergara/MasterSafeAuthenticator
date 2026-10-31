@@ -43,7 +43,7 @@ public static class ReleaseVerifier
         {
             var name = Path.GetFileName(path);
             if (name.EndsWith(".sig", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase)
-                || name.EndsWith(".pub", StringComparison.OrdinalIgnoreCase) || !IsReleaseFile(name))
+                || name.EndsWith(".pub", StringComparison.OrdinalIgnoreCase) || !IsReleaseFile(path))
             {
                 continue;
             }
@@ -106,6 +106,10 @@ public static class ReleaseVerifier
         return new ReleaseFileResult(name, checksumOk, signatureOk, notes.Count == 0 ? null : string.Join("; ", notes));
     }
 
-    private static bool IsReleaseFile(string name)
-        => ReleaseExtensions.Any(e => name.EndsWith(e, StringComparison.OrdinalIgnoreCase));
+    // A file is a release file when it looks like an installer or package, or when it has a signature or checksum
+    // next to it. The second rule covers programs without an extension, such as the Linux command-line tool.
+    private static bool IsReleaseFile(string path)
+        => ReleaseExtensions.Any(e => path.EndsWith(e, StringComparison.OrdinalIgnoreCase))
+           || File.Exists(path + ".sig")
+           || File.Exists(path + ".sha256");
 }
