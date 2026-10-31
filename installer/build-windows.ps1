@@ -55,11 +55,26 @@ $hash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
 "$hash  $(Split-Path $installer -Leaf)" | Set-Content -Path "$installer.sha256" -Encoding ascii
 Write-Host "SHA-256: $hash"
 
+# A standalone copy of the command-line tool, so anyone can verify the download without installing .NET.
+$cliProject = Join-Path $root "src\MasterSafe.Cli\MasterSafe.Cli.csproj"
+$cliDir = Join-Path $artifacts "cli-win-x64"
+dotnet publish $cliProject -c Release -r win-x64 --self-contained `
+    -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:Version=$Version -o $cliDir
+if ($LASTEXITCODE -ne 0) { throw "dotnet publish of the command-line tool failed" }
+$cli = Join-Path $artifacts "MasterSafe-Cli-$Version-win-x64.exe"
+Copy-Item (Join-Path $cliDir "MasterSafe.Cli.exe") $cli -Force
+$cliHash = (Get-FileHash $cli -Algorithm SHA256).Hash.ToLowerInvariant()
+"$cliHash  $(Split-Path $cli -Leaf)" | Set-Content -Path "$cli.sha256" -Encoding ascii
+
 if ($SigningKey) {
-    dotnet run --project (Join-Path $root "src\MasterSafe.Cli\MasterSafe.Cli.csproj") -c Release -- sign $installer $SigningKey
-    if ($LASTEXITCODE -ne 0) { throw "Signing failed" }
+    foreach ($file in @($installer, $cli)) {
+        dotnet run --project $cliProject -c Release -- sign $file $SigningKey
+        if ($LASTEXITCODE -ne 0) { throw "Signing $file failed" }
+    }
 } else {
-    Write-Warning "No signing key given. The installer is not signed with ML-DSA."
+    Write-Warning "No signing key given. The installer and the command-line tool are not signed with ML-DSA."
 }
 
 Write-Host "Done: $installer"
+Write-Host "Also built: $cli"

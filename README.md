@@ -40,20 +40,34 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 | Windows 10/11 (x64) | `MasterSafe-Authenticator-<version>-win-x64-setup.exe` | Run it. Installs for your user, no administrator needed |
 | Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`; `bash install.sh --uninstall` removes it) |
 
-Every file has a `.sha256` checksum and, for release builds, an **ML-DSA-65** signature (`.sig`).
-The project's public key is [signing/masterSafe-release.pub](signing/masterSafe-release.pub) and is also attached to
-each release. Verify a download with it:
+### How to verify a download
 
-```bash
-MasterSafe.Cli verify <downloaded-file> masterSafe-release.pub
+Every installer and package comes with a `.sha256` checksum file and an **ML-DSA-65** signature (`.sig`), and the
+release page also has the project's public key (`masterSafe-release.pub`, also kept in
+[signing/](signing/masterSafe-release.pub)) and a small verification tool.
+
+1. Download **everything** from the release page into one folder: the installer or package, its `.sha256` and `.sig`
+   files, `masterSafe-release.pub`, and the tool for your system
+   (`MasterSafe-Cli-<version>-win-x64.exe` or `MasterSafe-Cli-<version>-linux-x64`).
+2. Open a terminal in that folder and run:
+
+```powershell
+.\MasterSafe-Cli-<version>-win-x64.exe verify-release . masterSafe-release.pub        # Windows
+./MasterSafe-Cli-<version>-linux-x64 verify-release . masterSafe-release.pub          # Linux (chmod +x first)
 ```
 
-Check that you have the real public key by comparing its fingerprint (the command is
-`MasterSafe.Cli fingerprint masterSafe-release.pub`):
+3. Every file must say `OK ... signature valid, checksum ok`, and the key fingerprint printed first must be:
 
 ```
 SHA-256 fingerprint: 28ad8deb1624d6f04fe9100e25edb2666ad904e02824af14ef2fe6c8d2a74b8a
 ```
+
+If any line says `FAIL`, do not install or run that file, and please report it (see [SECURITY.md](SECURITY.md)).
+
+The tool cannot vouch for itself: a replaced tool could print anything. For the strongest check, build it from source
+(`dotnet run --project src/MasterSafe.Cli -c Release -- verify-release <folder> signing/masterSafe-release.pub`) and
+compare the fingerprint with the one printed here. Single files can also be checked with `verify <file> <pubkey>`, and
+a key with `fingerprint <pubkey>`.
 
 ### Windows or Edge says the download is unsafe
 
@@ -64,15 +78,8 @@ downloads and its installer is not yet signed with a Windows code-signing (Authe
 1. In Edge, open the download list, choose **...** next to the file, then **Keep**, then **Show more**, then **Keep anyway**.
 2. When Windows shows **Windows protected your PC**, choose **More info**, then **Run anyway**.
 
-Before running it, check that the file is genuine. Both checks use files from the same release page:
-
-```powershell
-Get-FileHash .\MasterSafe-Authenticator-<version>-win-x64-setup.exe -Algorithm SHA256   # compare with the .sha256 file
-MasterSafe.Cli verify .\MasterSafe-Authenticator-<version>-win-x64-setup.exe masterSafe-release.pub
-```
-
-The second command confirms the project's post-quantum signature; the public key and its fingerprint are
-described above. If either check fails, do not run the file and please report it (see [SECURITY.md](SECURITY.md)).
+Before running it, check that the file is genuine, as described in [How to verify a download](#how-to-verify-a-download).
+If a check fails, do not run the file and please report it (see [SECURITY.md](SECURITY.md)).
 Windows code signing is on the [roadmap](docs/Roadmap.md); the warning fades as signed releases build reputation.
 
 Your vault is stored in `%LocalAppData%\MasterSafe\vault.sauth` on Windows and `~/.local/share/MasterSafe/vault.sauth`
@@ -128,7 +135,7 @@ MasterSafe.slnx
 ├─ src/MasterSafe.Backup       # Encrypted .sauth backups (password or recovery key), local + WebDAV
 ├─ src/MasterSafe.Platform     # System tray abstraction, Windows Hello and FIDO2 security-key unlock providers
 ├─ src/MasterSafe.App          # Avalonia 11 MVVM desktop UI
-├─ src/MasterSafe.Cli          # Demo plus release signing commands (keygen, sign, verify)
+├─ src/MasterSafe.Cli          # Release tools: verify-release, verify, fingerprint, keygen, sign (also a demo)
 ├─ tests/MasterSafe.Tests      # Unit tests (RFC vectors, vault security, view models)
 ├─ installer/                  # Windows (Inno Setup) and Linux (tar.gz) packaging
 └─ docs/                       # Architecture, security, threat model, formats

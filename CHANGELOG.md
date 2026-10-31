@@ -2,6 +2,17 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Added
+- `MasterSafe-Cli` standalone verification tool, attached to releases (Windows and Linux, no .NET needed). Its
+  `verify-release` command checks every installer and package in a folder against its checksum and signature in one step.
+- Clear one-line error messages from the command-line tool instead of stack traces.
+
+### Changed
+- Updated libraries: SkiaSharp 4.154, CommunityToolkit.Mvvm 8.4.2, Tmds.DBus.Protocol 0.95.2, Entity Framework and
+  SQLitePCLRaw (data project), test packages.
+
 ## 1.2.0 (2026-10-31)
 
 ### Added

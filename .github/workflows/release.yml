@@ -51,6 +51,9 @@ jobs:
             artifacts/*-setup.exe
             artifacts/*-setup.exe.sha256
             artifacts/*-setup.exe.sig
+            artifacts/MasterSafe-Cli-*-win-x64.exe
+            artifacts/MasterSafe-Cli-*-win-x64.exe.sha256
+            artifacts/MasterSafe-Cli-*-win-x64.exe.sig
 
   linux:
     runs-on: ubuntu-latest
@@ -83,7 +86,8 @@ jobs:
         run: |
           if [ -n "$RELEASE_SIGNING_KEY" ]; then
             printf '%s' "$RELEASE_SIGNING_KEY" > "$RUNNER_TEMP/release.key"
-            for f in artifacts/*.tar.gz; do
+            for f in artifacts/*.tar.gz artifacts/MasterSafe-Cli-*-linux-*; do
+              case "$f" in *.sha256|*.sig) continue;; esac
               dotnet run --project src/MasterSafe.Cli -c Release -- sign "$f" "$RUNNER_TEMP/release.key"
             done
           fi
@@ -95,6 +99,7 @@ jobs:
             artifacts/*.tar.gz
             artifacts/*.tar.gz.sha256
             artifacts/*.tar.gz.sig
+            artifacts/MasterSafe-Cli-*-linux-*
             artifacts/sbom.cyclonedx.json
 
   publish:

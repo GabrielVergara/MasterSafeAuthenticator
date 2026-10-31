@@ -28,3 +28,16 @@ chmod +x "$STAGE/install.sh" "$STAGE/app/MasterSafe.App"
 tar -C "$ROOT/artifacts" -czf "$ROOT/artifacts/$NAME.tar.gz" "$NAME"
 ( cd "$ROOT/artifacts" && sha256sum "$NAME.tar.gz" > "$NAME.tar.gz.sha256" )
 echo "Done: artifacts/$NAME.tar.gz"
+
+# A standalone copy of the command-line tool, so anyone can verify the download without installing .NET.
+CLI_DIR="$ROOT/artifacts/cli-$RID"
+rm -rf "$CLI_DIR"
+dotnet publish "$ROOT/src/MasterSafe.Cli/MasterSafe.Cli.csproj" \
+  -c Release -r "$RID" --self-contained \
+  -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
+  -p:Version="$VERSION" -o "$CLI_DIR"
+CLI_NAME="MasterSafe-Cli-$VERSION-$RID"
+cp "$CLI_DIR/MasterSafe.Cli" "$ROOT/artifacts/$CLI_NAME"
+chmod +x "$ROOT/artifacts/$CLI_NAME"
+( cd "$ROOT/artifacts" && sha256sum "$CLI_NAME" > "$CLI_NAME.sha256" )
+echo "Also built: artifacts/$CLI_NAME"

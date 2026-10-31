@@ -34,11 +34,14 @@ already running as you while the vault is unlocked are listed there as out of sc
 ## Verifying downloads
 
 Release files carry a SHA-256 checksum and an ML-DSA-65 signature. The public key is
-[signing/masterSafe-release.pub](signing/masterSafe-release.pub). Verify with:
+[signing/masterSafe-release.pub](signing/masterSafe-release.pub). Put every downloaded file, the public key and the
+`MasterSafe-Cli` tool from the release page into one folder and run:
 
 ```bash
-MasterSafe.Cli verify <downloaded-file> masterSafe-release.pub
+MasterSafe-Cli-<version>-<system> verify-release . masterSafe-release.pub
 ```
+
+Every file must report `signature valid, checksum ok`. Full steps: [README](README.md#how-to-verify-a-download).
 
 The key's SHA-256 fingerprint is `28ad8deb1624d6f04fe9100e25edb2666ad904e02824af14ef2fe6c8d2a74b8a`.
 If a release is ever signed with a different key, treat it as suspect until this page and the README say otherwise.

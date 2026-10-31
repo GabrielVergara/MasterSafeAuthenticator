@@ -123,7 +123,8 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Installer | `./installer/build-windows.ps1 -Version <v>` (needs Inno Setup 6) | `bash installer/linux/build-linux.sh <v> linux-x64` (or `linux-arm64`) |
 | Cross-build for Linux from Windows | `dotnet publish src/MasterSafe.App -c Release -r linux-x64 --self-contained -p:MasterSafeTargetOs=linux` | n/a |
 | Sign a release file | `dotnet run --project src/MasterSafe.Cli -c Release -- sign <file> <key>` | same command |
-| Verify a download | `MasterSafe.Cli verify <file> signing/masterSafe-release.pub` | same command |
+| Verify a whole downloaded release folder | `MasterSafe-Cli-<v>-win-x64.exe verify-release <folder> masterSafe-release.pub` | `./MasterSafe-Cli-<v>-linux-x64 verify-release <folder> masterSafe-release.pub` |
+| Verify one file | `MasterSafe.Cli verify <file> <pubkey>` | same command |
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
 | Release | push a tag `v<version>`; `.github/workflows/release.yml` builds Windows and Linux, signs and drafts a release | |
 
