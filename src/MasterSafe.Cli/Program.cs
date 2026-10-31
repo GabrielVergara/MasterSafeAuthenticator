@@ -11,7 +11,8 @@ using MasterSafe.PostQuantum;
 //   MasterSafe.Cli keygen <name>             writes <name>.pub and <name>.key (keep the .key file secret)
 //   MasterSafe.Cli sign <file> <name>.key    writes <file>.sig
 //   MasterSafe.Cli verify <file> <name>.pub  checks <file>.sig
-if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify")
+//   MasterSafe.Cli fingerprint <name>.pub    prints the SHA-256 fingerprint of a public key
+if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "fingerprint")
 {
     return RunSigningCommand(args);
 }
@@ -53,8 +54,16 @@ static int RunSigningCommand(string[] args)
             return ok ? 0 : 1;
         }
 
+        case "fingerprint" when args.Length == 2:
+        {
+            var publicKey = Convert.FromBase64String(File.ReadAllText(args[1]).Trim());
+            var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(publicKey)).ToLowerInvariant();
+            Console.WriteLine(hash);
+            return 0;
+        }
+
         default:
-            Console.Error.WriteLine("Usage: keygen <name> | sign <file> <key> | verify <file> <pubkey>");
+            Console.Error.WriteLine("Usage: keygen <name> | sign <file> <key> | verify <file> <pubkey> | fingerprint <pubkey>");
             return 64;
     }
 }

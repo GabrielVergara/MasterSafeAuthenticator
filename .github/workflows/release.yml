@@ -101,6 +101,8 @@ jobs:
     needs: [windows, linux]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -111,4 +113,6 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          files: dist/*
+          files: |
+            dist/*
+            signing/masterSafe-release.pub

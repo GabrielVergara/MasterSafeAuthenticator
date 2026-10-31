@@ -39,10 +39,18 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 | Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`; `bash install.sh --uninstall` removes it) |
 
 Every file has a `.sha256` checksum and, for release builds, an **ML-DSA-65** signature (`.sig`).
-Verify a download with the project's public key (published with the release):
+The project's public key is [signing/masterSafe-release.pub](signing/masterSafe-release.pub) and is also attached to
+each release. Verify a download with it:
 
 ```bash
 MasterSafe.Cli verify <downloaded-file> masterSafe-release.pub
+```
+
+Check that you have the real public key by comparing its fingerprint (the command is
+`MasterSafe.Cli fingerprint masterSafe-release.pub`):
+
+```
+SHA-256 fingerprint: 28ad8deb1624d6f04fe9100e25edb2666ad904e02824af14ef2fe6c8d2a74b8a
 ```
 
 Your vault is stored in `%LocalAppData%\MasterSafe\vault.sauth` on Windows and `~/.local/share/MasterSafe/vault.sauth`

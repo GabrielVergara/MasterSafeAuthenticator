@@ -44,7 +44,7 @@ Legend: **Met** = implemented and covered by tests or CI. **Partial** = implemen
 | V9 Communications | 9.1 TLS for all connections | Met | WebDAV requires `https://` (plain http only for the local machine); .NET validates certificates |
 | V9 | Certificate pinning | Gap | Not planned; the user chooses the server |
 | V10 Malicious code | 10.1 / 10.2 No backdoors, no telemetry | Met | No network use except the WebDAV server the user configures |
-| V10 | 10.3 Release integrity | Partial | SHA-256 and ML-DSA-65 signatures on every release; Windows installer is not yet Authenticode-signed |
+| V10 | 10.3 Release integrity | Partial | SHA-256 and ML-DSA-65 signatures on every release, public key and fingerprint in `signing/`; Windows installer is not yet Authenticode-signed |
 | V10 | 10.3 Auto-update integrity | N/A | There is no auto-update; users download and verify releases |
 | V11 Business logic | 11.1 Destructive actions need confirmation | Met | Deleting accounts, passwords and vaults asks first. Vaults are archived, not deleted, when starting over |
 | V12 Files | 12.3 Path traversal | Met | Backup names must be plain file names (tested with `..`, absolute paths); vaults are only deleted inside the app folder |
