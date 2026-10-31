@@ -60,7 +60,12 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     public DashboardViewModel(Func<DateTimeOffset>? timeProvider = null, bool startTimer = true)
     {
         _timeProvider = timeProvider ?? (() => DateTimeOffset.UtcNow);
-        Accounts.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
+        Accounts.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(IsEmpty));
+            RebuildShown();
+            OnPropertyChanged(nameof(ShowSearch));
+        };
 
         if (startTimer && Dispatcher.UIThread.CheckAccess())
         {

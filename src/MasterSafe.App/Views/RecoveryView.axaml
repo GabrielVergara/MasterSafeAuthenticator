@@ -84,6 +84,21 @@
         </StackPanel>
       </Border>
 
+      <Border Classes="card" IsVisible="{Binding HasKey}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Automatic recovery backup" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="MasterSafe can save a new recovery backup by itself a minute after you change something. The backup is locked with your recovery key, so the folder can be anywhere, even a cloud-synced one. The newest 5 are kept and older ones are removed." />
+          <CheckBox Content="Save recovery backups automatically" IsChecked="{Binding AutoBackupEnabled, Mode=TwoWay}" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Choose folder..." Command="{Binding ChooseAutoBackupFolderCommand}" />
+            <TextBlock Text="{Binding AutoBackupFolder}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <TextBlock Text="{Binding AutoBackupStatus}" TextWrapping="Wrap"
+                     IsVisible="{Binding AutoBackupStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </Border>
+
       <TextBlock Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>

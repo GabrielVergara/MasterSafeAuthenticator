@@ -15,6 +15,8 @@
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Themes}"
                       SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
           </StackPanel>
+          <CheckBox Content="Show reminders on the codes page (recovery key, backups, updates)"
+                    IsChecked="{Binding ShowReminders, Mode=TwoWay}" />
           <CheckBox Content="Keep running in the system tray when the window is closed or minimized"
                     IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
           <StackPanel>

@@ -45,6 +45,21 @@ public sealed class AppSettings
     /// <summary>Look for a newer version once after unlocking (off by default; it contacts github.com).</summary>
     public bool CheckForUpdatesOnStart { get; set; }
 
+    /// <summary>Order of the password list (a key such as "title" or "changed").</summary>
+    public string? PasswordSort { get; set; }
+
+    /// <summary>Order of the authenticator accounts (a key such as "added" or "name").</summary>
+    public string? AccountSort { get; set; }
+
+    /// <summary>Show reminders (recovery key, backup, update) at the top of the codes page.</summary>
+    public bool ShowReminders { get; set; } = true;
+
+    /// <summary>Write a recovery backup automatically after changes.</summary>
+    public bool AutoRecoveryBackupEnabled { get; set; }
+
+    /// <summary>The folder automatic recovery backups are written to.</summary>
+    public string? AutoRecoveryBackupFolder { get; set; }
+
     /// <summary>Seconds a copied secret stays on the clipboard before it is cleared: 30, 60 or 120.</summary>
     public int ClipboardClearSeconds { get; set; } = ClipboardPolicy.DefaultSeconds;
 

@@ -35,6 +35,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private bool _blockScreenCapture = true;
 
     [ObservableProperty]
+    private bool _showReminders = true;
+
+    [ObservableProperty]
     private bool _breachCheckEnabled;
 
     [ObservableProperty]
@@ -129,6 +132,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _lockOnMinimize = saved.LockOnMinimize;
             _blockScreenCapture = saved.BlockScreenCapture;
             _breachCheckEnabled = saved.BreachCheckEnabled;
+            _showReminders = saved.ShowReminders;
             _checkForUpdatesOnStart = saved.CheckForUpdatesOnStart;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
@@ -154,6 +158,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnBlockScreenCaptureChanged(bool value) => SaveSettings();
 
     partial void OnBreachCheckEnabledChanged(bool value) => SaveSettings();
+
+    partial void OnShowRemindersChanged(bool value) => SaveSettings();
 
     partial void OnCheckForUpdatesOnStartChanged(bool value) => SaveSettings();
 
@@ -182,6 +188,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.LockOnMinimize = LockOnMinimize;
             settings.BlockScreenCapture = BlockScreenCapture;
             settings.BreachCheckEnabled = BreachCheckEnabled;
+            settings.ShowReminders = ShowReminders;
             settings.CheckForUpdatesOnStart = CheckForUpdatesOnStart;
             _store.Save(settings);
         }

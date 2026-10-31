@@ -113,6 +113,7 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         LastBackupInfo = string.IsNullOrEmpty(settings?.LastRecoveryBackupUtc)
             ? "No recovery backup yet."
             : $"Last recovery backup: {Format(settings.LastRecoveryBackupUtc)}.";
+        LoadAutoSettings(settings);
         OnPropertyChanged(nameof(CanCreateKey));
         OnPropertyChanged(nameof(IsAvailable));
     }

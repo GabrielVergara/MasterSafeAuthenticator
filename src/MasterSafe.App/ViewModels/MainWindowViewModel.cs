@@ -41,7 +41,14 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private string _activeSection = string.Empty;
 
     partial void OnCurrentPageChanged(object value)
-        => ActiveSection = value switch
+    {
+        if (value is DashboardViewModel)
+        {
+            Recovery.Refresh();
+            RefreshNotices();
+        }
+
+        ActiveSection = value switch
         {
             DashboardViewModel => "Dashboard",
             PasswordsViewModel => "Passwords",
@@ -55,6 +62,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             HelpViewModel => "Help",
             _ => string.Empty,
         };
+    }
 
     public LoginViewModel Login { get; } = new();
 
@@ -109,9 +117,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             services?.Dialogs);
         Settings.Updates.UpdateFound += (_, info) =>
         {
+            _newerRelease = info;
             if (IsUnlocked)
             {
                 Dashboard.StatusMessage = $"Version {info.Version} is available. Open Settings to download and verify it.";
+                RefreshNotices();
             }
         };
         Health = new HealthViewModel(() => Passwords.Snapshot(), () => Settings.BreachCheckEnabled, new BreachChecker(BreachChecker.CreateClient()), _clock)
@@ -124,6 +134,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         };
         Vaults = new VaultsViewModel(services, _providers);
         Recovery = new RecoveryViewModel(services, BuildContents);
+        Recovery.IsVaultUnlocked = () => IsUnlocked;
+        Recovery.Clock = _clock;
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
         _currentPage = Login;
 
@@ -151,7 +163,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Passwords.Dialogs = services?.Dialogs;
         if (services is not null)
         {
-            Passwords.RestoreFolderPaneWidth(services.SettingsStore.Load().FolderPaneWidth);
+            var saved = services.SettingsStore.Load();
+            Passwords.RestoreFolderPaneWidth(saved.FolderPaneWidth);
+            Passwords.RestoreSort(saved.PasswordSort);
+            Dashboard.RestoreSort(saved.AccountSort);
+            Passwords.SortChanged += (_, _) => SaveSortChoices(services);
+            Dashboard.SortChanged += (_, _) => SaveSortChoices(services);
             Passwords.FolderPaneWidthChanged += (_, _) =>
             {
                 try
@@ -306,6 +323,86 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void SaveSortChoices(AppServices services)
+    {
+        try
+        {
+            var settings = services.SettingsStore.Load();
+            settings.PasswordSort = Passwords.SelectedSort.Key;
+            settings.AccountSort = Dashboard.SelectedSort.Key;
+            services.SettingsStore.Save(settings);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The order is a convenience; it is simply not remembered.
+        }
+    }
+
+    private UpdateInfo? _newerRelease;
+
+    /// <summary>Rebuilds the reminders at the top of the codes page.</summary>
+    public void RefreshNotices()
+    {
+        if (!IsUnlocked || !Settings.ShowReminders)
+        {
+            Dashboard.SetNotices([]);
+            return;
+        }
+
+        var notices = new List<NoticeRow>();
+        if (_newerRelease is not null)
+        {
+            notices.Add(new NoticeRow(
+                "update",
+                $"Version {_newerRelease.Version} is available.",
+                "Open Settings",
+                new RelayCommand(() => CurrentPage = Settings)));
+        }
+
+        if (Recovery.IsAvailable && Recovery.IsSupported && !Recovery.HasKey)
+        {
+            notices.Add(new NoticeRow(
+                "recovery-key",
+                "You have no recovery key yet. If you forget your master password, your data cannot be recovered.",
+                "Set up recovery",
+                new RelayCommand(() => CurrentPage = Recovery)));
+        }
+        else if (Recovery.IsAvailable && Recovery.HasKey && (Recovery.DaysSinceLastBackup is null or > 30))
+        {
+            notices.Add(new NoticeRow(
+                "recovery-backup",
+                Recovery.DaysSinceLastBackup is null
+                    ? "You have a recovery key but no recovery backup yet."
+                    : $"Your last recovery backup is {Recovery.DaysSinceLastBackup} days old.",
+                "Create a backup",
+                new RelayCommand(() => CurrentPage = Recovery)));
+        }
+
+        if (Login.UnlockMethods.Count == 0 && Settings.AddableMethods.Count > 0)
+        {
+            notices.Add(new NoticeRow(
+                "unlock-method",
+                "You can unlock faster, and more safely, with Windows Hello or a security key.",
+                "Add one",
+                new RelayCommand(() => CurrentPage = Settings)));
+        }
+
+        if (!Settings.CheckForUpdatesOnStart)
+        {
+            notices.Add(new NoticeRow(
+                "updates",
+                "MasterSafe does not look for new versions by itself, so you would not hear about security fixes.",
+                "Turn on",
+                new RelayCommand(() =>
+                {
+                    Settings.CheckForUpdatesOnStart = true;
+                    RefreshNotices();
+                })));
+        }
+
+        Dashboard.SetNotices(notices);
+    }
+
     private bool _updateChecked;
 
     /// <summary>Looks for a newer version once per run, when the user allowed it.</summary>
@@ -419,6 +516,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             if (_sessionKey is not null)
             {
                 await _vault.SaveWithKeyAsync(_sessionKey, BuildContents());
+                Recovery.NotifyVaultChanged();
             }
         }
         catch (Exception ex)
@@ -638,7 +736,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Import.ManualUri = string.Empty;
         Import.KeePass.Discard();
         Recovery.ClearSecrets();
+        Recovery.CancelAutoBackup();
         Health.ClearSecrets();
+        Dashboard.ResetNotices();
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;
