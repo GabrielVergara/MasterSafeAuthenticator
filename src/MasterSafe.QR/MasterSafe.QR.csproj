@@ -4,7 +4,7 @@
     <AssemblyName>MasterSafe.QR</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
     <PackageReference Include="SkiaSharp" Version="4.154.0" />
     <!-- Avalonia.Skia pulls the older 3.119 Linux native library, which does not match SkiaSharp 4. Pin the matching one. -->
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.154.0" />
