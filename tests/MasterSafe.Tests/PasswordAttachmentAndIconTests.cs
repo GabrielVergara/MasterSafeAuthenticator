@@ -134,7 +134,7 @@ public sealed class PasswordAttachmentAndIconTests : IDisposable
     }
 
     [Fact]
-    public void DeletingAnEntry_DeletesItsFiles_AlsoWhenSeveralAreDeletedTogether()
+    public void DeletingAnEntry_KeepsItsFilesInTheBin_UntilItIsDeletedForGood()
     {
         var vm = Vm();
         vm.AttachFile(File_("a.bin", 100));
@@ -144,10 +144,15 @@ public sealed class PasswordAttachmentAndIconTests : IDisposable
         vm.AttachmentBytes.Should().Be(300);
 
         vm.DeleteCommand.Execute(vm.Snapshot().Single(e => e.Title == "One"));
-        vm.AttachmentBytes.Should().Be(200);
+        vm.AttachmentBytes.Should().Be(300, "the entry can still be restored with its file");
+
+        vm.DeleteCommand.Execute(vm.Snapshot().Single(e => e.Title == "One"));
+        vm.AttachmentBytes.Should().Be(200, "deleted for good, so the file is gone");
 
         vm.SelectAllCommand.Execute(null);
         vm.ConfirmDeleteSelectedCommand.Execute(null);
+        vm.SelectedNode = vm.FolderNodes.Single(n => n.IsBin);
+        vm.ConfirmEmptyBinCommand.Execute(null);
 
         vm.AttachmentBytes.Should().Be(0);
     }
@@ -364,7 +369,7 @@ public sealed class PasswordAttachmentAndIconTests : IDisposable
         return vm;
     }
 
-    private static void Select(PasswordsViewModel vm, string path) => vm.SelectedNode = vm.FolderNodes.Single(n => n.Path == path);
+    private static void Select(PasswordsViewModel vm, string path) => vm.SelectedNode = vm.FolderNodes.Single(n => n.Path == path && !n.IsBin);
 
     private static FolderIcon Icon(string key) => FolderIconCatalog.All.Single(i => i.Key == key);
 

@@ -14,7 +14,7 @@ using MasterSafe.Core;
 namespace MasterSafe.App.ViewModels;
 
 /// <summary>One line of the folder list. <see cref="Path"/> is null for "All passwords".</summary>
-public sealed record FolderNode(string? Path, string Name, int Depth, int Count, string IconKey)
+public sealed record FolderNode(string? Path, string Name, int Depth, int Count, string IconKey, bool IsBin = false)
 {
     /// <summary>Text shown in the list.</summary>
     public string Display => $"{Name} ({Count})";
@@ -174,6 +174,7 @@ public sealed partial class PasswordsViewModel
             FormFolder = ChoiceFor(value?.Path ?? string.Empty);
         }
 
+        NotifyBinChanged();
         FilterEntries();
     }
 
@@ -248,7 +249,7 @@ public sealed partial class PasswordsViewModel
         }
 
         var parent = FolderPath.Parent(old);
-        var moved = _all.Count(e => FolderPath.IsInside(e.Folder, old));
+        var moved = Active.Count(e => FolderPath.IsInside(e.Folder, old));
         Relocate(old, parent, keepFolder: false);
         Status = moved == 0
             ? $"Deleted folder {old}."
@@ -286,7 +287,7 @@ public sealed partial class PasswordsViewModel
     }
 
     private bool FolderExists(string path)
-        => _emptyFolders.Contains(path) || _all.Any(e => FolderPath.IsInside(e.Folder, path));
+        => _emptyFolders.Contains(path) || Active.Any(e => FolderPath.IsInside(e.Folder, path));
 
     private FolderChoice? ChoiceFor(string path)
         => FolderChoices.FirstOrDefault(c => c.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
@@ -333,12 +334,12 @@ public sealed partial class PasswordsViewModel
     }
 
     /// <summary>Rebuilds the folder list and the folder choices, and keeps the current selections where they still exist.</summary>
-    private void RebuildFolders(string? selectPath)
+    private void RebuildFolders(string? selectPath, bool selectBin = false)
     {
         _rebuildingFolders = true;
         try
         {
-            var paths = _all.Select(e => e.Folder)
+            var paths = Active.Select(e => e.Folder)
                 .Concat(_emptyFolders)
                 .Where(p => p.Length > 0)
                 .SelectMany(FolderPath.WithAncestors)
@@ -350,19 +351,24 @@ public sealed partial class PasswordsViewModel
             var movePath = MoveTarget?.Path;
 
             FolderNodes.Clear();
-            FolderNodes.Add(new FolderNode(null, "All passwords", 0, _all.Count, "key"));
+            var activeCount = Active.Count();
+            FolderNodes.Add(new FolderNode(null, "All passwords", 0, activeCount, "key"));
             FolderChoices.Clear();
             FolderChoices.Add(new FolderChoice(string.Empty, "(No folder)", "lock"));
             foreach (var path in paths)
             {
                 var depth = FolderPath.Depth(path) - 1;
                 var icon = IconKeyFor(path);
-                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, _all.Count(e => FolderPath.IsInside(e.Folder, path)), icon));
+                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, Active.Count(e => FolderPath.IsInside(e.Folder, path)), icon));
                 FolderChoices.Add(new FolderChoice(path, new string(' ', depth * 2) + FolderPath.Name(path), icon));
             }
 
-            SelectedNode = FolderNodes.FirstOrDefault(n => n.Path is not null && selectPath is not null && n.Path.Equals(selectPath, StringComparison.OrdinalIgnoreCase))
-                ?? FolderNodes[0];
+            FolderNodes.Add(new FolderNode(null, "Recycle bin", 0, BinCount, "bin", IsBin: true));
+
+            SelectedNode = selectBin
+                ? FolderNodes[^1]
+                : FolderNodes.FirstOrDefault(n => !n.IsBin && n.Path is not null && selectPath is not null && n.Path.Equals(selectPath, StringComparison.OrdinalIgnoreCase))
+                    ?? FolderNodes[0];
             FormFolder = ChoiceFor(formPath) ?? FolderChoices[0];
             MoveTarget = movePath is null ? null : ChoiceFor(movePath);
         }

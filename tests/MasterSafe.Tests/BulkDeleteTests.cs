@@ -29,7 +29,7 @@ public sealed class BulkDeleteTests
 
         vm.SelectedCount.Should().Be(2);
         vm.HasSelection.Should().BeTrue();
-        vm.Snapshot().Should().HaveCount(3);
+        vm.ActiveSnapshot().Should().HaveCount(3);
     }
 
     [Fact]
@@ -44,16 +44,16 @@ public sealed class BulkDeleteTests
         vm.RequestDeleteSelectedCommand.Execute(null);
 
         vm.IsConfirmingBulkDelete.Should().BeTrue();
-        vm.BulkDeleteQuestion.Should().Contain("2 selected passwords");
-        vm.Snapshot().Should().HaveCount(3);
+        vm.BulkDeleteQuestion.Should().Contain("2 selected passwords").And.Contain("recycle bin");
+        vm.ActiveSnapshot().Should().HaveCount(3);
 
         vm.ConfirmDeleteSelectedCommand.Execute(null);
 
-        vm.Snapshot().Select(e => e.Title).Should().Equal("C");
+        vm.ActiveSnapshot().Select(e => e.Title).Should().Equal("C");
         vm.Rows.Should().ContainSingle();
         vm.SelectedCount.Should().Be(0);
         vm.IsConfirmingBulkDelete.Should().BeFalse();
-        vm.Status.Should().Be("Deleted 2 passwords.");
+        vm.Status.Should().Be("Moved 2 passwords to the recycle bin.");
         saves.Should().Be(1);
     }
 
@@ -67,7 +67,7 @@ public sealed class BulkDeleteTests
         vm.CancelDeleteSelectedCommand.Execute(null);
 
         vm.IsConfirmingBulkDelete.Should().BeFalse();
-        vm.Snapshot().Should().HaveCount(2);
+        vm.ActiveSnapshot().Should().HaveCount(2);
         vm.SelectedCount.Should().Be(2, "the ticks stay so the user can change their mind");
     }
 
@@ -84,7 +84,7 @@ public sealed class BulkDeleteTests
         vm.SelectAllCommand.Execute(null);
         vm.ConfirmDeleteSelectedCommand.Execute(null);
 
-        vm.Snapshot().Select(e => e.Title).Should().BeEquivalentTo("Apple", "Banana");
+        vm.ActiveSnapshot().Select(e => e.Title).Should().BeEquivalentTo("Apple", "Banana");
     }
 
     [Fact]

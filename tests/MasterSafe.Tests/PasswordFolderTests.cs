@@ -23,7 +23,7 @@ public sealed class PasswordFolderTests
     }
 
     private static void Select(PasswordsViewModel vm, string? path)
-        => vm.SelectedNode = vm.FolderNodes.Single(n => n.Path == path);
+        => vm.SelectedNode = vm.FolderNodes.Single(n => n.Path == path && !n.IsBin);
 
     [Theory]
     [InlineData("  Email / Work  ", "Email/Work")]
@@ -63,7 +63,7 @@ public sealed class PasswordFolderTests
     {
         var vm = Vm(Entry("a", "Email/Work"), Entry("b", "Email"), Entry("c"));
 
-        vm.FolderNodes.Select(n => (n.Path, n.Count)).Should().Equal(
+        vm.FolderNodes.Where(n => !n.IsBin).Select(n => (n.Path, n.Count)).Should().Equal(
             ((string?)null, 3), ("Email", 2), ("Email/Work", 1));
         vm.FolderChoices.Select(c => c.Path).Should().Equal(string.Empty, "Email", "Email/Work");
     }

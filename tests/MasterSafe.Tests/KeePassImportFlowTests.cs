@@ -173,7 +173,7 @@ public sealed class KeePassImportFlowTests : IDisposable
 
         var reopened = new MainWindowViewModel(_vault);
         await reopened.UnlockVaultAsync(Password);
-        reopened.Passwords.FolderNodes.Select(n => n.Path).Should().Equal(null, "Email", "Empty");
+        reopened.Passwords.FolderNodes.Where(n => !n.IsBin).Select(n => n.Path).Should().Equal(null, "Email", "Empty");
     }
 
     [Fact]

@@ -62,7 +62,9 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     private bool _isConfirmingBulkDelete;
 
     /// <summary>Question shown while deleting the ticked entries waits for confirmation.</summary>
-    public string BulkDeleteQuestion => $"Delete {SelectedCount} selected {(SelectedCount == 1 ? "password" : "passwords")}? This cannot be undone.";
+    public string BulkDeleteQuestion => IsInBin
+        ? $"Delete {SelectedCount} selected {(SelectedCount == 1 ? "password" : "passwords")} for good? This cannot be undone."
+        : $"Move {SelectedCount} selected {(SelectedCount == 1 ? "password" : "passwords")} to the recycle bin? You can restore {(SelectedCount == 1 ? "it" : "them")} for {PasswordVersion.BinRetentionDays} days.";
 
     /// <summary>Ticks all the entries that are currently shown.</summary>
     [RelayCommand]
@@ -106,7 +108,25 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         IsConfirmingBulkDelete = false;
         var ids = _selected.ToHashSet();
-        var removed = _all.RemoveAll(e => ids.Contains(e.Id));
+        var forGood = IsInBin;
+        var removed = 0;
+        if (forGood)
+        {
+            removed = _all.RemoveAll(e => ids.Contains(e.Id) && e.IsDeleted);
+        }
+        else
+        {
+            var now = DateTimeOffset.UtcNow;
+            for (var i = 0; i < _all.Count; i++)
+            {
+                if (ids.Contains(_all[i].Id) && !_all[i].IsDeleted)
+                {
+                    _all[i] = _all[i].WithDeleted(now);
+                    removed++;
+                }
+            }
+        }
+
         _selected.Clear();
         if (removed == 0)
         {
@@ -114,7 +134,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             return;
         }
 
-        Status = $"Deleted {removed} {(removed == 1 ? "password" : "passwords")}.";
+        var what = removed == 1 ? "password" : "passwords";
+        Status = forGood ? $"Deleted {removed} {what} for good." : $"Moved {removed} {what} to the recycle bin.";
         PruneBlobs();
         ApplyFilter();
         EntriesChanged?.Invoke(this, EventArgs.Empty);
@@ -194,6 +215,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         ClearBlobs();
         _all.Clear();
         _all.AddRange(entries.Select(WithCleanFolder));
+        PurgeOldBinEntries();
         foreach (var attachment in _all.SelectMany(e => e.Attachments))
         {
             if (attachments is not null && attachments.TryGetValue(attachment.Id, out var bytes))
@@ -291,6 +313,11 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         var index = _all.FindIndex(e => e.Id == entry.Id);
         if (index >= 0)
         {
+            entry = entry.WithHistory(BuildHistory(_all[index], entry));
+        }
+
+        if (index >= 0)
+        {
             _all[index] = entry;
         }
         else
@@ -326,6 +353,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             FormAttachments.Add(new AttachmentRow(attachment));
         }
 
+        ShowHistory(entry);
+
         PruneBlobs();
         Status = $"Editing {entry.Title}.";
     }
@@ -333,12 +362,24 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     [RelayCommand]
     private void Delete(PasswordEntry? entry)
     {
-        if (entry is null || _all.RemoveAll(e => e.Id == entry.Id) == 0)
+        var index = entry is null ? -1 : _all.FindIndex(e => e.Id == entry.Id);
+        if (index < 0)
         {
             return;
         }
 
-        Status = $"Deleted {entry.Title}.";
+        var current = _all[index];
+        if (current.IsDeleted)
+        {
+            _all.RemoveAt(index);
+            Status = $"Deleted {current.Title} for good.";
+        }
+        else
+        {
+            _all[index] = current.WithDeleted(DateTimeOffset.UtcNow);
+            Status = $"Moved {current.Title} to the recycle bin. You can restore it for {PasswordVersion.BinRetentionDays} days.";
+        }
+
         PruneBlobs();
         ApplyFilter();
         EntriesChanged?.Invoke(this, EventArgs.Empty);
@@ -375,16 +416,18 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         Title = UserName = Password = Url = Notes = Tags = string.Empty;
         FormFolder = ChoiceFor(SelectedNode?.Path ?? string.Empty) ?? FolderChoices.FirstOrDefault();
         FormAttachments.Clear();
+        FormHistory.Clear();
+        OnPropertyChanged(nameof(HasHistory));
         PruneBlobs();
     }
 
-    /// <summary>Refreshes the folder list and the shown entries, keeping the selected folder.</summary>
-    private void ApplyFilter() => ApplyFilter(SelectedNode?.Path);
+    /// <summary>Refreshes the folder list and the shown entries, keeping the selected folder (or the recycle bin).</summary>
+    private void ApplyFilter() => ApplyFilter(SelectedNode?.Path, SelectedNode?.IsBin == true);
 
     /// <summary>Refreshes the folder list and the shown entries, selecting <paramref name="folder"/> (null is "All passwords").</summary>
-    private void ApplyFilter(string? folder)
+    private void ApplyFilter(string? folder, bool bin = false)
     {
-        RebuildFolders(folder);
+        RebuildFolders(folder, bin);
         FilterEntries();
     }
 
@@ -392,10 +435,12 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         var q = SearchText.Trim();
         var folder = SelectedNode?.Path;
+        var inBin = SelectedNode?.IsBin == true;
         Entries.Clear();
         Rows.Clear();
         _selected.IntersectWith(_all.Select(e => e.Id));
         foreach (var e in _all
+            .Where(e => e.IsDeleted == inBin)
             .Where(e => folder is null || FolderPath.IsInside(e.Folder, folder))
             .Where(e => q.Length == 0
                 || e.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
@@ -403,7 +448,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
                 || e.UserName.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Url.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(e => e.Title, StringComparer.OrdinalIgnoreCase))
+            .OrderByDescending(e => inBin ? e.DeletedUtc ?? DateTimeOffset.MinValue : DateTimeOffset.MinValue)
+            .ThenBy(e => e.Title, StringComparer.OrdinalIgnoreCase))
         {
             Entries.Add(e);
             Rows.Add(new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged));
@@ -418,6 +464,12 @@ public sealed partial class PasswordRow(PasswordEntry entry, bool isSelected, Ac
 {
     /// <summary>The entry.</summary>
     public PasswordEntry Entry { get; } = entry;
+
+    /// <summary>True while the entry is in the recycle bin.</summary>
+    public bool IsDeleted => Entry.IsDeleted;
+
+    /// <summary>True while the entry is in use (not in the recycle bin).</summary>
+    public bool IsActive => !Entry.IsDeleted;
 
     /// <summary>True when files are attached to the entry.</summary>
     public bool HasAttachments => Entry.Attachments.Count > 0;

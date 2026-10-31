@@ -80,7 +80,8 @@ public class RemainingPhasesTests
         vm.Snapshot().Single(e => e.Title == "GitHub").Password.Should().Be("changed");
 
         vm.DeleteCommand.Execute(vm.Entries[0]);
-        vm.Snapshot().Should().ContainSingle();
+        vm.ActiveSnapshot().Should().ContainSingle();
+        vm.Snapshot().Should().HaveCount(2, "the deleted entry waits in the recycle bin");
         changes.Should().Be(4);
     }
 

@@ -73,9 +73,15 @@ public static class FolderIconCatalog
         }
     }
 
+    // Icons the app uses itself. They are not offered when choosing a folder icon.
+    private static readonly FolderIcon[] Reserved =
+    [
+        new("bin", "Recycle bin", "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19"),
+    ];
+
     /// <summary>Finds an icon by key; unknown keys (for example from a newer version) give the default icon.</summary>
     public static FolderIcon Get(string? key)
-        => All.FirstOrDefault(i => string.Equals(i.Key, key, StringComparison.OrdinalIgnoreCase)) ?? All[0];
+        => All.Concat(Reserved).FirstOrDefault(i => string.Equals(i.Key, key, StringComparison.OrdinalIgnoreCase)) ?? All[0];
 
     /// <summary>True when <paramref name="key"/> names an icon in the catalog.</summary>
     public static bool IsKnown(string? key) => All.Any(i => string.Equals(i.Key, key, StringComparison.OrdinalIgnoreCase));
