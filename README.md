@@ -6,6 +6,8 @@ targeting **.NET 10** and running on **Windows** and **Linux**. Free for persona
 
 by Gabriel Vergara Ezcurdia
 
+See the [changelog](CHANGELOG.md) for what changed in each version.
+
 ## Features
 
 - TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits), imported from an
