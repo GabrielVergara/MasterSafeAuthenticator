@@ -14,7 +14,12 @@
     </StackPanel>
     <Button Classes="accent" Content="Import" HorizontalAlignment="Left" Command="{Binding ImportUriCommand}" />
     <Border Classes="card" Padding="20">
-      <TextBlock Text="Drag a QR code image (png, jpg, jpeg or bmp) onto the window to import it." Classes="hint" />
+      <StackPanel Spacing="10">
+        <TextBlock Text="From a QR code image" Classes="h2" />
+        <TextBlock TextWrapping="Wrap" Classes="hint"
+                   Text="Drag a PNG, JPG or BMP picture of the QR code onto this window, or choose the file yourself. You can drop several images at once." />
+        <Button Content="Choose an image..." HorizontalAlignment="Left" Command="{Binding BrowseImageCommand}" />
+      </StackPanel>
     </Border>
     <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
   </StackPanel>

@@ -46,7 +46,10 @@ public static class HelpContent
             Open the Import screen to add an account.
 
             - Paste an otpauth:// URI (for example otpauth://totp/Issuer:user?secret=...).
-            - Or drag a QR image (png, jpg, jpeg, or bmp) onto the window to decode it.
+            - Or drag a QR image (png, jpg, jpeg, or bmp) onto the window while the vault is unlocked,
+              or use "Choose an image..." on the Import screen. You can drop several images at once.
+
+            An account that is already in your vault is not added a second time.
 
             MasterSafe validates the account details before adding them, so malformed
             or non-otpauth codes are rejected safely.

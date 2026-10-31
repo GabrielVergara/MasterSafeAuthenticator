@@ -11,7 +11,7 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 ## Features
 
 - TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits), imported from an
-  `otpauth://` link or a QR code image.
+  `otpauth://` link or a QR code image (drag it onto the window, or choose the file).
 - Encrypted vault for authenticator accounts and KeePass-style password entries, with a password generator
   and clipboard auto-clear after 30 seconds.
 - Unlock with the master password (**Argon2id**), **Windows Hello** or a **FIDO2 security key** (tested with a

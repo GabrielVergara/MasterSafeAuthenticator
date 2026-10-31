@@ -121,9 +121,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         Dashboard.AccountsChanged += async (_, _) => await PersistAsync();
         Passwords.EntriesChanged += async (_, _) => await PersistAsync();
+        Import.Dialogs = services?.Dialogs;
+        Import.IsDuplicate = account => Dashboard.Accounts.Any(a => SameAccount(a.Account, account));
         Import.AccountImported += (_, account) =>
         {
             Dashboard.Add(account);
+            Dashboard.StatusMessage = Import.Status;
             CurrentPage = Dashboard;
         };
         AccountEditor.AccountSaved += (_, account) =>
@@ -149,6 +152,37 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             _idleTimer.Start();
         }
     }
+
+    /// <summary>
+    /// Imports QR code images dropped on the window. Only works while the vault is unlocked. Returns the number of
+    /// accounts added. When nothing could be imported the Import page is shown so the reason is visible.
+    /// </summary>
+    public int ImportDroppedFiles(IEnumerable<string> paths)
+    {
+        ArgumentNullException.ThrowIfNull(paths);
+
+        if (!IsUnlocked)
+        {
+            return 0;
+        }
+
+        NotifyActivity();
+        var imported = Import.ImportFromImages(paths);
+        if (imported == 0)
+        {
+            CurrentPage = Import;
+        }
+
+        return imported;
+    }
+
+    private static bool SameAccount(OtpAccount a, OtpAccount b)
+        => string.Equals(Normalise(a.Secret), Normalise(b.Secret), StringComparison.Ordinal)
+           && string.Equals(a.Issuer, b.Issuer, StringComparison.OrdinalIgnoreCase)
+           && string.Equals(a.Label, b.Label, StringComparison.OrdinalIgnoreCase);
+
+    private static string Normalise(string secret)
+        => secret.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("-", string.Empty, StringComparison.Ordinal).ToUpperInvariant();
 
     /// <summary>Records user activity so the auto-lock countdown restarts.</summary>
     public void NotifyActivity() => _lastActivity = _clock();

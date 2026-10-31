@@ -6,6 +6,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using MasterSafe.App.ViewModels;
 
 namespace MasterSafe.App.Views;
@@ -21,6 +22,35 @@ public partial class MainWindow : Window
         AddHandler(PointerMovedEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(PointerPressedEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(KeyDownEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+
+        // QR code images can be dropped anywhere on the window while the vault is unlocked.
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DragOverEvent, OnDragOver);
+        AddHandler(DragDrop.DropEvent, OnDrop);
+    }
+
+    private void OnDragOver(object? sender, DragEventArgs e)
+    {
+        var canDrop = DataContext is MainWindowViewModel { IsUnlocked: true } && e.DataTransfer.TryGetFiles() is { Length: > 0 };
+        e.DragEffects = canDrop ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnDrop(object? sender, DragEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        var paths = (e.DataTransfer.TryGetFiles() ?? [])
+            .Select(f => f.TryGetLocalPath())
+            .Where(p => !string.IsNullOrEmpty(p))
+            .Select(p => p!)
+            .ToList();
+
+        vm.ImportDroppedFiles(paths);
+        e.Handled = true;
     }
 
     private void OnActivity(object? sender, RoutedEventArgs e) => (DataContext as MainWindowViewModel)?.NotifyActivity();
