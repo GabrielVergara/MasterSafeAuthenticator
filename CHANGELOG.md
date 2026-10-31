@@ -10,8 +10,11 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - Clear one-line error messages from the command-line tool instead of stack traces.
 
 ### Changed
-- Updated libraries: SkiaSharp 4.154, CommunityToolkit.Mvvm 8.4.2, Tmds.DBus.Protocol 0.95.2, Entity Framework and
-  SQLitePCLRaw (data project), test packages.
+- Updated libraries: **Avalonia 12.1.4** (the UI toolkit), SkiaSharp 4.154, CommunityToolkit.Mvvm 8.4.2, Entity Framework 10
+  and SQLitePCLRaw 3.x (data project), test packages. The separate Tmds.DBus.Protocol security pin is gone because Avalonia 12
+  already requires the fixed version.
+- Updated the GitHub Actions used by the build and release workflows (setup-dotnet 6, upload-artifact 7, CodeQL 4, gitleaks 3,
+  action-gh-release 3).
 
 ## 1.2.0 (2026-10-31)
 

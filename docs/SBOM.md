@@ -23,10 +23,10 @@ Avalonia and SkiaSharp. The SBOM above lists the NuGet packages; the runtime ver
 | Component | Version | License |
 | --- | --- | --- |
 | Konscious.Security.Cryptography.Argon2 | 1.3.1 | MIT |
-| Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent, Avalonia.Fonts.Inter | 11.2.3 | MIT |
-| CommunityToolkit.Mvvm | 8.3.2 | MIT |
-| ZXing.Net, SkiaSharp | see `MasterSafe.QR.csproj` | Apache-2.0 / MIT |
-| Microsoft.EntityFrameworkCore.Sqlite | see `MasterSafe.Data.csproj` | MIT |
+| Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent, Avalonia.Fonts.Inter | 12.1.4 | MIT |
+| CommunityToolkit.Mvvm | 8.4.2 | MIT |
+| ZXing.Net, SkiaSharp | see `MasterSafe.QR.csproj` (SkiaSharp 4.154) | Apache-2.0 / MIT |
+| Microsoft.EntityFrameworkCore.Sqlite and Design, SQLitePCLRaw | 10.0.14 and 3.x, see `MasterSafe.Data.csproj` | MIT |
 | xunit | 2.9.2 | Apache-2.0 |
 | FluentAssertions | 6.12.1 | Apache-2.0 (check the terms of newer 8.x versions before upgrading) |
 | Moq | 4.20.72 | BSD-3-Clause |
@@ -40,7 +40,6 @@ nothing from it is shipped). Both apply to Windows builds only.
 ## Advisories
 
 CI runs `dotnet list package --vulnerable --include-transitive` on Ubuntu and Windows. At the time of writing nothing is
-reported. `Tmds.DBus.Protocol` (used by Avalonia on Linux) was affected by GHSA-xrw6-gwf8-vvr9 (CVE-2026-39959);
-the app pins the patched 0.21.3 as a direct reference in `MasterSafe.App.csproj`. Remove that pin once Avalonia
-depends on a fixed version. The pinned version has not been run on a Linux desktop yet, so test the Linux tray and
-notifications after each upgrade.
+reported. `Tmds.DBus.Protocol` (used by Avalonia on Linux) was affected by GHSA-xrw6-gwf8-vvr9 (CVE-2026-39959). Avalonia 12 depends on the
+fixed 0.94.1 or newer, so no separate pin is needed any more. The Linux build has not been run on a Linux desktop yet, so
+test the Linux tray and notifications after each upgrade.

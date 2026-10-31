@@ -14,6 +14,9 @@ updates:
         patterns: ["Avalonia*"]
       testing:
         patterns: ["xunit*", "FluentAssertions", "Moq", "coverlet*", "Microsoft.NET.Test.Sdk"]
+      # These must move together: Entity Framework with its SQLite packages, and the SQLitePCLRaw set.
+      data:
+        patterns: ["Microsoft.EntityFrameworkCore*", "Microsoft.Data.Sqlite*", "SQLitePCLRaw*"]
     commit-message:
       prefix: "deps"
 
@@ -22,5 +25,8 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    groups:
+      actions:
+        patterns: ["*"]
     commit-message:
       prefix: "ci"

@@ -134,7 +134,7 @@ MasterSafe.slnx
 ├─ src/MasterSafe.Data         # EF Core SQLite persistence (not used by the app at present)
 ├─ src/MasterSafe.Backup       # Encrypted .sauth backups (password or recovery key), local + WebDAV
 ├─ src/MasterSafe.Platform     # System tray abstraction, Windows Hello and FIDO2 security-key unlock providers
-├─ src/MasterSafe.App          # Avalonia 11 MVVM desktop UI
+├─ src/MasterSafe.App          # Avalonia 12 MVVM desktop UI
 ├─ src/MasterSafe.Cli          # Release tools: verify-release, verify, fingerprint, keygen, sign (also a demo)
 ├─ tests/MasterSafe.Tests      # Unit tests (RFC vectors, vault security, view models)
 ├─ installer/                  # Windows (Inno Setup) and Linux (tar.gz) packaging
@@ -170,7 +170,7 @@ and release builds bundle the newest patched .NET runtime. The self-assessment a
 | Konscious.Security.Cryptography.Argon2 | Argon2id KDF |
 | ZXing.Net + SkiaSharp | QR decode/generate |
 | Microsoft.EntityFrameworkCore.Sqlite + SQLitePCLRaw | Persistence library |
-| Avalonia 11 + CommunityToolkit.Mvvm | Desktop UI |
+| Avalonia 12 + CommunityToolkit.Mvvm | Desktop UI |
 | xunit / FluentAssertions / Moq / coverlet | Testing |
 
 Post-quantum algorithms (ML-KEM, ML-DSA) come from .NET 10 and the operating system's cryptography provider.
