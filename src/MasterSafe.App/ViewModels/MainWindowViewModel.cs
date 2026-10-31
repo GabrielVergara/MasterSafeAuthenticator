@@ -45,6 +45,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             DashboardViewModel => "Dashboard",
             PasswordsViewModel => "Passwords",
+            HealthViewModel => "Health",
             AccountEditorViewModel => "Add",
             ImportViewModel => "Import",
             BackupViewModel => "Backup",
@@ -60,6 +61,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public DashboardViewModel Dashboard { get; }
 
     public PasswordsViewModel Passwords { get; } = new();
+
+    /// <summary>The password health page.</summary>
+    public HealthViewModel Health { get; }
 
     public SettingsViewModel Settings { get; }
 
@@ -100,6 +104,24 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Dashboard = new DashboardViewModel();
         Settings = new SettingsViewModel(services?.SettingsStore);
         _throttle = new UnlockThrottle(_clock, services?.SettingsStore);
+        Settings.Updates = new UpdatesViewModel(
+            TryCreateUpdateChecker(),
+            services?.Dialogs);
+        Settings.Updates.UpdateFound += (_, info) =>
+        {
+            if (IsUnlocked)
+            {
+                Dashboard.StatusMessage = $"Version {info.Version} is available. Open Settings to download and verify it.";
+            }
+        };
+        Health = new HealthViewModel(() => Passwords.Snapshot(), () => Settings.BreachCheckEnabled, new BreachChecker(BreachChecker.CreateClient()), _clock)
+        {
+            OpenEntry = id =>
+            {
+                Passwords.EditEntryById(id);
+                CurrentPage = Passwords;
+            },
+        };
         Vaults = new VaultsViewModel(services, _providers);
         Recovery = new RecoveryViewModel(services, BuildContents);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
@@ -272,11 +294,38 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private static UpdateChecker? TryCreateUpdateChecker()
+    {
+        try
+        {
+            return new UpdateChecker(UpdateChecker.CreateClient(), ReleaseKey.Load(), AppInfo.Version);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException)
+        {
+            return null;
+        }
+    }
+
+    private bool _updateChecked;
+
+    /// <summary>Looks for a newer version once per run, when the user allowed it.</summary>
+    private void CheckForUpdatesOnce()
+    {
+        if (_updateChecked || !Settings.CheckForUpdatesOnStart || Settings.Updates is null)
+        {
+            return;
+        }
+
+        _updateChecked = true;
+        _ = Settings.Updates.CheckAsync(quiet: true);
+    }
+
     /// <summary>Resets the failure counter after a correct unlock and tells the user about any wrong attempts before it.</summary>
     private void AfterSuccessfulUnlock()
     {
         var failed = _throttle.RecordSuccess();
         UpdateLockout();
+        CheckForUpdatesOnce();
         if (failed > 0)
         {
             Dashboard.StatusMessage = failed == 1
@@ -530,6 +579,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private void ShowPasswords() => CurrentPage = Passwords;
 
     [RelayCommand]
+    private void ShowHealth()
+    {
+        Health.Refresh();
+        CurrentPage = Health;
+    }
+
+    [RelayCommand]
     private void ShowAddAccount() => CurrentPage = AccountEditor;
 
     [RelayCommand]
@@ -582,6 +638,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Import.ManualUri = string.Empty;
         Import.KeePass.Discard();
         Recovery.ClearSecrets();
+        Health.ClearSecrets();
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;

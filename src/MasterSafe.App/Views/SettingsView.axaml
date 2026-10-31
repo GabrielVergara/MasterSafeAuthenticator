@@ -43,6 +43,28 @@
                     IsChecked="{Binding BlockScreenCapture, Mode=TwoWay}" />
           <TextBlock Classes="hint" TextWrapping="Wrap"
                      Text="Screenshots and screen sharing show this window as black while this is on. Turn it off if you need to capture the window." />
+          <CheckBox Content="Allow checking passwords against known data breaches (Password health page)"
+                    IsChecked="{Binding BreachCheckEnabled, Mode=TwoWay}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Off by default. When you run the check, only the first 5 characters of each password's SHA-1 hash are sent to api.pwnedpasswords.com (Have I Been Pwned). Your passwords never leave this computer." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Updates" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Updates are never installed automatically. A download is checked against the project's signature before it is offered, and you run the installer yourself. Your vault is not touched." />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Check for updates" Command="{Binding Updates.CheckCommand}" />
+            <Button Classes="accent" Content="Download and verify" Command="{Binding Updates.DownloadCommand}" IsVisible="{Binding Updates.HasUpdate}" />
+            <Button Content="Show the file" Command="{Binding Updates.ShowFileCommand}" IsVisible="{Binding Updates.HasVerifiedDownload}" />
+            <Button Content="Release page" Command="{Binding Updates.OpenReleasePageCommand}" IsVisible="{Binding Updates.HasUpdate}" />
+          </StackPanel>
+          <TextBlock Text="{Binding Updates.Status}" TextWrapping="Wrap"
+                     IsVisible="{Binding Updates.Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <CheckBox Content="Look for a new version once after I unlock (contacts github.com)"
+                    IsChecked="{Binding CheckForUpdatesOnStart, Mode=TwoWay}" />
         </StackPanel>
       </Border>
 

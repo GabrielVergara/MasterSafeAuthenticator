@@ -35,6 +35,16 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private bool _blockScreenCapture = true;
 
     [ObservableProperty]
+    private bool _breachCheckEnabled;
+
+    [ObservableProperty]
+    private bool _checkForUpdatesOnStart;
+
+    /// <summary>The "check for updates" section. Set by the shell.</summary>
+    [ObservableProperty]
+    private UpdatesViewModel? _updates;
+
+    [ObservableProperty]
     private ClipboardDelayOption _selectedClipboardDelay = ClipboardPolicy.Current;
 
     /// <summary>The waits offered for clearing the clipboard.</summary>
@@ -118,6 +128,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _lockOnSessionLock = saved.LockOnSessionLock;
             _lockOnMinimize = saved.LockOnMinimize;
             _blockScreenCapture = saved.BlockScreenCapture;
+            _breachCheckEnabled = saved.BreachCheckEnabled;
+            _checkForUpdatesOnStart = saved.CheckForUpdatesOnStart;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
         }
@@ -140,6 +152,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnLockOnMinimizeChanged(bool value) => SaveSettings();
 
     partial void OnBlockScreenCaptureChanged(bool value) => SaveSettings();
+
+    partial void OnBreachCheckEnabledChanged(bool value) => SaveSettings();
+
+    partial void OnCheckForUpdatesOnStartChanged(bool value) => SaveSettings();
 
     partial void OnSelectedClipboardDelayChanged(ClipboardDelayOption value)
     {
@@ -165,6 +181,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.LockOnSessionLock = LockOnSessionLock;
             settings.LockOnMinimize = LockOnMinimize;
             settings.BlockScreenCapture = BlockScreenCapture;
+            settings.BreachCheckEnabled = BreachCheckEnabled;
+            settings.CheckForUpdatesOnStart = CheckForUpdatesOnStart;
             _store.Save(settings);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

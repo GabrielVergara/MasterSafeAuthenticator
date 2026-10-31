@@ -331,6 +331,20 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         EntriesChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Shows an entry in the form (used by the health page). Does nothing for an unknown or deleted entry.</summary>
+    public void EditEntryById(Guid id)
+    {
+        var entry = _all.Find(e => e.Id == id && !e.IsDeleted);
+        if (entry is null)
+        {
+            return;
+        }
+
+        SearchText = string.Empty;
+        SelectedNode = FolderNodes.FirstOrDefault(n => n.Path is null && !n.IsBin) ?? SelectedNode;
+        EditCommand.Execute(entry);
+    }
+
     [RelayCommand]
     private void Edit(PasswordEntry? entry)
     {

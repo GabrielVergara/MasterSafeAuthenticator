@@ -32,6 +32,8 @@
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Dashboard}" />
           <Button Classes="nav" Content="Passwords" Command="{Binding ShowPasswordsCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Passwords}" />
+          <Button Classes="nav" Content="Password health" Command="{Binding ShowHealthCommand}"
+                  Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Health}" />
           <Button Classes="nav" Content="Add account" Command="{Binding ShowAddAccountCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Add}" />
           <Button Classes="nav" Content="Import" Command="{Binding ShowImportCommand}"

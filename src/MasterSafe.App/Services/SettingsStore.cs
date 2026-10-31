@@ -39,6 +39,12 @@ public sealed class AppSettings
     /// <summary>Width of the folder list on the Passwords page in pixels; 0 means fit it to the folder names.</summary>
     public double FolderPaneWidth { get; set; }
 
+    /// <summary>Allow the optional check of passwords against known data breaches (off by default; it contacts api.pwnedpasswords.com).</summary>
+    public bool BreachCheckEnabled { get; set; }
+
+    /// <summary>Look for a newer version once after unlocking (off by default; it contacts github.com).</summary>
+    public bool CheckForUpdatesOnStart { get; set; }
+
     /// <summary>Seconds a copied secret stays on the clipboard before it is cleared: 30, 60 or 120.</summary>
     public int ClipboardClearSeconds { get; set; } = ClipboardPolicy.DefaultSeconds;
 

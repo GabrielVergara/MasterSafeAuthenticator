@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             x:Class="MasterSafe.App.Views.HealthView"
+             x:DataType="vm:HealthViewModel">
+  <ScrollViewer>
+    <StackPanel Spacing="16" MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,14,0">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Password health" Classes="h1" />
+        <TextBlock Classes="hint" TextWrapping="Wrap"
+                   Text="Finds passwords that are easy to guess, used more than once, or not changed for a year. This runs on this computer only." />
+      </StackPanel>
+
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Text="{Binding Summary}" Classes="h2" TextWrapping="Wrap" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="The strength check is an estimate. It cannot see every pattern, such as a dictionary word with a few letters swapped for digits, so a long random password or phrase is always the safer choice." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Weak.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Weak passwords" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Weak}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                          Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Reused.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Reused passwords" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Reused}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                          Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Old.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Old passwords" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Old}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                          Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Breached.Count}" BorderBrush="{DynamicResource DangerBrush}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Found in known data breaches" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Breached}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="error" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                          Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Check against known data breaches (optional)" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap" Text="{Binding BreachCheckNote}" />
+          <Button Content="Check my passwords now" HorizontalAlignment="Left" Command="{Binding CheckBreachesCommand}" />
+          <TextBlock Text="{Binding Status}" TextWrapping="Wrap"
+                     IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
