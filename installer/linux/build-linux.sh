@@ -4,7 +4,7 @@
 # Works on Linux, macOS and Windows (Git Bash). The result is in artifacts/.
 set -euo pipefail
 
-VERSION="${1:-1.3.0}"
+VERSION="${1:-1.3.1}"
 RID="${2:-linux-x64}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUT="$ROOT/artifacts/$RID"

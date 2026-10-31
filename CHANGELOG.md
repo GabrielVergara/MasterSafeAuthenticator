@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.3.1 (2026-11-01)
 
 ### Added
 - Recovery: "Create recovery key automatically". MasterSafe chooses a strong random passphrase (30 characters, no look-alike letters), asks where to save the key file, and shows the passphrase once with a Copy button so it can be written down. Nothing is set up if the file is not saved. Choosing your own passphrase still works.

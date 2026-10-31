@@ -9,7 +9,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - Recovery: recovery key file, recovery backups (hybrid post-quantum), restore from the sign-in screen.
 - Vault management: where files are stored, archive an old vault, open any vault file, delete old vaults.
 - Settings saved between runs. Confirmation before deleting accounts, passwords and vaults.
-- Password folders (passwords only) with user-selectable icons, multiple delete and move, attached files on entries (5 MiB each, 50 MiB per vault) (1.3.0).
+- Password folders (passwords only) with user-selectable icons, multiple delete and move, attached files on entries (5 MiB each, 50 MiB per vault) (1.3.0). Recovery key creation with a generated passphrase (1.3.1).
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen (in the next release).
 - Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0 and 1.2.1.)
 
