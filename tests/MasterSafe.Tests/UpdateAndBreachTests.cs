@@ -145,7 +145,9 @@ public sealed class UpdateAndBreachTests : IDisposable
 
     private (UpdateChecker Checker, UpdateInfo Info, FakeHandler Handler, byte[] Installer) Release(bool tamper = false, bool sign = true, string host = Base)
     {
-        var (publicKey, seed) = ReleaseSigner.GenerateKeyPair();
+        // Some systems (for example the Ubuntu build runner) cannot make ML-DSA keys. The tests that do not check the
+        // signature itself still run there with placeholder keys.
+        var (publicKey, seed) = ReleaseSigner.IsSupported ? ReleaseSigner.GenerateKeyPair() : ([1, 2, 3], [4, 5, 6]);
         var installer = Encoding.UTF8.GetBytes("pretend installer " + Guid.NewGuid());
         var name = OperatingSystem.IsWindows()
             ? "MasterSafe-Authenticator-9.9.9-win-x64-setup.exe"
@@ -153,7 +155,7 @@ public sealed class UpdateAndBreachTests : IDisposable
                 ? "MasterSafe-Authenticator-9.9.9-linux-arm64.tar.gz"
                 : "MasterSafe-Authenticator-9.9.9-linux-x64.tar.gz";
 
-        var signature = Convert.ToBase64String(ReleaseSigner.Sign(installer, seed));
+        var signature = ReleaseSigner.IsSupported ? Convert.ToBase64String(ReleaseSigner.Sign(installer, seed)) : "placeholder";
         var sha = Convert.ToHexString(SHA256.HashData(installer)) + "  " + name;
         var served = tamper ? [.. installer, 1] : installer;
 
