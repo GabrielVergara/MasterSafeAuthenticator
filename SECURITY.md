@@ -31,6 +31,21 @@ crafted file crash or exhaust the application. The design and its known limits a
 [docs/Security.md](docs/Security.md) and [docs/ThreatModel.md](docs/ThreatModel.md). Issues that need malware
 already running as you while the vault is unlocked are listed there as out of scope.
 
+## How the repository is protected
+
+Only the owner can change this repository. Everyone else can read it, fork it and propose changes in a pull request, and
+the owner decides what is merged.
+
+- **Only the owner changes `main`.** A ruleset on the default branch allows updates only to repository administrators
+  (the owner). It also blocks deleting `main` and force-pushing to it.
+- **Only the owner creates or changes release tags.** Tags that start with `v` cannot be created, moved or deleted by
+  anyone else, so a release cannot be replaced behind your back.
+- **Workflows from outside contributors need approval** before they run, every time, and the workflow token is read-only.
+- **Secrets are checked before they are pushed** (secret scanning with push protection), and Gitleaks runs on every push.
+- **Releases are signed.** Even if a download were swapped, `verify-release` shows it is not genuine (see below).
+
+The rulesets are in the repository settings under Rules, Rulesets.
+
 ## Verifying downloads
 
 Release files carry a SHA-256 checksum and an ML-DSA-65 signature. The public key is

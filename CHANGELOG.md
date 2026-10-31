@@ -4,6 +4,9 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ## Unreleased
 
+### Security
+- The repository now has rulesets so that only the owner can change `main` or create, move or delete `v*` release tags, and force-pushes to `main` are blocked. Workflows from outside contributors always need approval, and secret scanning push protection is on. See SECURITY.md.
+
 ### Changed
 - New setting "Clear the clipboard after copying a password or code": **30 seconds, 1 minute or 2 minutes**. Copied passwords, codes and recovery passphrases now stay on the clipboard for 2 minutes unless you choose otherwise (it was 30 seconds). Copying another secret restarts the wait, so the newest copy always gets the full time, and the clipboard is only cleared if it still holds the secret, so anything else you copied is left alone.
 
