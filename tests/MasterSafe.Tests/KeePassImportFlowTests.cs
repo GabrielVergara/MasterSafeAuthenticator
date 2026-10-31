@@ -158,6 +158,25 @@ public sealed class KeePassImportFlowTests : IDisposable
     }
 
     [Fact]
+    public async Task ImportedGroups_BecomeFolders_ThatSurviveSavingAndReopening()
+    {
+        var shell = await UnlockedShellAsync();
+        shell.Import.KeePass.Load(Export());
+        shell.Import.KeePass.ConfirmCommand.Execute(null);
+        shell.Passwords.FolderName = "Empty";
+        shell.Passwords.CreateFolderCommand.Execute(null);
+        await shell.PersistAsync();
+
+        var saved = await _vault.OpenContentsAsync(Password);
+        saved.Passwords.Single(p => p.Title == "Gmail").Folder.Should().Be("Email");
+        saved.Folders.Should().Equal("Empty");
+
+        var reopened = new MainWindowViewModel(_vault);
+        await reopened.UnlockVaultAsync(Password);
+        reopened.Passwords.FolderNodes.Select(n => n.Path).Should().Equal(null, "Email", "Empty");
+    }
+
+    [Fact]
     public async Task ABrokenFile_ShowsAMessage_AndNoPreview()
     {
         var shell = await UnlockedShellAsync();

@@ -9,6 +9,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - Recovery: recovery key file, recovery backups (hybrid post-quantum), restore from the sign-in screen.
 - Vault management: where files are stored, archive an old vault, open any vault file, delete old vaults.
 - Settings saved between runs. Confirmation before deleting accounts, passwords and vaults.
+- Password folders (passwords only), multiple delete and move (in the next release).
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen (in the next release).
 - Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0 and 1.2.1.)
 
@@ -16,9 +17,10 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 
 | Item | Why |
 | --- | --- |
+| **Attachments on password entries** | Like KeePass: attach files to an entry, save them out again. Limits agreed: 5 MiB per file and 50 MiB per vault. Needs a binary section in the vault format (version bump, old vaults upgrade as before), the vault size limit raised to match, backups and recovery files updated, and KeePass XML attachments mapped in the import |
 | Recovery reminders | Show a warning when the last recovery backup is older than 30 days or the vault has changed a lot since |
 | Several security keys per vault | A spare key means a lost key does not lock you out of the quick unlock |
-| Edit accounts | Rename, change issuer, move to a folder |
+| Edit accounts | Rename, change issuer |
 | Search and sorting on the codes page | Needed once you have more than a handful of accounts |
 | Authenticode signing of the Windows installer | **Postponed: costs money and is not critical for now.** Reduces the SmartScreen "unsafe download" warning, which depends on signing and on download reputation over time. Options: a standard (OV) code-signing certificate, Azure Artifact Signing (organisations in the EU, individuals only in the USA and Canada), or publishing through the Microsoft Store, where Microsoft signs the package (the app would need MSIX packaging and a plan for where the vault is kept) |
 | Automatic encrypted backup after changes | To a folder you choose, with the existing backup format |
@@ -47,7 +49,7 @@ licensed helpers (for example BouncyCastle, MIT, for the ChaCha20 and Salsa20 st
 ### Step 1: KeePass XML and CSV import (done, ships after 1.2.1)
 
 - Input: *File, Export, KeePass XML (2.x)* from KeePass or KeePassXC, and KeePassXC CSV.
-- Maps entries to MasterSafe password entries: Title, UserName, Password, URL, Notes; the group path becomes tags.
+- Maps entries to MasterSafe password entries: Title, UserName, Password, URL, Notes; the group path becomes the password folder.
 - Entries with a one-time-password field (`otp`, or `TimeOtp-Secret-Base32` with its period, digits and algorithm
   fields) become authenticator accounts.
 - A **preview screen** shows counts, duplicates and anything skipped (attachments, history, custom icons), and

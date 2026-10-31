@@ -87,16 +87,16 @@ public sealed class KeePassImporterTests : IDisposable
 
         var top = result.Passwords.Single(p => p.Title == "Top level");
         top.Password.Should().Be("p&ss <1>");
-        top.Tags.Should().BeEmpty("the top group is the database itself");
+        top.Folder.Should().BeEmpty("the top group is the database itself");
         top.ModifiedUtc.Should().Be(new DateTimeOffset(2024, 5, 6, 7, 8, 9, TimeSpan.Zero));
 
         var gmail = result.Passwords.Single(p => p.Title == "Gmail");
         gmail.UserName.Should().Be("alice@example.com");
         gmail.Url.Should().Be("https://mail.google.com");
         gmail.Notes.Should().Contain("line 2");
-        gmail.Tags.Should().Equal("Email");
+        gmail.Folder.Should().Be("Email");
 
-        result.Passwords.Single(p => p.Title == "VPN").Tags.Should().Equal("Email/Work");
+        result.Passwords.Single(p => p.Title == "VPN").Folder.Should().Be("Email/Work");
     }
 
     [Fact]
@@ -190,8 +190,8 @@ public sealed class KeePassImporterTests : IDisposable
         var gmail = result.Passwords.Single(p => p.Title == "Gmail");
         gmail.Password.Should().Be("has \"quotes\", and comma");
         gmail.Notes.Should().Be("two\nlines");
-        gmail.Tags.Should().Equal("Email");
-        result.Passwords.Single(p => p.Title == "Top").Tags.Should().BeEmpty();
+        gmail.Folder.Should().Be("Email");
+        result.Passwords.Single(p => p.Title == "Top").Folder.Should().BeEmpty();
 
         result.Accounts.Should().HaveCount(2);
         result.Accounts.Single(a => a.Issuer == "Google").Secret.Should().Be("JBSWY3DPEHPK3PXP");

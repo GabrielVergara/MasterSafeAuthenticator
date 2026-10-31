@@ -57,7 +57,7 @@ public static class HelpContent
             - On the Import screen choose "Choose an export file...", or drop the file onto the window.
             - A summary shows what will be added and what is skipped (recycle bin, old versions, attachments, duplicates).
               Nothing is added until you choose Import.
-            - Groups become tags, and one-time-password fields become authenticator accounts.
+            - Groups become folders, and one-time-password fields become authenticator accounts.
             - The export file is not encrypted. Delete it once you have imported it.
 
             MasterSafe validates the account details before adding them, so malformed
@@ -71,7 +71,14 @@ public static class HelpContent
 
             - Fill in the form and choose Save. Use Generate for a strong password.
             - Copy user and Copy password put the value on the clipboard; it is cleared after 30 seconds.
-            - Search matches the title, user name, URL and tags.
+            - Search matches the title, user name, URL, folder and tags.
+            - Folders: the list on the left shows your folders with how many passwords each holds. Choose one to
+              see its passwords and the ones in its subfolders. Type a name and choose New folder to add one inside
+              the selected folder, Rename selected to rename it, and Delete folder to remove it. Deleting a folder
+              never deletes passwords: they move up to the folder above.
+            - The Folder box in the form sets where an entry lives. New entries start in the folder you are viewing.
+            - To move several entries, tick them, choose a folder next to "Move selected to", then choose Move.
+            - Folders are for passwords only. Authenticator accounts are kept separate.
             - To delete several entries, tick their boxes (or choose Select all shown), then choose
               Delete selected. You are asked to confirm, and it cannot be undone.
             - Changing the search clears the ticks, so you never delete entries that are out of sight.

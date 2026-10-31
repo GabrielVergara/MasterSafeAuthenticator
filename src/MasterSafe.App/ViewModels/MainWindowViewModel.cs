@@ -533,6 +533,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         Accounts = Dashboard.Accounts.Select(a => a.Account).ToList(),
         Passwords = Passwords.Snapshot(),
+        Folders = Passwords.FolderSnapshot(),
     };
 
     private async Task CompleteUnlockWithKeyAsync(byte[] key)
@@ -554,7 +555,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private void CompleteUnlock(VaultContents contents)
     {
         Dashboard.Load(contents.Accounts);
-        Passwords.Load(contents.Passwords);
+        Passwords.Load(contents.Passwords, contents.Folders);
         Login.MasterPassword = string.Empty;
         Login.ConfirmPassword = string.Empty;
         Login.IsCreateMode = false;

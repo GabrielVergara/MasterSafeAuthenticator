@@ -32,6 +32,23 @@ public sealed class PasswordEntry
     /// <summary>Optional tags for grouping.</summary>
     public IReadOnlyList<string> Tags { get; init; } = [];
 
+    /// <summary>Folder the entry is in, for example <c>Email/Work</c>. Empty means the top level.</summary>
+    public string Folder { get; init; } = string.Empty;
+
+    /// <summary>Returns a copy of this entry in another folder.</summary>
+    public PasswordEntry WithFolder(string folder) => new()
+    {
+        Id = Id,
+        Title = Title,
+        UserName = UserName,
+        Password = Password,
+        Url = Url,
+        Notes = Notes,
+        Tags = Tags,
+        Folder = folder,
+        ModifiedUtc = ModifiedUtc,
+    };
+
     /// <summary>UTC time the entry was last modified.</summary>
     public DateTimeOffset ModifiedUtc { get; init; } = DateTimeOffset.UtcNow;
 

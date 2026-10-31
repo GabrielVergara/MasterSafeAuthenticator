@@ -181,16 +181,30 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>Raised when the view should copy text to the clipboard (and clear it later).</summary>
     public event EventHandler<string>? CopyRequested;
 
-    /// <summary>Replaces all entries (used when the vault is unlocked).</summary>
-    public void Load(IEnumerable<PasswordEntry> entries)
+    /// <summary>Replaces all entries and empty folders (used when the vault is unlocked).</summary>
+    public void Load(IEnumerable<PasswordEntry> entries, IEnumerable<string>? folders = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
         _all.Clear();
-        _all.AddRange(entries);
+        _all.AddRange(entries.Select(WithCleanFolder));
+        _emptyFolders.Clear();
+        foreach (var folder in (folders ?? []).Select(FolderPath.Normalize).Where(f => f.Length > 0))
+        {
+            _emptyFolders.Add(folder);
+        }
+
         _selected.Clear();
         IsConfirmingBulkDelete = false;
+        SelectedNode = null;
+        ApplyFilter(null);
         ClearForm();
-        ApplyFilter();
+    }
+
+    /// <summary>A vault file is untrusted, so a folder path in it is cleaned up before it is used.</summary>
+    private static PasswordEntry WithCleanFolder(PasswordEntry entry)
+    {
+        var clean = FolderPath.Normalize(entry.Folder);
+        return clean == entry.Folder ? entry : entry.WithFolder(clean);
     }
 
     /// <summary>Adds several entries and saves once.</summary>
@@ -198,7 +212,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         ArgumentNullException.ThrowIfNull(entries);
         var before = _all.Count;
-        _all.AddRange(entries);
+        _all.AddRange(entries.Select(WithCleanFolder));
         if (_all.Count > before)
         {
             ApplyFilter();
@@ -232,6 +246,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             Url = Url.Trim(),
             Notes = Notes,
             Tags = Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+            Folder = FolderPath.Normalize(FormFolder?.Path),
             ModifiedUtc = DateTimeOffset.UtcNow,
         };
 
@@ -272,6 +287,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         Url = entry.Url;
         Notes = entry.Notes;
         Tags = string.Join(", ", entry.Tags);
+        FormFolder = ChoiceFor(entry.Folder) ?? FolderChoices.FirstOrDefault();
         Status = $"Editing {entry.Title}.";
     }
 
@@ -317,17 +333,31 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         _editingId = null;
         Title = UserName = Password = Url = Notes = Tags = string.Empty;
+        FormFolder = ChoiceFor(SelectedNode?.Path ?? string.Empty) ?? FolderChoices.FirstOrDefault();
     }
 
-    private void ApplyFilter()
+    /// <summary>Refreshes the folder list and the shown entries, keeping the selected folder.</summary>
+    private void ApplyFilter() => ApplyFilter(SelectedNode?.Path);
+
+    /// <summary>Refreshes the folder list and the shown entries, selecting <paramref name="folder"/> (null is "All passwords").</summary>
+    private void ApplyFilter(string? folder)
+    {
+        RebuildFolders(folder);
+        FilterEntries();
+    }
+
+    private void FilterEntries()
     {
         var q = SearchText.Trim();
+        var folder = SelectedNode?.Path;
         Entries.Clear();
         Rows.Clear();
         _selected.IntersectWith(_all.Select(e => e.Id));
         foreach (var e in _all
+            .Where(e => folder is null || FolderPath.IsInside(e.Folder, folder))
             .Where(e => q.Length == 0
                 || e.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || e.Folder.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.UserName.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Url.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase)))

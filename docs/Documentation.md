@@ -149,6 +149,8 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Recovery, Create and save recovery key, then Create recovery backup | A `.msrk` key file and a `recovery-*.sauth` file are written where you chose |
 | Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
+| Passwords, type a folder name, New folder, then tick two entries and Move selected to that folder | The entries show "Folder: name" and appear under the folder; after Lock and unlock the folder is still there |
+| Delete a folder that holds passwords | The passwords are still listed, one level up |
 | Passwords, tick two entries, Delete selected, Yes | Only the ticked entries are removed and the vault is saved once; typing in Search first clears the ticks |
 | Drag a QR code PNG from Explorer onto the unlocked window | The account appears on the dashboard; dropping it again says it is already in the vault; while locked the drop is refused |
 | Vaults, Start a new vault, then Open the archived vault | The old vault opens again with its old password |

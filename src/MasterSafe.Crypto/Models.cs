@@ -151,4 +151,7 @@ public sealed class VaultContents
 
     /// <summary>Stored password entries.</summary>
     public IReadOnlyList<MasterSafe.Core.PasswordEntry> Passwords { get; init; } = [];
+
+    /// <summary>Password folders that have no entries yet (folders with entries are known from the entries).</summary>
+    public IReadOnlyList<string> Folders { get; init; } = [];
 }

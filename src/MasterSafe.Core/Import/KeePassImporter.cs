@@ -275,7 +275,8 @@ public static class KeePassImporter
         List<string> groupPath,
         DateTimeOffset modified)
     {
-        IReadOnlyList<string> tags = groupPath.Count == 0 ? [] : [string.Join('/', groupPath)];
+        var folder = FolderPath.Normalize(string.Join(FolderPath.Separator, groupPath));
+        IReadOnlyList<string> tags = folder.Length == 0 ? [] : [folder];
         var added = false;
 
         if (!string.IsNullOrEmpty(password) && !string.IsNullOrWhiteSpace(title))
@@ -287,7 +288,7 @@ public static class KeePassImporter
                 Password = password,
                 Url = url.Trim(),
                 Notes = notes,
-                Tags = tags,
+                Folder = folder,
                 ModifiedUtc = modified,
             });
             added = true;

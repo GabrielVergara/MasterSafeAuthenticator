@@ -5,6 +5,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Added
+- Password folders: a folder tree on the Passwords page, with new, rename and delete (deleting keeps the passwords and moves them up), a Folder choice in the entry form, and "Move selected to" for several entries at once. Search also matches the folder. Folders are for passwords only; authenticator accounts stay separate. KeePass and KeePassXC groups are imported as folders. Existing vaults open as before, with every password at the top level.
 - Passwords: tick several entries (or "Select all shown") and delete them together, after one confirmation. Changing the search clears the ticks so hidden entries are never deleted.
 - The About window links to the author's web site, <https://www.gabriel-vergara.com/>, and the installer lists it as the publisher.
 - **Import from KeePass and KeePassXC** (Import page, or drop the file onto the window): KeePass XML (2.x) and KeePassXC CSV or XML exports. Passwords keep their title, user name, URL and notes, and the group becomes a tag. One-time-password fields become authenticator accounts. A summary is shown first, entries already in the vault are skipped, and nothing is added until you confirm. Recycle bin entries, old versions and attachments are not imported. The files are read safely (no DTDs or external entities, size and entry limits). Opening `.kdbx` files directly is still planned.
