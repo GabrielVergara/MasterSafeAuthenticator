@@ -20,7 +20,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 | Several security keys per vault | A spare key means a lost key does not lock you out of the quick unlock |
 | Edit accounts | Rename, change issuer, move to a folder |
 | Search and sorting on the codes page | Needed once you have more than a handful of accounts |
-| Authenticode signing of the Windows installer | Removes the SmartScreen warning. Needs a code-signing certificate |
+| Authenticode signing of the Windows installer | Reduces the SmartScreen "unsafe download" warning, which depends on signing and on download reputation over time. Options: a standard (OV) code-signing certificate, Azure Artifact Signing (organisations in the EU, individuals only in the USA and Canada), or publishing through the Microsoft Store, where Microsoft signs the package (the app would need MSIX packaging and a plan for where the vault is kept) |
 | Automatic encrypted backup after changes | To a folder you choose, with the existing backup format |
 
 ## Later

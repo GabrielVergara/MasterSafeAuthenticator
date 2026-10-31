@@ -55,6 +55,26 @@ Check that you have the real public key by comparing its fingerprint (the comman
 SHA-256 fingerprint: 28ad8deb1624d6f04fe9100e25edb2666ad904e02824af14ef2fe6c8d2a74b8a
 ```
 
+### Windows or Edge says the download is unsafe
+
+Microsoft Edge and Windows SmartScreen judge downloads by **reputation**. MasterSafe Authenticator is new, has few
+downloads and its installer is not yet signed with a Windows code-signing (Authenticode) certificate, so it is shown as
+"not commonly downloaded". That is not a malware verdict. To install it:
+
+1. In Edge, open the download list, choose **...** next to the file, then **Keep**, then **Show more**, then **Keep anyway**.
+2. When Windows shows **Windows protected your PC**, choose **More info**, then **Run anyway**.
+
+Before running it, check that the file is genuine. Both checks use files from the same release page:
+
+```powershell
+Get-FileHash .\MasterSafe-Authenticator-<version>-win-x64-setup.exe -Algorithm SHA256   # compare with the .sha256 file
+MasterSafe.Cli verify .\MasterSafe-Authenticator-<version>-win-x64-setup.exe masterSafe-release.pub
+```
+
+The second command confirms the project's post-quantum signature; the public key and its fingerprint are
+described above. If either check fails, do not run the file and please report it (see [SECURITY.md](SECURITY.md)).
+Windows code signing is on the [roadmap](docs/Roadmap.md); the warning fades as signed releases build reputation.
+
 Your vault is stored in `%LocalAppData%\MasterSafe\vault.sauth` on Windows and `~/.local/share/MasterSafe/vault.sauth`
 on Linux. Uninstalling never deletes it. [docs/FileLocations.md](docs/FileLocations.md) lists every file the app
 creates and where.

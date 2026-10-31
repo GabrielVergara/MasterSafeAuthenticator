@@ -37,7 +37,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ### Known limits
 - Hardware unlock (Windows Hello, security keys) is Windows only for now. One security key per vault.
-- The Windows installer is not Authenticode-signed, so Windows SmartScreen may warn when you run it.
+- The Windows installer is not Authenticode-signed, so Edge and Windows SmartScreen show an "unsafe download" warning.
+  Steps to continue and how to verify the file are in the README.
 - No KeePass import yet. See [docs/Roadmap.md](docs/Roadmap.md).
 
 ## 1.1.0
