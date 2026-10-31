@@ -36,6 +36,10 @@ public static class AttachmentLimits
     /// <summary>Longest file name that is kept.</summary>
     public const int MaxNameLength = 150;
 
+    // The characters Windows does not allow in file names. The same set is used everywhere so that a name is
+    // safe on every system, whichever one the vault was made on.
+    private const string InvalidNameChars = "<>:\"/\\|?*";
+
     /// <summary>
     /// Turns a name from a file, a vault or an import into a plain file name: no folders, no characters that are not
     /// allowed in file names, not too long, never empty.
@@ -45,8 +49,7 @@ public static class AttachmentLimits
         var plain = (name ?? string.Empty).Replace('\\', '/');
         plain = plain[(plain.LastIndexOf('/') + 1)..];
 
-        var invalid = Path.GetInvalidFileNameChars();
-        var cleaned = new string(plain.Select(c => invalid.Contains(c) || char.IsControl(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
+        var cleaned = new string(plain.Select(c => InvalidNameChars.Contains(c) || char.IsControl(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
 
         if (cleaned.Length > MaxNameLength)
         {
