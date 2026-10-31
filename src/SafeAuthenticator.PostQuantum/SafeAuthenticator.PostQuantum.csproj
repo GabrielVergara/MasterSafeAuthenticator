@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>SafeAuthenticator.PostQuantum</RootNamespace>
+    <AssemblyName>SafeAuthenticator.PostQuantum</AssemblyName>
+  </PropertyGroup>
+</Project>

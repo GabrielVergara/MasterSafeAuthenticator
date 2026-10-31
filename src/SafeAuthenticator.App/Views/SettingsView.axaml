@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SafeAuthenticator.App.ViewModels"
+             x:Class="SafeAuthenticator.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
+    <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" />
+    <TextBlock Text="Theme" />
+    <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+    <CheckBox Content="Minimize to tray" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
+    <TextBlock Text="Auto-lock after (minutes)" />
+    <NumericUpDown Minimum="1" Maximum="120" Value="{Binding AutoLockMinutes, Mode=TwoWay}" />
+  </StackPanel>
+</UserControl>

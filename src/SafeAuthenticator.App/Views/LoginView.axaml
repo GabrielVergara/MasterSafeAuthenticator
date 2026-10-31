@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SafeAuthenticator.App.ViewModels"
+             x:Class="SafeAuthenticator.App.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Width="320">
+    <TextBlock Text="Unlock your vault" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+    <TextBox Watermark="Master password" PasswordChar="•"
+             Text="{Binding MasterPassword, Mode=TwoWay}" />
+    <Button Content="Unlock" HorizontalAlignment="Stretch"
+            Command="{Binding UnlockCommand}" />
+    <TextBlock Text="{Binding Error}" Foreground="IndianRed"
+               IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </StackPanel>
+</UserControl>

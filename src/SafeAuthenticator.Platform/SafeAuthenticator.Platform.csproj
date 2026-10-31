@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>SafeAuthenticator.Platform</RootNamespace>
+    <AssemblyName>SafeAuthenticator.Platform</AssemblyName>
+  </PropertyGroup>
+</Project>

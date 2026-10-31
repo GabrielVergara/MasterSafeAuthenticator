@@ -1,1 +1,0 @@
-using System.Security.Cryptography; namespace SafeAuthenticator.Core; public static class VaultService { public static byte[] Encrypt(byte[] d, byte[] k){ using var a=new AesGcm(k); return d; } }
