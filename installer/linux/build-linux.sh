@@ -17,6 +17,9 @@ dotnet publish "$ROOT/src/MasterSafe.App/MasterSafe.App.csproj" \
   -p:MasterSafeTargetOs=linux -p:Version="$VERSION" \
   -o "$OUT"
 
+# Debug symbols are for developers and only make the package bigger.
+find "$OUT" -name '*.pdb' -delete
+
 mkdir -p "$STAGE/app"
 cp -r "$OUT"/. "$STAGE/app/"
 cp "$ROOT/LICENSE" "$STAGE/LICENSE"

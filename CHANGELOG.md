@@ -8,6 +8,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - `MasterSafe-Cli` standalone verification tool, attached to releases (Windows and Linux, no .NET needed). Its
   `verify-release` command checks every installer and package in a folder against its checksum and signature in one step.
 - Clear one-line error messages from the command-line tool instead of stack traces.
+- The installer and the Linux package no longer include native debug-symbol files (about 110 MB), which SkiaSharp 4 ships.
 
 ### Changed
 - Updated libraries: **Avalonia 12.1.4** (the UI toolkit), SkiaSharp 4.154, CommunityToolkit.Mvvm 8.4.2, Entity Framework 10
