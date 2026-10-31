@@ -20,7 +20,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <!-- Avalonia 11.2.3 brings Tmds.DBus.Protocol 0.20.0 (Linux only), which has advisory GHSA-xrw6-gwf8-vvr9.
          0.21.3 is the patched backport. Remove this line once Avalonia depends on a fixed version. -->
-    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.2" />
   </ItemGroup>
 <ItemGroup>
     <ProjectReference Include="..\MasterSafe.Core\MasterSafe.Core.csproj" />
