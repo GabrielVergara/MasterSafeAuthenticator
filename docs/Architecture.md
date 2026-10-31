@@ -30,10 +30,10 @@ flowchart LR
 
 ## Projects
 
-- **SafeAuthenticator.Core** — pure, dependency-free OTP domain logic.
-- **SafeAuthenticator.Crypto** — encryption, KDF, vault orchestration and persistence interfaces.
-- **SafeAuthenticator.PostQuantum** — ML-KEM-768 shaped abstraction for future hybrid encryption.
-- **SafeAuthenticator.Tests** — xUnit tests with RFC vectors.
+- **MasterSafe.Core** — pure, dependency-free OTP domain logic.
+- **MasterSafe.Crypto** — encryption, KDF, vault orchestration and persistence interfaces.
+- **MasterSafe.PostQuantum** — ML-KEM-768 shaped abstraction for future hybrid encryption.
+- **MasterSafe.Tests** — xUnit tests with RFC vectors.
 
 ## Principles
 

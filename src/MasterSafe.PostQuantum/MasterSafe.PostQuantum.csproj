@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>MasterSafe.PostQuantum</RootNamespace>
+    <AssemblyName>MasterSafe.PostQuantum</AssemblyName>
+  </PropertyGroup>
+</Project>

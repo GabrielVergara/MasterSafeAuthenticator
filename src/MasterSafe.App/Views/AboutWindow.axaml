@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+        x:Class="MasterSafe.App.Views.AboutWindow"
+        x:DataType="vm:AboutViewModel"
+        Width="420" Height="340"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Title="About MasterSafe Authenticator">
+  <StackPanel Margin="24" Spacing="12" VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal" Spacing="14">
+      <Image Source="/Assets/logo-256.png" Width="56" Height="56" />
+      <TextBlock Text="{Binding ProductName}" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </StackPanel>
+    <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" Opacity="0.8" />
+    <TextBlock Text="{Binding Version, StringFormat='Version {0}'}" />
+    <TextBlock Text="{Binding Author, StringFormat='By {0}'}" />
+    <TextBlock Text="{Binding Copyright}" Opacity="0.7" />
+    <Button Content="Project on GitHub" Command="{Binding OpenProjectCommand}" />
+    <Button Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />
+  </StackPanel>
+</Window>

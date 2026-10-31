@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:MasterSafe.App"
+        x:Class="MasterSafe.App.Views.SplashWindow"
+        Width="520" Height="320"
+        CanResize="False"
+        SystemDecorations="None"
+        ShowInTaskbar="False"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/app.ico"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Title="MasterSafe Authenticator">
+  <Border Background="#12263A" BorderBrush="#2B4560" BorderThickness="1"
+          CornerRadius="16" ClipToBounds="True">
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10">
+      <Image Source="/Assets/logo-256.png" Width="112" Height="112" Margin="0,0,0,8" />
+      <TextBlock Text="{x:Static app:AppInfo.ProductName}" Foreground="#E8F1F2"
+                 FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" />
+      <TextBlock Text="{x:Static app:AppInfo.SplashByline}" Foreground="#A9BCC8"
+                 FontSize="14" HorizontalAlignment="Center" />
+      <ProgressBar IsIndeterminate="True" Width="220" Height="4" Margin="0,14,0,0"
+                   Foreground="#F2B33D" Background="#2B4560" />
+      <TextBlock Text="{x:Static app:AppInfo.SplashVersion}" Foreground="#7E95A6"
+                 FontSize="11" HorizontalAlignment="Center" />
+    </StackPanel>
+  </Border>
+</Window>

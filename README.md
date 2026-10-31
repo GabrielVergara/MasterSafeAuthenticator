@@ -1,4 +1,4 @@
-# SafeAuthenticator
+# MasterSafe Authenticator
 
 A privacy-first, offline-first authenticator for TOTP/HOTP with an encrypted vault, targeting **.NET 10**.
 
@@ -21,16 +21,16 @@ A privacy-first, offline-first authenticator for TOTP/HOTP with an encrypted vau
 ## Solution layout
 
 ```
-SafeAuthenticator.slnx
-├─ src/SafeAuthenticator.Core         # RFC6238 TOTP, RFC4226 HOTP, Base32, otpauth parser, account model
-├─ src/SafeAuthenticator.Crypto       # Argon2id KEK, AES-256-GCM, vault + interfaces, DPAPI
-├─ src/SafeAuthenticator.PostQuantum  # IPostQuantumEncryptionProvider (ML-KEM-768 abstraction)
-├─ src/SafeAuthenticator.QR           # ZXing.Net + SkiaSharp QR decode/generate
-├─ src/SafeAuthenticator.Data         # EF Core SQLite persistence (encrypted secrets only)
-├─ src/SafeAuthenticator.Backup       # Encrypted .sauth export/import + local-folder provider
-├─ src/SafeAuthenticator.Platform     # Cross-platform system-tray abstraction
-├─ src/SafeAuthenticator.App          # Avalonia 11 MVVM desktop UI
-└─ tests/SafeAuthenticator.Tests      # Unit tests with RFC test vectors + ViewModel tests
+MasterSafe.slnx
+├─ src/MasterSafe.Core         # RFC6238 TOTP, RFC4226 HOTP, Base32, otpauth parser, account model
+├─ src/MasterSafe.Crypto       # Argon2id KEK, AES-256-GCM, vault + interfaces, DPAPI
+├─ src/MasterSafe.PostQuantum  # IPostQuantumEncryptionProvider (ML-KEM-768 abstraction)
+├─ src/MasterSafe.QR           # ZXing.Net + SkiaSharp QR decode/generate
+├─ src/MasterSafe.Data         # EF Core SQLite persistence (encrypted secrets only)
+├─ src/MasterSafe.Backup       # Encrypted .sauth export/import + local-folder provider
+├─ src/MasterSafe.Platform     # Cross-platform system-tray abstraction
+├─ src/MasterSafe.App          # Avalonia 11 MVVM desktop UI
+└─ tests/MasterSafe.Tests      # Unit tests with RFC test vectors + ViewModel tests
 ```
 
 ## Build & test
@@ -65,12 +65,12 @@ See [docs/Security.md](docs/Security.md), [docs/ThreatModel.md](docs/ThreatModel
 
 ## Desktop app
 
-The Avalonia MVVM app (`src/SafeAuthenticator.App`) provides login/unlock, a live dashboard with
+The Avalonia MVVM app (`src/MasterSafe.App`) provides login/unlock, a live dashboard with
 auto-refreshing OTP codes and progress rings, account editor with validation, QR/URI import,
 encrypted backup management, and theme (System/Light/Dark) settings. Run it with:
 
 ```bash
-dotnet run --project src/SafeAuthenticator.App
+dotnet run --project src/MasterSafe.App
 ```
 
 ## Staged / future work
@@ -80,3 +80,11 @@ WebDAV cloud provider (`WebDavBackupProvider`) that works with Nextcloud/ownClou
 endpoints via `HttpClient` — no vendor SDK, only encrypted bytes leave the device. Additional
 vendor-specific providers can be added by implementing `IBackupProvider`.
 
+
+## License
+
+MasterSafe Authenticator is **freeware for personal, non-commercial use**. See [LICENSE](LICENSE).
+The source is available for review and personal use; commercial use and distribution of modified
+versions are not permitted. Third-party components keep their own licenses.
+
+Copyright (c) 2026 Gabriel Vergara Ezcurdia.

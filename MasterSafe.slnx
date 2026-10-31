@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MasterSafe.App/MasterSafe.App.csproj" />
+    <Project Path="src/MasterSafe.Backup/MasterSafe.Backup.csproj" />
+    <Project Path="src/MasterSafe.Cli/MasterSafe.Cli.csproj" />
+    <Project Path="src/MasterSafe.Core/MasterSafe.Core.csproj" />
+    <Project Path="src/MasterSafe.Crypto/MasterSafe.Crypto.csproj" />
+    <Project Path="src/MasterSafe.Data/MasterSafe.Data.csproj" />
+    <Project Path="src/MasterSafe.Platform/MasterSafe.Platform.csproj" />
+    <Project Path="src/MasterSafe.PostQuantum/MasterSafe.PostQuantum.csproj" />
+    <Project Path="src/MasterSafe.QR/MasterSafe.QR.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MasterSafe.Tests/MasterSafe.Tests.csproj" />
+  </Folder>
+</Solution>

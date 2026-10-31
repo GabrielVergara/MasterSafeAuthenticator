@@ -1,0 +1,70 @@
+MasterSafe Authenticator Freeware License
+Version 1.0, 2026
+
+Copyright (c) 2026 Gabriel Vergara Ezcurdia. All rights reserved.
+
+1. GRANT OF LICENSE
+   You may download, install and use MasterSafe Authenticator (the "Software")
+   free of charge, on any number of your own devices, for personal,
+   non-commercial purposes.
+
+2. NON-COMMERCIAL USE ONLY
+   You may not use the Software for any commercial purpose. This includes, but
+   is not limited to: use in or for a business, company, employer or
+   organization that operates for profit; use to provide a paid service;
+   selling, renting, leasing or sublicensing the Software; and bundling the
+   Software with any product or service that is sold or otherwise monetized.
+   Use by schools, charities and individuals for their own non-profit purposes
+   is permitted. Commercial licenses may be offered in the future; contact the
+   author to request one.
+
+3. REDISTRIBUTION
+   You may redistribute the Software free of charge, in its original unmodified
+   form and together with this license. You may not charge for it, and you may
+   not remove or alter any copyright notice, product name or author credit.
+
+4. SOURCE CODE
+   The source code is made available so that its security can be reviewed. You
+   may read, build and modify it for your own personal, non-commercial use.
+   You may not publish or distribute modified versions or derivative works, or
+   use the product name, logo or author name for them, without written
+   permission from the author.
+
+5. RESTRICTIONS
+   You may not remove or circumvent any security feature of the Software in
+   order to attack other users, and you may not use the Software to violate any
+   law or the rights of others.
+
+6. TRADEMARKS
+   "MasterSafe" and the MasterSafe Authenticator logo are identifiers of the
+   author. This license grants no right to use them except to refer to the
+   unmodified Software.
+
+7. THIRD-PARTY COMPONENTS
+   The Software includes third-party components (for example Avalonia,
+   SkiaSharp, ZXing.Net, Konscious.Security.Cryptography and the .NET runtime),
+   each of which remains under its own license. This license does not change
+   the terms of those components.
+
+8. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, SECURITY AND NON-INFRINGEMENT. YOU ARE
+   RESPONSIBLE FOR KEEPING YOUR MASTER PASSWORD AND YOUR OWN BACKUPS. IF YOU
+   LOSE YOUR MASTER PASSWORD, YOUR DATA CANNOT BE RECOVERED.
+
+9. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE, INCLUDING LOSS OF DATA OR ACCOUNT ACCESS.
+
+10. TERMINATION
+   This license ends automatically if you breach any of its terms. On
+   termination you must stop using the Software and delete your copies.
+
+11. CHANGES
+   The author may release future versions under different terms. Versions you
+   have already received remain under the terms they were released with.
+
+Contact: https://github.com/GabrielVergara/SafeAuthenticator

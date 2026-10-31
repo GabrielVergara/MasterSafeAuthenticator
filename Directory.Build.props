@@ -9,8 +9,8 @@
 	<AnalysisLevel>latest</AnalysisLevel>
 	<GenerateDocumentationFile>false</GenerateDocumentationFile>
 	<Deterministic>true</Deterministic>
-	<Company>SafeAuthenticator</Company>
-	<Product>SafeAuthenticator</Product>
+	<Company>MasterSafe</Company>
+	<Product>MasterSafe</Product>
 	<Version>1.1.0</Version>
 	<Authors>Gabriel Vergara Ezcurdia</Authors>
 	<Copyright>Copyright (c) Gabriel Vergara Ezcurdia</Copyright>

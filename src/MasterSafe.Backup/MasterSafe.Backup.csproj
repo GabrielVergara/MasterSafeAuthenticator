@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>MasterSafe.Backup</RootNamespace>
+    <AssemblyName>MasterSafe.Backup</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MasterSafe.Core\MasterSafe.Core.csproj" />
+    <ProjectReference Include="..\MasterSafe.Crypto\MasterSafe.Crypto.csproj" />
+  </ItemGroup>
+</Project>

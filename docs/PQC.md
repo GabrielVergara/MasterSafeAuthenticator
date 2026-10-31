@@ -2,12 +2,12 @@
 
 ## Goal
 
-Prepare SafeAuthenticator for a hybrid classical + post-quantum scheme based on **ML-KEM-768**
+Prepare MasterSafe for a hybrid classical + post-quantum scheme based on **ML-KEM-768**
 (FIPS 203) without shipping fake cryptography.
 
 ## Current state
 
-`SafeAuthenticator.PostQuantum` defines `IPostQuantumEncryptionProvider` (key generation,
+`MasterSafe.PostQuantum` defines `IPostQuantumEncryptionProvider` (key generation,
 encapsulation, decapsulation). The only shipped implementation, `UnavailableMlKemProvider`, reports
 `IsAvailable == false` and **throws** `NotSupportedException` rather than returning insecure output.
 

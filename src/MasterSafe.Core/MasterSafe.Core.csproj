@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>MasterSafe.Core</RootNamespace>
+    <AssemblyName>MasterSafe.Core</AssemblyName>
+  </PropertyGroup>
+</Project>

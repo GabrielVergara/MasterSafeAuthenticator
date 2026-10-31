@@ -1,25 +1,25 @@
-# SafeAuthenticator Documentation
+# MasterSafe Authenticator Documentation
 
 **Version:** 1.1.0  
 **Author:** Gabriel Vergara Ezcurdia
 
-SafeAuthenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
+MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
 vault that also stores KeePass-style password entries.
 
 ## 1. Solution layout
 
 ```mermaid
 flowchart TD
-    App[SafeAuthenticator.App<br/>Avalonia MVVM UI] --> Core[SafeAuthenticator.Core<br/>OTP + PasswordEntry]
-    App --> Crypto[SafeAuthenticator.Crypto<br/>Argon2id + AES-GCM vault]
-    App --> Platform[SafeAuthenticator.Platform<br/>Tray + Credential Manager]
-    App --> Backup[SafeAuthenticator.Backup<br/>Local + WebDAV]
-    App --> QR[SafeAuthenticator.QR]
+    App[MasterSafe.App<br/>Avalonia MVVM UI] --> Core[MasterSafe.Core<br/>OTP + PasswordEntry]
+    App --> Crypto[MasterSafe.Crypto<br/>Argon2id + AES-GCM vault]
+    App --> Platform[MasterSafe.Platform<br/>Tray + Credential Manager]
+    App --> Backup[MasterSafe.Backup<br/>Local + WebDAV]
+    App --> QR[MasterSafe.QR]
     Crypto --> Core
     Backup --> Crypto
-    Data[SafeAuthenticator.Data<br/>EF Core SQLite] --> Core
-    PQ[SafeAuthenticator.PostQuantum] --> Crypto
-    Tests[SafeAuthenticator.Tests] -.-> App
+    Data[MasterSafe.Data<br/>EF Core SQLite] --> Core
+    PQ[MasterSafe.PostQuantum] --> Crypto
+    Tests[MasterSafe.Tests] -.-> App
 ```
 
 ## 2. Unlocking the vault

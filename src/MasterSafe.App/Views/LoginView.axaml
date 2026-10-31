@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             x:Class="MasterSafe.App.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" Width="320">
+    <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+    <TextBox Watermark="Master password" PasswordChar="*"
+             Text="{Binding MasterPassword, Mode=TwoWay}" />
+    <TextBox Watermark="Confirm master password" PasswordChar="*"
+             IsVisible="{Binding IsCreateMode}"
+             Text="{Binding ConfirmPassword, Mode=TwoWay}" />
+    <CheckBox Content="Remember me (Windows Credential Manager)" IsChecked="{Binding RememberMe, Mode=TwoWay}" />
+    <Button Content="{Binding ButtonText}" HorizontalAlignment="Stretch"
+            Command="{Binding UnlockCommand}" />
+    <Button Content="Unlock with saved credentials" HorizontalAlignment="Stretch"
+            IsVisible="{Binding HasQuickUnlock}" Command="{Binding QuickUnlockCommand}" />
+    <TextBlock Text="{Binding Error}"
+               IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+        x:Class="MasterSafe.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="900" Height="640"
+        Icon="/Assets/app.ico"
+        Title="MasterSafe Authenticator">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Menu Grid.Row="0">
+      <MenuItem Header="_Help">
+        <MenuItem Header="_Help Contents" Command="{Binding ShowHelpCommand}" />
+        <Separator />
+        <MenuItem Header="_About MasterSafe Authenticator" Command="{Binding ShowAboutCommand}" />
+      </MenuItem>
+    </Menu>
+    <Border Grid.Row="1" Padding="12" IsVisible="{Binding IsUnlocked}"
+            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" />
+        <Button Content="Passwords" Command="{Binding ShowPasswordsCommand}" />
+        <Button Content="Add" Command="{Binding ShowAddAccountCommand}" />
+        <Button Content="Import" Command="{Binding ShowImportCommand}" />
+        <Button Content="Backup" Command="{Binding ShowBackupCommand}" />
+        <Button Content="Settings" Command="{Binding ShowSettingsCommand}" />
+        <Button Content="Help" Command="{Binding ShowHelpCommand}" />
+        <Button Content="Lock" Command="{Binding LockCommand}" />
+      </StackPanel>
+    </Border>
+    <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" Margin="12" />
+  </Grid>
+</Window>

@@ -11,7 +11,7 @@ SBOMs are generated in CI by `.github/workflows/sbom.yml` and stored under `/sbo
 
 ```bash
 dotnet tool install --global CycloneDX
-dotnet CycloneDX SafeAuthenticator.slnx -o sbom -f sbom.cyclonedx.json --json
+dotnet CycloneDX MasterSafe.slnx -o sbom -f sbom.cyclonedx.json --json
 ```
 
 ## Direct dependencies
