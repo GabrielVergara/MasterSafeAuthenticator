@@ -27,6 +27,7 @@ flowchart TD
 | Runs malware as you while the vault is **unlocked** | Yes | See below |
 | Has your computer and your Windows PIN | Yes, via Windows Hello | Hello is as strong as your PIN or biometrics |
 | Has your security key but not its PIN | No | The vault asks the key for a secret, and the key requires its PIN and a touch. Too many wrong PINs lock the key |
+| Gets a file you saved out of an entry ("Save as...") | Yes, that file | A saved attachment is a normal file on disk and is no longer protected by the vault. The app says so when it saves one; delete it when you are done |
 | Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https |
 
 ## Recovery and old vaults

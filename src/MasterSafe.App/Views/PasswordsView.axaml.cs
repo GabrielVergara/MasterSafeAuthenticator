@@ -31,6 +31,9 @@ public partial class PasswordsView : UserControl
         };
     }
 
+    /// <summary>Closes the icon picker once an icon was chosen.</summary>
+    private void OnIconPicked(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => ChangeIconButton.Flyout?.Hide();
+
     private async void OnCopyRequested(object? sender, string text)
     {
         if (_vm is not null && !await ClipboardHelper.CopyAsync(this, text))

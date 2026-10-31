@@ -5,24 +5,33 @@
 
 using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 
 namespace MasterSafe.App.ViewModels;
 
 /// <summary>One line of the folder list. <see cref="Path"/> is null for "All passwords".</summary>
-public sealed record FolderNode(string? Path, string Name, int Depth, int Count)
+public sealed record FolderNode(string? Path, string Name, int Depth, int Count, string IconKey)
 {
     /// <summary>Text shown in the list.</summary>
     public string Display => $"{Name} ({Count})";
+
+    /// <summary>The icon drawn in front of the name.</summary>
+    public Geometry Icon => FolderIconCatalog.GeometryFor(IconKey);
 
     /// <summary>Indent that shows how deep the folder is.</summary>
     public Thickness Indent => new(Depth * 14, 0, 0, 0);
 }
 
 /// <summary>A folder that can be picked for an entry. An empty <see cref="Path"/> is the top level.</summary>
-public sealed record FolderChoice(string Path, string Display);
+public sealed record FolderChoice(string Path, string Display, string IconKey)
+{
+    /// <summary>The icon drawn in front of the name.</summary>
+    public Geometry Icon => FolderIconCatalog.GeometryFor(IconKey);
+}
 
 /// <summary>Folders of the password manager. Passwords only; authenticator accounts are not part of this.</summary>
 public sealed partial class PasswordsViewModel
@@ -30,6 +39,48 @@ public sealed partial class PasswordsViewModel
     // Folders that have no entries yet. A folder with entries exists because of them.
     private readonly HashSet<string> _emptyFolders = new(StringComparer.OrdinalIgnoreCase);
     private bool _rebuildingFolders;
+
+    // Folder path to the key of its icon. Folders that are not in here use the default icon.
+    private readonly Dictionary<string, string> _icons = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The icons a folder can be given.</summary>
+    public IReadOnlyList<FolderIcon> IconChoices => FolderIconCatalog.All;
+
+    /// <summary>The chosen icons, for saving in the vault. Folders that no longer exist are left out.</summary>
+    public IReadOnlyDictionary<string, string> IconSnapshot()
+    {
+        var existing = _all.Select(e => e.Folder).Concat(_emptyFolders)
+            .Where(p => p.Length > 0).SelectMany(FolderPath.WithAncestors)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return _icons.Where(i => existing.Contains(i.Key)).ToDictionary(i => i.Key, i => i.Value, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Gives the selected folder an icon.</summary>
+    [RelayCommand]
+    private void SetFolderIcon(FolderIcon? icon)
+    {
+        var path = SelectedNode?.Path;
+        if (path is null || icon is null)
+        {
+            Status = "Choose a folder first, then pick its icon.";
+            return;
+        }
+
+        if (icon.Key == FolderIconCatalog.DefaultKey)
+        {
+            _icons.Remove(path);
+        }
+        else
+        {
+            _icons[path] = icon.Key;
+        }
+
+        Status = $"Changed the icon of {path}.";
+        ApplyFilter(path);
+        EntriesChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private string IconKeyFor(string path) => _icons.TryGetValue(path, out var key) ? key : FolderIconCatalog.DefaultKey;
 
     /// <summary>The folder list, starting with "All passwords".</summary>
     public ObservableCollection<FolderNode> FolderNodes { get; } = [];
@@ -205,6 +256,19 @@ public sealed partial class PasswordsViewModel
             }
         }
 
+        foreach (var (path, key) in _icons.Where(i => FolderPath.IsInside(i.Key, from)).ToList())
+        {
+            _icons.Remove(path);
+            if (keepFolder || !path.Equals(from, StringComparison.OrdinalIgnoreCase))
+            {
+                var mapped = Map(path);
+                if (mapped.Length > 0)
+                {
+                    _icons[mapped] = key;
+                }
+            }
+        }
+
         var affected = _emptyFolders.Where(f => FolderPath.IsInside(f, from)).ToList();
         foreach (var folder in affected)
         {
@@ -238,14 +302,15 @@ public sealed partial class PasswordsViewModel
             var movePath = MoveTarget?.Path;
 
             FolderNodes.Clear();
-            FolderNodes.Add(new FolderNode(null, "All passwords", 0, _all.Count));
+            FolderNodes.Add(new FolderNode(null, "All passwords", 0, _all.Count, "key"));
             FolderChoices.Clear();
-            FolderChoices.Add(new FolderChoice(string.Empty, "(No folder)"));
+            FolderChoices.Add(new FolderChoice(string.Empty, "(No folder)", "lock"));
             foreach (var path in paths)
             {
                 var depth = FolderPath.Depth(path) - 1;
-                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, _all.Count(e => FolderPath.IsInside(e.Folder, path))));
-                FolderChoices.Add(new FolderChoice(path, new string(' ', depth * 2) + FolderPath.Name(path)));
+                var icon = IconKeyFor(path);
+                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, _all.Count(e => FolderPath.IsInside(e.Folder, path)), icon));
+                FolderChoices.Add(new FolderChoice(path, new string(' ', depth * 2) + FolderPath.Name(path), icon));
             }
 
             SelectedNode = FolderNodes.FirstOrDefault(n => n.Path is not null && selectPath is not null && n.Path.Equals(selectPath, StringComparison.OrdinalIgnoreCase))

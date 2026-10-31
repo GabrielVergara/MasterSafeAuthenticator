@@ -9,7 +9,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - Recovery: recovery key file, recovery backups (hybrid post-quantum), restore from the sign-in screen.
 - Vault management: where files are stored, archive an old vault, open any vault file, delete old vaults.
 - Settings saved between runs. Confirmation before deleting accounts, passwords and vaults.
-- Password folders (passwords only), multiple delete and move (in the next release).
+- Password folders (passwords only) with user-selectable icons, multiple delete and move, attached files on entries (5 MiB each, 50 MiB per vault) (1.3.0).
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen (in the next release).
 - Windows installer, Linux package, signed releases (ML-DSA-65), CI on Windows and Linux. (Released as 1.2.0 and 1.2.1.)
 
@@ -17,7 +17,6 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 
 | Item | Why |
 | --- | --- |
-| **Attachments on password entries** | Like KeePass: attach files to an entry, save them out again. Limits agreed: 5 MiB per file and 50 MiB per vault. Needs a binary section in the vault format (version bump, old vaults upgrade as before), the vault size limit raised to match, backups and recovery files updated, and KeePass XML attachments mapped in the import |
 | Recovery reminders | Show a warning when the last recovery backup is older than 30 days or the vault has changed a lot since |
 | Several security keys per vault | A spare key means a lost key does not lock you out of the quick unlock |
 | Edit accounts | Rename, change issuer |
@@ -49,10 +48,10 @@ licensed helpers (for example BouncyCastle, MIT, for the ChaCha20 and Salsa20 st
 ### Step 1: KeePass XML and CSV import (done, ships after 1.2.1)
 
 - Input: *File, Export, KeePass XML (2.x)* from KeePass or KeePassXC, and KeePassXC CSV.
-- Maps entries to MasterSafe password entries: Title, UserName, Password, URL, Notes; the group path becomes the password folder.
+- Maps entries to MasterSafe password entries: Title, UserName, Password, URL, Notes; the group path becomes the password folder, and attached files (KeePass XML) are imported up to 5 MiB each.
 - Entries with a one-time-password field (`otp`, or `TimeOtp-Secret-Base32` with its period, digits and algorithm
   fields) become authenticator accounts.
-- A **preview screen** shows counts, duplicates and anything skipped (attachments, history, custom icons), and
+- A **preview screen** shows counts, duplicates and anything skipped (history, custom icons, attachments over 5 MiB), and
   nothing is saved until you confirm.
 - Safe parsing: DTDs and external entities are disabled, document size and entry counts are limited.
 - The export file is **unencrypted**. The app warns about this and offers to open the folder so you can delete it.
@@ -67,7 +66,7 @@ licensed helpers (for example BouncyCastle, MIT, for the ChaCha20 and Salsa20 st
   files in place.
 - Testing: files created by KeePass 2.x and KeePassXC, plus malformed and hostile samples, in the unit tests and a
   fuzzing job.
-- Not planned: YubiKey challenge-response used as a KeePass key, plugins, attachments.
+- Not planned: YubiKey challenge-response used as a KeePass key, plugins.
 
 ### Step 3: export to `.kdbx` 4
 

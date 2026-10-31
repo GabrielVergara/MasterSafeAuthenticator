@@ -177,6 +177,33 @@ public sealed class KeePassImportFlowTests : IDisposable
     }
 
     [Fact]
+    public async Task AttachmentsAndIcons_SurviveSavingLockingAndReopening()
+    {
+        var shell = await UnlockedShellAsync();
+        var bytes = System.Text.Encoding.UTF8.GetBytes("secret attachment");
+        var xml = "<KeePassFile><Root><Group><UUID>R=</UUID><Name>DB</Name><Group><UUID>G=</UUID><Name>Email</Name>"
+            + "<Entry><String><Key>Title</Key><Value>Gmail</Value></String><String><Key>Password</Key><Value>pw</Value></String>"
+            + $"<Binary><Key>codes.txt</Key><Value>{Convert.ToBase64String(bytes)}</Value></Binary></Entry></Group></Group></Root></KeePassFile>";
+        var path = Path.Combine(_folder, "att.xml");
+        File.WriteAllText(path, xml);
+
+        shell.Import.KeePass.Load(path);
+        shell.Import.KeePass.Preview.Should().Contain(l => l.StartsWith("Attached files to add: 1"));
+        shell.Import.KeePass.ConfirmCommand.Execute(null);
+        shell.Passwords.SelectedNode = shell.Passwords.FolderNodes.Single(n => n.Path == "Email");
+        shell.Passwords.SetFolderIconCommand.Execute(MasterSafe.App.Services.FolderIconCatalog.All.Single(i => i.Key == "mail"));
+        await shell.PersistAsync();
+
+        var reopened = new MainWindowViewModel(_vault);
+        await reopened.UnlockVaultAsync(Password);
+
+        var entry = reopened.Passwords.Snapshot().Single();
+        entry.Attachments.Single().Name.Should().Be("codes.txt");
+        reopened.Passwords.AttachmentSnapshot()[entry.Attachments[0].Id].Should().Equal(bytes);
+        reopened.Passwords.FolderNodes.Single(n => n.Path == "Email").IconKey.Should().Be("mail");
+    }
+
+    [Fact]
     public async Task ABrokenFile_ShowsAMessage_AndNoPreview()
     {
         var shell = await UnlockedShellAsync();

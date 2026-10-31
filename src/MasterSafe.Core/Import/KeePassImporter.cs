@@ -100,8 +100,13 @@ public static class KeePassImporter
             throw new KeePassImportException("The export contains no groups.");
         }
 
+        var pool = (document.Root.Element("Meta")?.Element("Binaries")?.Elements("Binary") ?? [])
+            .Where(b => b.Attribute("ID") is not null)
+            .GroupBy(b => (string)b.Attribute("ID")!)
+            .ToDictionary(g => g.Key, g => g.First());
+
         var protectedValues = false;
-        ReadGroup(root, [], isRoot: true, recycleBin, result, ref protectedValues, depth: 0);
+        ReadGroup(root, [], isRoot: true, recycleBin, result, pool, ref protectedValues, depth: 0);
         if (protectedValues)
         {
             result.Warnings.Add("Some values are protected inside the file and could not be read. Export again with KeePass's own export command.");
@@ -156,14 +161,21 @@ public static class KeePassImporter
                 path.RemoveAt(0);
             }
 
-            AddEntry(result, Get(title), Get(user), Get(password), Get(url), Get(notes), Get(totp), path, DateTimeOffset.UtcNow);
+            AddEntry(result, Get(title), Get(user), Get(password), Get(url), Get(notes), Get(totp), path, DateTimeOffset.UtcNow, []);
         }
 
         return result;
     }
 
     private static void ReadGroup(
-        XElement group, List<string> path, bool isRoot, string? recycleBin, KeePassImportResult result, ref bool protectedValues, int depth)
+        XElement group,
+        List<string> path,
+        bool isRoot,
+        string? recycleBin,
+        KeePassImportResult result,
+        Dictionary<string, XElement> pool,
+        ref bool protectedValues,
+        int depth)
     {
         if (depth > MaxGroupDepth)
         {
@@ -188,7 +200,7 @@ public static class KeePassImporter
             }
 
             result.SkippedHistory += entry.Element("History")?.Elements("Entry").Count() ?? 0;
-            result.SkippedAttachments += entry.Elements("Binary").Count();
+            var attachments = ReadAttachments(entry, pool, result);
 
             var fields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var field in entry.Elements("String"))
@@ -231,12 +243,87 @@ public static class KeePassImporter
                 fields.GetValueOrDefault("Notes", string.Empty),
                 OtpValue(fields),
                 here,
-                modified);
+                modified,
+                attachments);
         }
 
         foreach (var child in group.Elements("Group"))
         {
-            ReadGroup(child, here, isRoot: false, recycleBin, result, ref protectedValues, depth + 1);
+            ReadGroup(child, here, isRoot: false, recycleBin, result, pool, ref protectedValues, depth + 1);
+        }
+    }
+
+    /// <summary>
+    /// Reads the files attached to an entry. A file is skipped when it is larger than one attachment may be, when the
+    /// total would pass the vault limit, or when it cannot be decoded.
+    /// </summary>
+    private static List<PasswordAttachment> ReadAttachments(XElement entry, Dictionary<string, XElement> pool, KeePassImportResult result)
+    {
+        var attachments = new List<PasswordAttachment>();
+        foreach (var binary in entry.Elements("Binary"))
+        {
+            var value = binary.Element("Value");
+            var reference = (string?)value?.Attribute("Ref");
+            var source = reference is null ? value : pool.GetValueOrDefault(reference);
+            var bytes = source is null ? null : DecodeBinary(source);
+
+            if (bytes is null
+                || result.AttachmentBytes + bytes.Length > AttachmentLimits.MaxTotalBytes
+                || result.Attachments.Count >= AttachmentLimits.MaxCount)
+            {
+                result.SkippedAttachments++;
+                continue;
+            }
+
+            var attachment = new PasswordAttachment
+            {
+                Name = AttachmentLimits.SafeName(binary.Element("Key")?.Value),
+                Size = bytes.Length,
+            };
+            result.Attachments[attachment.Id] = bytes;
+            attachments.Add(attachment);
+        }
+
+        return attachments;
+    }
+
+    /// <summary>Decodes the base64 (and, when marked, gzip) content of a binary. Null when it is too large or damaged.</summary>
+    private static byte[]? DecodeBinary(XElement element)
+    {
+        var text = element.Value;
+        if (text.Length > AttachmentLimits.MaxFileBytes * 4 / 3 + 1024)
+        {
+            return null;
+        }
+
+        try
+        {
+            var raw = Convert.FromBase64String(text);
+            if (!string.Equals((string?)element.Attribute("Compressed"), "True", StringComparison.OrdinalIgnoreCase))
+            {
+                return raw.Length <= AttachmentLimits.MaxFileBytes ? raw : null;
+            }
+
+            using var input = new MemoryStream(raw);
+            using var gzip = new System.IO.Compression.GZipStream(input, System.IO.Compression.CompressionMode.Decompress);
+            using var output = new MemoryStream();
+            var buffer = new byte[81920];
+            int read;
+            while ((read = gzip.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                if (output.Length + read > AttachmentLimits.MaxFileBytes)
+                {
+                    return null;
+                }
+
+                output.Write(buffer, 0, read);
+            }
+
+            return output.ToArray();
+        }
+        catch (Exception ex) when (ex is FormatException or InvalidDataException or IOException)
+        {
+            return null;
         }
     }
 
@@ -273,7 +360,8 @@ public static class KeePassImporter
         string notes,
         string otp,
         List<string> groupPath,
-        DateTimeOffset modified)
+        DateTimeOffset modified,
+        List<PasswordAttachment> attachments)
     {
         var folder = FolderPath.Normalize(string.Join(FolderPath.Separator, groupPath));
         IReadOnlyList<string> tags = folder.Length == 0 ? [] : [folder];
@@ -289,9 +377,20 @@ public static class KeePassImporter
                 Url = url.Trim(),
                 Notes = notes,
                 Folder = folder,
+                Attachments = attachments,
                 ModifiedUtc = modified,
             });
             added = true;
+        }
+        else if (attachments.Count > 0)
+        {
+            // Files only make sense next to a password entry, so they are not kept without one.
+            foreach (var attachment in attachments)
+            {
+                result.Attachments.Remove(attachment.Id);
+            }
+
+            result.SkippedAttachments += attachments.Count;
         }
 
         if (!string.IsNullOrWhiteSpace(otp))

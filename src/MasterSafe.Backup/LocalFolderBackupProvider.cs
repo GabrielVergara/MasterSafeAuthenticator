@@ -62,8 +62,8 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
         return Task.FromResult<IReadOnlyList<string>>(files);
     }
 
-    /// <summary>Largest backup that will be read (32 MiB).</summary>
-    public const long MaxBackupBytes = 32L * 1024 * 1024;
+    /// <summary>Largest backup that will be read (100 MiB).</summary>
+    public const long MaxBackupBytes = 100L * 1024 * 1024;
 
     // A backup name must be a plain file name. Names with folders, "..", or a full path are refused so a
     // crafted name can never reach outside the backup folder.

@@ -10,8 +10,8 @@ namespace MasterSafe.Crypto;
 /// <summary>GZip helpers that refuse to expand data past a fixed limit (decompression-bomb guard).</summary>
 public static class BoundedGzip
 {
-    /// <summary>Largest decompressed size accepted (64 MiB).</summary>
-    public const int DefaultMaxBytes = 64 * 1024 * 1024;
+    /// <summary>Largest decompressed size accepted (96 MiB: the attachments allowed in a vault plus its other contents).</summary>
+    public const int DefaultMaxBytes = 96 * 1024 * 1024;
 
     /// <summary>Compresses <paramref name="data"/>.</summary>
     public static byte[] Compress(byte[] data)

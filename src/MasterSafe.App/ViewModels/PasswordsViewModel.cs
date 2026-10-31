@@ -6,6 +6,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 
 namespace MasterSafe.App.ViewModels;
@@ -114,6 +115,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         }
 
         Status = $"Deleted {removed} {(removed == 1 ? "password" : "passwords")}.";
+        PruneBlobs();
         ApplyFilter();
         EntriesChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -182,11 +184,34 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     public event EventHandler<string>? CopyRequested;
 
     /// <summary>Replaces all entries and empty folders (used when the vault is unlocked).</summary>
-    public void Load(IEnumerable<PasswordEntry> entries, IEnumerable<string>? folders = null)
+    public void Load(
+        IEnumerable<PasswordEntry> entries,
+        IEnumerable<string>? folders = null,
+        IReadOnlyDictionary<Guid, byte[]>? attachments = null,
+        IReadOnlyDictionary<string, string>? folderIcons = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
+        ClearBlobs();
         _all.Clear();
         _all.AddRange(entries.Select(WithCleanFolder));
+        foreach (var attachment in _all.SelectMany(e => e.Attachments))
+        {
+            if (attachments is not null && attachments.TryGetValue(attachment.Id, out var bytes))
+            {
+                _blobs[attachment.Id] = bytes;
+            }
+        }
+
+        _icons.Clear();
+        foreach (var (path, key) in folderIcons ?? new Dictionary<string, string>())
+        {
+            var clean = FolderPath.Normalize(path);
+            if (clean.Length > 0 && FolderIconCatalog.IsKnown(key))
+            {
+                _icons[clean] = key;
+            }
+        }
+
         _emptyFolders.Clear();
         foreach (var folder in (folders ?? []).Select(FolderPath.Normalize).Where(f => f.Length > 0))
         {
@@ -207,17 +232,23 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         return clean == entry.Folder ? entry : entry.WithFolder(clean);
     }
 
-    /// <summary>Adds several entries and saves once.</summary>
-    public void AddRange(IEnumerable<PasswordEntry> entries)
+    /// <summary>
+    /// Adds several entries (with their attachments, when supplied) and saves once. Returns how many attachments
+    /// were left out because of the size limits.
+    /// </summary>
+    public int AddRange(IEnumerable<PasswordEntry> entries, IReadOnlyDictionary<Guid, byte[]>? attachments = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
         var before = _all.Count;
-        _all.AddRange(entries.Select(WithCleanFolder));
+        var (fitted, dropped) = FitAttachments(entries.Select(WithCleanFolder), attachments);
+        _all.AddRange(fitted);
         if (_all.Count > before)
         {
             ApplyFilter();
             EntriesChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        return dropped;
     }
 
     /// <summary>Returns a copy of all entries for persistence.</summary>
@@ -247,6 +278,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             Notes = Notes,
             Tags = Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
             Folder = FolderPath.Normalize(FormFolder?.Path),
+            Attachments = FormAttachments.Select(r => r.Attachment).ToList(),
             ModifiedUtc = DateTimeOffset.UtcNow,
         };
 
@@ -288,6 +320,13 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         Notes = entry.Notes;
         Tags = string.Join(", ", entry.Tags);
         FormFolder = ChoiceFor(entry.Folder) ?? FolderChoices.FirstOrDefault();
+        FormAttachments.Clear();
+        foreach (var attachment in entry.Attachments)
+        {
+            FormAttachments.Add(new AttachmentRow(attachment));
+        }
+
+        PruneBlobs();
         Status = $"Editing {entry.Title}.";
     }
 
@@ -300,6 +339,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         }
 
         Status = $"Deleted {entry.Title}.";
+        PruneBlobs();
         ApplyFilter();
         EntriesChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -334,6 +374,8 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         _editingId = null;
         Title = UserName = Password = Url = Notes = Tags = string.Empty;
         FormFolder = ChoiceFor(SelectedNode?.Path ?? string.Empty) ?? FolderChoices.FirstOrDefault();
+        FormAttachments.Clear();
+        PruneBlobs();
     }
 
     /// <summary>Refreshes the folder list and the shown entries, keeping the selected folder.</summary>
@@ -376,6 +418,12 @@ public sealed partial class PasswordRow(PasswordEntry entry, bool isSelected, Ac
 {
     /// <summary>The entry.</summary>
     public PasswordEntry Entry { get; } = entry;
+
+    /// <summary>True when files are attached to the entry.</summary>
+    public bool HasAttachments => Entry.Attachments.Count > 0;
+
+    /// <summary>For example "2 attached files".</summary>
+    public string AttachmentsText => Entry.Attachments.Count == 1 ? "1 attached file" : $"{Entry.Attachments.Count} attached files";
 
     /// <summary>True while the entry is ticked.</summary>
     [ObservableProperty]

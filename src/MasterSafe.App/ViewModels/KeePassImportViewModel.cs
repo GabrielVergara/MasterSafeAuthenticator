@@ -89,7 +89,12 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
         AddIfAny($"Already in your vault, skipped: {duplicates}", duplicates);
         AddIfAny($"Entries in the recycle bin, skipped: {_result.SkippedRecycleBin}", _result.SkippedRecycleBin);
         AddIfAny($"Old versions of entries, skipped: {_result.SkippedHistory}", _result.SkippedHistory);
-        AddIfAny($"File attachments, not imported: {_result.SkippedAttachments}", _result.SkippedAttachments);
+        AddIfAny(
+            $"Attached files to add: {_newPasswords.Sum(p => p.Attachments.Count)} ({AttachmentLimits.Describe(_newPasswords.SelectMany(p => p.Attachments).Sum(a => a.Size))})",
+            _newPasswords.Sum(p => p.Attachments.Count));
+        AddIfAny(
+            $"Attached files not imported (over {AttachmentLimits.Describe(AttachmentLimits.MaxFileBytes)} each, or over the vault limit): {_result.SkippedAttachments}",
+            _result.SkippedAttachments);
         AddIfAny($"Entries without a title or password, skipped: {_result.SkippedInvalid}", _result.SkippedInvalid);
         foreach (var warning in _result.Warnings.Take(10))
         {
@@ -119,9 +124,11 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
 
         var passwords = _newPasswords;
         var accounts = _newAccounts;
+        var wanted = passwords.SelectMany(p => p.Attachments).Select(a => a.Id).ToHashSet();
+        var attachments = _result!.Attachments.Where(a => wanted.Contains(a.Key)).ToDictionary(a => a.Key, a => a.Value);
         Discard();
         Status = $"Imported {passwords.Count} passwords and {accounts.Count} authenticator accounts.";
-        Confirmed?.Invoke(this, new KeePassImportConfirmedEventArgs(passwords, accounts));
+        Confirmed?.Invoke(this, new KeePassImportConfirmedEventArgs(passwords, accounts, attachments));
     }
 
     /// <summary>Throws the preview away without importing.</summary>
@@ -172,8 +179,14 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
 }
 
 /// <summary>The entries to add after the user confirmed a KeePass import.</summary>
-public sealed class KeePassImportConfirmedEventArgs(IReadOnlyList<PasswordEntry> passwords, IReadOnlyList<OtpAccount> accounts) : EventArgs
+public sealed class KeePassImportConfirmedEventArgs(
+    IReadOnlyList<PasswordEntry> passwords,
+    IReadOnlyList<OtpAccount> accounts,
+    IReadOnlyDictionary<Guid, byte[]> attachments) : EventArgs
 {
+    /// <summary>The bytes of the attached files, by attachment id.</summary>
+    public IReadOnlyDictionary<Guid, byte[]> Attachments { get; } = attachments;
+
     /// <summary>Password entries to add.</summary>
     public IReadOnlyList<PasswordEntry> Passwords { get; } = passwords;
 

@@ -14,8 +14,8 @@ namespace MasterSafe.Crypto;
 /// </summary>
 public sealed class FileVaultRepository : IVaultRepository
 {
-    /// <summary>Largest vault file that will be read (16 MiB).</summary>
-    public const long MaxFileBytes = 16L * 1024 * 1024;
+    /// <summary>Largest vault file that will be read (100 MiB: 50 MiB of attachments, stored as encoded text, plus the rest).</summary>
+    public const long MaxFileBytes = 100L * 1024 * 1024;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

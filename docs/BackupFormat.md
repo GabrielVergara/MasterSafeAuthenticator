@@ -78,3 +78,21 @@ Argon2 parameters in the file are limited to safe ranges, and the file may not b
 
 The live vault uses format 3 (see [Security.md](Security.md)): a random vault id, a list of unlock slots,
 and the contents encrypted with the data key. The previous version of the file is kept as `vault.sauth.bak`.
+
+### Contents
+
+Before encryption the contents are compressed (GZip). They are one of two layouts, chosen by the first bytes:
+
+| Layout | When | Shape |
+| --- | --- | --- |
+| Plain JSON | The vault has no attachments (always the case before 1.3.0) | `{"Accounts":[...],"Passwords":[...],"Folders":[...],"FolderIcons":{...}}` |
+| Container `MSV4` | At least one entry has an attached file | `"MSV4"`, length of the JSON (int32 little-endian), the same JSON, number of files (int32), then for each file: its 16-byte id, its length (int32) and its raw bytes |
+
+Attached files are not put inside the JSON, because that would make them a third larger. An entry only holds the
+description of its files (id, name, size). The same layout is used inside recovery backups.
+
+When reading, every length is checked before memory is reserved: the JSON part may be at most 16 MiB, one file 5 MiB,
+all files together 50 MiB, and at most 1000 files. Files that no entry refers to are ignored, and the description of a file
+whose bytes are missing or whose size does not match is dropped. File names are reduced to a plain name (no folders).
+
+Limits on whole files: the vault file and backups may be up to 100 MiB, and the decompressed contents up to 96 MiB.

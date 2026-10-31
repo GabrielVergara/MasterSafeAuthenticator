@@ -57,7 +57,8 @@ public static class HelpContent
             - On the Import screen choose "Choose an export file...", or drop the file onto the window.
             - A summary shows what will be added and what is skipped (recycle bin, old versions, attachments, duplicates).
               Nothing is added until you choose Import.
-            - Groups become folders, and one-time-password fields become authenticator accounts.
+            - Groups become folders, one-time-password fields become authenticator accounts, and attached files
+              (KeePass XML exports) come along, up to 5 MB each.
             - The export file is not encrypted. Delete it once you have imported it.
 
             MasterSafe validates the account details before adding them, so malformed
@@ -78,7 +79,11 @@ public static class HelpContent
               never deletes passwords: they move up to the folder above.
             - The Folder box in the form sets where an entry lives. New entries start in the folder you are viewing.
             - To move several entries, tick them, choose a folder next to "Move selected to", then choose Move.
+            - Change icon gives the selected folder an icon. Pick one from the set; choose the plain folder to go back.
             - Folders are for passwords only. Authenticator accounts are kept separate.
+            - Attached files: in the entry form choose "Attach a file..." (up to 5 MB each, 50 MB in the whole vault),
+              then Save. Files are stored encrypted inside your vault and included in recovery backups. "Save as..."
+              writes a copy to disk, and that copy is no longer protected by your vault, so delete it when done.
             - To delete several entries, tick their boxes (or choose Select all shown), then choose
               Delete selected. You are asked to confirm, and it cannot be undone.
             - Changing the search clears the ticks, so you never delete entries that are out of sight.

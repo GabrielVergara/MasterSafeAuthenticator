@@ -154,4 +154,14 @@ public sealed class VaultContents
 
     /// <summary>Password folders that have no entries yet (folders with entries are known from the entries).</summary>
     public IReadOnlyList<string> Folders { get; init; } = [];
+
+    /// <summary>The icon chosen for a folder: folder path to icon name. Folders without an entry here use the default icon.</summary>
+    public IReadOnlyDictionary<string, string> FolderIcons { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// The bytes of the files attached to password entries, by attachment id. They are not part of the JSON; they are
+    /// stored in their own section (see <see cref="VaultContentsCodec"/>).
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public IReadOnlyDictionary<Guid, byte[]> AttachmentData { get; init; } = new Dictionary<Guid, byte[]>();
 }

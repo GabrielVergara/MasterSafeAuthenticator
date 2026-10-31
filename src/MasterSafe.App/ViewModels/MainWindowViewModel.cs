@@ -123,13 +123,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Passwords.EntriesChanged += async (_, _) => await PersistAsync();
         Import.Dialogs = services?.Dialogs;
         Import.KeePass.Dialogs = services?.Dialogs;
+        Passwords.Dialogs = services?.Dialogs;
         Import.KeePass.ExistingPasswords = () => Passwords.Snapshot();
         Import.KeePass.ExistingAccounts = () => Dashboard.Accounts.Select(a => a.Account).ToList();
         Import.KeePass.Confirmed += (_, e) =>
         {
-            Passwords.AddRange(e.Passwords);
+            var dropped = Passwords.AddRange(e.Passwords, e.Attachments);
             Dashboard.AddRange(e.Accounts);
-            Dashboard.StatusMessage = Import.KeePass.Status;
+            Dashboard.StatusMessage = dropped == 0
+                ? Import.KeePass.Status
+                : $"{Import.KeePass.Status} {dropped} attachments were left out because the vault's attachment limit was reached.";
             CurrentPage = e.Passwords.Count > 0 ? Passwords : Dashboard;
         };
         Import.IsDuplicate = account => Dashboard.Accounts.Any(a => SameAccount(a.Account, account));
@@ -534,6 +537,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Accounts = Dashboard.Accounts.Select(a => a.Account).ToList(),
         Passwords = Passwords.Snapshot(),
         Folders = Passwords.FolderSnapshot(),
+        FolderIcons = Passwords.IconSnapshot(),
+        AttachmentData = Passwords.AttachmentSnapshot(),
     };
 
     private async Task CompleteUnlockWithKeyAsync(byte[] key)
@@ -555,7 +560,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private void CompleteUnlock(VaultContents contents)
     {
         Dashboard.Load(contents.Accounts);
-        Passwords.Load(contents.Passwords, contents.Folders);
+        Passwords.Load(contents.Passwords, contents.Folders, contents.AttachmentData, contents.FolderIcons);
         Login.MasterPassword = string.Empty;
         Login.ConfirmPassword = string.Empty;
         Login.IsCreateMode = false;

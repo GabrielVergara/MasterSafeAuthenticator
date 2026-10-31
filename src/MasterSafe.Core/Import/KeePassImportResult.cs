@@ -26,8 +26,14 @@ public sealed class KeePassImportResult
     /// <summary>Old versions of entries, which are not imported.</summary>
     public int SkippedHistory { get; set; }
 
-    /// <summary>File attachments, which are not imported.</summary>
+    /// <summary>The bytes of the attached files that will be imported, by attachment id.</summary>
+    public Dictionary<Guid, byte[]> Attachments { get; } = [];
+
+    /// <summary>Attached files that are not imported: too large, over the vault limit, or unreadable.</summary>
     public int SkippedAttachments { get; set; }
+
+    /// <summary>Total size of the attached files that will be imported.</summary>
+    public long AttachmentBytes => Attachments.Values.Sum(b => (long)b.Length);
 
     /// <summary>Entries without a title or password and without a usable one-time password.</summary>
     public int SkippedInvalid { get; set; }

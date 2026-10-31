@@ -418,7 +418,7 @@ public sealed class VaultService : IVaultService
         var json = DecodeCurrentBytes(vault, dataKey);
         try
         {
-            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+            return VaultContentsCodec.Decode(json);
         }
         finally
         {
@@ -447,7 +447,7 @@ public sealed class VaultService : IVaultService
     private async Task WriteCurrentAsync(
         string vaultId, IReadOnlyList<KeySlot> slots, byte[] dataKey, VaultContents contents, CancellationToken cancellationToken)
     {
-        var json = JsonSerializer.SerializeToUtf8Bytes(contents);
+        var json = VaultContentsCodec.Encode(contents);
         var compressed = BoundedGzip.Compress(json);
         CryptographicOperations.ZeroMemory(json);
 

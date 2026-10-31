@@ -65,7 +65,7 @@ public sealed class RecipientBackupService
         var encapsulation = _kem.Encapsulate(recipientPublicKey);
         try
         {
-            var json = JsonSerializer.SerializeToUtf8Bytes(contents);
+            var json = VaultContentsCodec.Encode(contents);
             var compressed = BoundedGzip.Compress(json);
             CryptographicOperations.ZeroMemory(json);
             var payload = _encryption.Encrypt(compressed, dataKey, ContentAad(id));
@@ -152,7 +152,7 @@ public sealed class RecipientBackupService
                 // Backups made before passwords were included hold just a JSON array of accounts.
                 return json.Length > 0 && json[0] == (byte)'['
                     ? new VaultContents { Accounts = JsonSerializer.Deserialize<List<OtpAccount>>(json) ?? [] }
-                    : JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+                    : VaultContentsCodec.Decode(json);
             }
             finally
             {

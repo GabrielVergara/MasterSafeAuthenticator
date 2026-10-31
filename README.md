@@ -29,7 +29,10 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - System tray (the app keeps running there when the window is closed or minimized), light/dark theme, in-app help.
   On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
-- Import from KeePass and KeePassXC (XML or CSV export) with a preview before anything is added.
+- Import from KeePass and KeePassXC (XML or CSV export) with a preview before anything is added. Groups become folders and
+  attached files come along.
+- Password folders with icons you choose, select several passwords to delete or move, and files attached to entries
+  (up to 5 MB each).
 
 Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
 a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
@@ -189,6 +192,6 @@ Please use the repository's **Security** tab on GitHub (Report a vulnerability) 
 
 MasterSafe Authenticator is **freeware for personal, non-commercial use**. See [LICENSE](LICENSE).
 The source is available for review and personal use; commercial use and distribution of modified
-versions are not permitted. Third-party components keep their own licenses.
+versions are not permitted. Third-party components keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Copyright (c) 2026 Gabriel Vergara Ezcurdia.

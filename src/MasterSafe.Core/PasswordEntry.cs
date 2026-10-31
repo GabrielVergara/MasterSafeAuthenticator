@@ -35,8 +35,16 @@ public sealed class PasswordEntry
     /// <summary>Folder the entry is in, for example <c>Email/Work</c>. Empty means the top level.</summary>
     public string Folder { get; init; } = string.Empty;
 
+    /// <summary>Files attached to the entry. The bytes are kept separately in the vault.</summary>
+    public IReadOnlyList<PasswordAttachment> Attachments { get; init; } = [];
+
     /// <summary>Returns a copy of this entry in another folder.</summary>
-    public PasswordEntry WithFolder(string folder) => new()
+    public PasswordEntry WithFolder(string folder) => Copy(folder, Attachments);
+
+    /// <summary>Returns a copy of this entry with a different list of attachments.</summary>
+    public PasswordEntry WithAttachments(IReadOnlyList<PasswordAttachment> attachments) => Copy(Folder, attachments);
+
+    private PasswordEntry Copy(string folder, IReadOnlyList<PasswordAttachment> attachments) => new()
     {
         Id = Id,
         Title = Title,
@@ -46,6 +54,7 @@ public sealed class PasswordEntry
         Notes = Notes,
         Tags = Tags,
         Folder = folder,
+        Attachments = attachments,
         ModifiedUtc = ModifiedUtc,
     };
 

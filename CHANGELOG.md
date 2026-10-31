@@ -2,9 +2,11 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.3.0 (2026-11-01)
 
 ### Added
+- **Attached files** on password entries, like KeePass: attach a file in the entry form (up to 5 MB each, 50 MB in the vault), save it back out, remove it. The files are stored encrypted inside the vault and are included in recovery backups. KeePass XML exports with attachments are imported with them. Vaults that have no attachments keep the old file layout, so older versions can still open them.
+- **Folder icons**: pick an icon for each password folder from a set of 24. The icons come from Material Design Icons (Apache License 2.0); see THIRD-PARTY-NOTICES.md. They are shown in the folder list and in the folder pickers, and they follow a folder when it is renamed.
 - Password folders: a folder tree on the Passwords page, with new, rename and delete (deleting keeps the passwords and moves them up), a Folder choice in the entry form, and "Move selected to" for several entries at once. Search also matches the folder. Folders are for passwords only; authenticator accounts stay separate. KeePass and KeePassXC groups are imported as folders. Existing vaults open as before, with every password at the top level.
 - Passwords: tick several entries (or "Select all shown") and delete them together, after one confirmation. Changing the search clears the ticks so hidden entries are never deleted.
 - The About window links to the author's web site, <https://www.gabriel-vergara.com/>, and the installer lists it as the publisher.

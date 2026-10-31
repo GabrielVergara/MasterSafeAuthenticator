@@ -15,8 +15,8 @@ namespace MasterSafe.Backup;
 /// </summary>
 public sealed class WebDavBackupProvider : IBackupProvider
 {
-    /// <summary>Largest backup that will be downloaded (32 MiB).</summary>
-    public const long MaxDownloadBytes = 32L * 1024 * 1024;
+    /// <summary>Largest backup that will be downloaded (100 MiB).</summary>
+    public const long MaxDownloadBytes = 100L * 1024 * 1024;
 
     private readonly HttpClient _client;
     private readonly Uri _baseUri;
