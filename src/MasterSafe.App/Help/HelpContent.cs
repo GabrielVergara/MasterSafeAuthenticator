@@ -51,6 +51,15 @@ public static class HelpContent
 
             An account that is already in your vault is not added a second time.
 
+            Moving over from KeePass or KeePassXC:
+
+            - In KeePass choose File, Export, KeePass XML (2.x). In KeePassXC choose Database, Export to CSV (or XML).
+            - On the Import screen choose "Choose an export file...", or drop the file onto the window.
+            - A summary shows what will be added and what is skipped (recycle bin, old versions, attachments, duplicates).
+              Nothing is added until you choose Import.
+            - Groups become tags, and one-time-password fields become authenticator accounts.
+            - The export file is not encrypted. Delete it once you have imported it.
+
             MasterSafe validates the account details before adding them, so malformed
             or non-otpauth codes are rejected safely.
             """),

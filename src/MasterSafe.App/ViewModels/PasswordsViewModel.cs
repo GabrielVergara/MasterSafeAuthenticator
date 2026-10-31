@@ -92,6 +92,19 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         ApplyFilter();
     }
 
+    /// <summary>Adds several entries and saves once.</summary>
+    public void AddRange(IEnumerable<PasswordEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        var before = _all.Count;
+        _all.AddRange(entries);
+        if (_all.Count > before)
+        {
+            ApplyFilter();
+            EntriesChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     /// <summary>Returns a copy of all entries for persistence.</summary>
     public IReadOnlyList<PasswordEntry> Snapshot() => _all.ToList();
 

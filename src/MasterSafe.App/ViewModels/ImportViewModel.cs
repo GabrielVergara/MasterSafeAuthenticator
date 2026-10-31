@@ -31,6 +31,9 @@ public sealed partial class ImportViewModel : ViewModelBase
     [ObservableProperty]
     private OtpAccount? _importedAccount;
 
+    /// <summary>Imports from a KeePass or KeePassXC export, with a preview.</summary>
+    public KeePassImportViewModel KeePass { get; } = new();
+
     /// <summary>Raised for each account that was imported and should be added to the vault.</summary>
     public event EventHandler<OtpAccount>? AccountImported;
 

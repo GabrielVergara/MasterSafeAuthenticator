@@ -95,6 +95,24 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
         AccountsChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Adds several accounts and saves once.</summary>
+    public void AddRange(IEnumerable<OtpAccount> accounts)
+    {
+        ArgumentNullException.ThrowIfNull(accounts);
+        var count = 0;
+        foreach (var account in accounts)
+        {
+            Accounts.Add(new OtpItemViewModel(account));
+            count++;
+        }
+
+        if (count > 0)
+        {
+            Refresh();
+            AccountsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     [RelayCommand]
     private void Delete(OtpItemViewModel? item)
     {

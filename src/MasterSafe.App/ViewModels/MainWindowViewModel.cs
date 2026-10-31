@@ -122,6 +122,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Dashboard.AccountsChanged += async (_, _) => await PersistAsync();
         Passwords.EntriesChanged += async (_, _) => await PersistAsync();
         Import.Dialogs = services?.Dialogs;
+        Import.KeePass.Dialogs = services?.Dialogs;
+        Import.KeePass.ExistingPasswords = () => Passwords.Snapshot();
+        Import.KeePass.ExistingAccounts = () => Dashboard.Accounts.Select(a => a.Account).ToList();
+        Import.KeePass.Confirmed += (_, e) =>
+        {
+            Passwords.AddRange(e.Passwords);
+            Dashboard.AddRange(e.Accounts);
+            Dashboard.StatusMessage = Import.KeePass.Status;
+            CurrentPage = e.Passwords.Count > 0 ? Passwords : Dashboard;
+        };
         Import.IsDuplicate = account => Dashboard.Accounts.Any(a => SameAccount(a.Account, account));
         Import.AccountImported += (_, account) =>
         {
@@ -167,7 +177,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
 
         NotifyActivity();
-        var imported = Import.ImportFromImages(paths);
+
+        var files = paths.ToList();
+        if (files.Count == 1 && Path.GetExtension(files[0]).ToLowerInvariant() is ".xml" or ".csv" or ".kdbx")
+        {
+            Import.KeePass.Load(files[0]);
+            CurrentPage = Import;
+            return 0;
+        }
+
+        var imported = Import.ImportFromImages(files);
         if (imported == 0)
         {
             CurrentPage = Import;
@@ -478,6 +497,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Passwords.ClearFormCommand.Execute(null);
         AccountEditor.Secret = string.Empty;
         Import.ManualUri = string.Empty;
+        Import.KeePass.Discard();
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;

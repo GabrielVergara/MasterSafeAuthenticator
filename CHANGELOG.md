@@ -2,6 +2,11 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Added
+- **Import from KeePass and KeePassXC** (Import page, or drop the file onto the window): KeePass XML (2.x) and KeePassXC CSV or XML exports. Passwords keep their title, user name, URL and notes, and the group becomes a tag. One-time-password fields become authenticator accounts. A summary is shown first, entries already in the vault are skipped, and nothing is added until you confirm. Recycle bin entries, old versions and attachments are not imported. The files are read safely (no DTDs or external entities, size and entry limits). Opening `.kdbx` files directly is still planned.
+
 ## 1.2.1 (2026-10-31)
 
 ### Fixed

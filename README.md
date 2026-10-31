@@ -29,7 +29,9 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - System tray (the app keeps running there when the window is closed or minimized), light/dark theme, in-app help.
   On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
-Planned: KeePass import, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
+- Import from KeePass and KeePassXC (XML or CSV export) with a preview before anything is added.
+
+Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
 a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
 
 ## Download and install
