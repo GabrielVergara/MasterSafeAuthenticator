@@ -63,7 +63,7 @@ public static class HelpContent
             - TOTP codes change on a fixed schedule (usually every 30 seconds). The progress
               bar and countdown indicate when the next code appears.
             - HOTP codes advance by a counter and are shown without a countdown.
-            - Use Copy code to place the current code on the clipboard.
+            - Use Copy code to place the current code on the clipboard. It is cleared again after 30 seconds.
             - Delete removes an account from the vault immediately. Make sure you can still
               sign in to the service some other way first.
 

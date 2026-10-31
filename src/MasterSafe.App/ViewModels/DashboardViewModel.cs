@@ -27,6 +27,9 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     public ObservableCollection<OtpItemViewModel> Accounts { get; } = [];
 
+    /// <summary>Raised when the view should copy a code to the clipboard (and clear it later).</summary>
+    public event EventHandler<string>? CopyRequested;
+
     /// <summary>The account waiting for the user to confirm its deletion.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPendingDelete))]
@@ -122,7 +125,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        StatusMessage = $"Copied code for {item.Issuer}.";
+        CopyRequested?.Invoke(this, item.Code);
+        StatusMessage = $"Copied code for {item.Issuer}. The clipboard clears in 30 seconds.";
     }
 
     public void Dispose()

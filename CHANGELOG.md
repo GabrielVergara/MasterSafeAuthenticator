@@ -5,6 +5,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## 1.2.1 (2026-10-31)
 
 ### Fixed
+- "Copy code" on the dashboard only showed a message and never put the code on the clipboard. It now copies it (and clears it after 30 seconds, like passwords). A busy clipboard is retried, and a failure is reported instead of ignored.
 - Linux: the package shipped an older SkiaSharp native library that did not match the new SkiaSharp 4, so QR codes and drawing would fail. The matching native library is now included.
 - Backup names containing a backslash or colon are now refused on every platform, not only Windows.
 - The SBOM workflow uses the current CycloneDX option names.

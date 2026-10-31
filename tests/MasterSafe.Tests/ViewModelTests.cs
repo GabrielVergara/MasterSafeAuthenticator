@@ -57,6 +57,19 @@ public class ViewModelTests
     }
 
     [Fact]
+    public void Dashboard_CopyCode_AsksTheViewToCopyTheCurrentCode()
+    {
+        using var vm = new DashboardViewModel(() => DateTimeOffset.UtcNow, startTimer: false);
+        vm.Load([DemoAccount()]);
+        string? copied = null;
+        vm.CopyRequested += (_, code) => copied = code;
+
+        vm.CopyCodeCommand.Execute(vm.Accounts[0]);
+
+        copied.Should().Be(vm.Accounts[0].Code).And.HaveLength(6);
+    }
+
+    [Fact]
     public void Login_Unlock_RaisesEventWithPassword()
     {
         var vm = new LoginViewModel { MasterPassword = "hunter2" };
