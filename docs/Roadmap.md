@@ -15,7 +15,16 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
 
-## Next (1.6): deep protection
+## Next (1.6): icons and deep protection
+
+Icons come first: they are visible to everyone and do not change how a vault is opened.
+
+| Item | Why |
+| --- | --- |
+| Letter icons for passwords and authenticator accounts | Finding the right entry at a glance, with no logos and no network. See the plan below |
+| Website icon for a password (optional) | Fetches the site's own icon, only when you ask. Off by default, with only the strictest settings. See the plan below |
+
+The deep protection work follows:
 
 | Item | Why |
 | --- | --- |
@@ -51,6 +60,88 @@ The two optional unlock changes come last: they change how a vault is opened and
 | Mobile app (Android and iOS) | Shares the Core, Crypto and Backup libraries. Recovery backups already work across devices |
 | Reproducible builds | So a download can be checked against the source. Build attestations are already in place |
 | Authenticode signing and Store packaging | **Postponed: costs money and is not critical for now.** Reduces the SmartScreen "unsafe download" warning, which depends on signing and on download reputation over time. Options: a standard (OV) code-signing certificate, Azure Artifact Signing (organisations in the EU, individuals only in the USA and Canada), or publishing through the Microsoft Store, where Microsoft signs the package (the app would need MSIX packaging and a plan for where the vault is kept) |
+
+## Icons plan
+
+Today only folders have icons (24 general symbols, no brand logos). Passwords and authenticator accounts have none. Each
+entry will show the website icon you accepted, or else a letter icon.
+
+### Step 1: letter icons, built in
+
+- The first letter of the name on a coloured tile, with the colour worked out from the name. Nothing is downloaded and no
+  logo is copied, so there is nothing to license.
+- Icons follow the theme and high contrast, and the entry's name stays the accessible name.
+
+### Rule for brand logos: none unless proven allowed
+
+**A logo ships only when its license clearly allows it and its owner's brand rules allow this use. If either is missing,
+restricted or unclear, it is not used at all.** There is no "probably fine".
+
+- Checked 2026-11-01: Simple Icons releases its project under CC0 but says that does not cover every icon. Of its 3,467
+  icons, 3,243 have no license on record. None of the major services checked has one, including Bluesky, Mastodon, Facebook,
+  Instagram, Threads, X, TikTok, YouTube, Reddit, Discord, Telegram, WhatsApp, Signal, Snapchat, Pinterest, Twitch,
+  Tumblr, GitHub, GitLab, Google, Apple, Netflix, Spotify, PayPal, Steam, Dropbox and Proton Mail.
+- So **no brand logos are planned**, and the app ships none. A copyright license would not settle trademark use either.
+- Service names may still be written as plain text, and a logo can be added if its owner gives written permission.
+
+### Step 2: website icon, optional, strictest settings only
+
+This fetches an icon the site itself publishes, for your own private use. MasterSafe does not distribute it. The
+settings below are fixed; none of them can be loosened.
+
+- **Off by default**, and the setting says what it reveals: the site, and anyone watching the network, can see that this
+  computer asked for that site's icon.
+- **Only when you ask:** a "Use the site's icon" button on one password at a time, while the vault is unlocked. It shows a
+  preview and saves only after you accept. No background fetching and no "fetch all".
+- **Direct to the site:** no third-party icon service, because one would learn every site in the vault.
+- **Only `https://<host>/favicon.ico` is requested.** The saved path, query and user name are never sent, no cookies are
+  stored or sent, and no web page is read or parsed.
+- **HTTPS with a valid certificate only.** No fallback to HTTP.
+- **Public names only:** IP addresses, local names and any name resolving to a private, loopback or link-local address
+  are refused. The check runs again on the connection itself, so a site cannot aim the app at this computer or the network.
+- **No redirects to another site.** Only the same name with or without `www.`, over HTTPS, and only one.
+- **Strict limits:** 5 seconds and 256 KiB. The file must begin with a PNG or ICO signature before any image decoder
+  sees it. SVG is refused because it can carry scripts.
+- **Stored safely:** decoded with size limits, reduced to a 32 by 32 PNG, and kept inside the encrypted vault. The
+  downloaded file itself is never kept.
+- **An icon is not proof.** A fake site can copy a real site's icon, so the app never treats it as a sign a site is genuine.
+- **Testing:** hostile servers (private addresses, redirects, huge and malformed files) in the unit tests, and the image
+  check in the fuzz tests. Vault files with icons are tested against older versions, as attachments were.
+
+## Features other apps have
+
+Compared on 2026-11-01 with the published feature lists of KeePassXC, Aegis, Bitwarden and 1Password. This project stays
+offline first, so each idea is judged by what it adds to the attack surface as well as what it gives.
+
+**Worth doing, low risk**
+
+| Feature | Seen in | Notes |
+| --- | --- | --- |
+| Export to `.kdbx` and an encrypted export | KeePassXC, Aegis | Nobody is locked in. Already planned |
+| Import from 1Password, Bitwarden, Proton Pass and authenticator apps | KeePassXC, Aegis | Each with a preview screen |
+| Custom fields and more item types (secure notes, cards, identities) | KeePassXC, Bitwarden, 1Password | Tags already exist in the data, but need a screen |
+| Tap to reveal codes | Aegis | Hides codes until clicked, against shoulder surfing |
+| Custom order and groups for authenticator accounts | Aegis | |
+| More health checks: duplicate items, `http://` addresses, expiry dates | 1Password | Works offline. Weak and reused passwords are already covered |
+| Password expiry reminders | 1Password | |
+| Printed emergency sheet | | Local alternative to a cloud emergency contact |
+
+**Useful, but each one adds real risk: decide one at a time**
+
+| Feature | Seen in | Risk to weigh |
+| --- | --- | --- |
+| Browser extension and passkeys | KeePassXC, Bitwarden, 1Password | The largest gap for daily use, and the largest new attack surface: a browser talking to the vault. Needs its own design and review |
+| Auto-type | KeePassXC | Can type a password into the wrong window; needs a confirmation |
+| SSH agent | KeePassXC, 1Password | Other programs can ask for a key to be used |
+| Mobile apps | Bitwarden, 1Password, Aegis | Large effort. Already in Later |
+| Encrypted sync through your own folder or WebDAV | KeePassXC users, Bitwarden | Needs conflict handling so that a merge never loses entries |
+| Emergency access | Bitwarden | Bitwarden does it through its servers. A recovery key split between people gives much of this offline |
+| Travel mode | 1Password | Hiding folders on a trip. Hard to do honestly in a single local vault file |
+
+**Not planned**
+
+- Cloud accounts or a hosted service, and anything that makes MasterSafe depend on one. It goes against the offline design.
+- Brand icon packs, for the reason above.
 
 ## KeePass support plan
 
