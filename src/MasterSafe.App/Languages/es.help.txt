@@ -1,0 +1,300 @@
+@@help
+### Welcome and first steps
+title: Bienvenida y primeros pasos
+summary: Cree su bóveda y configúrela en unos minutos.
+body:
+MasterSafe Authenticator guarda las cuentas de contraseña de un solo uso (los códigos de 6 dígitos de la autenticación en dos pasos) y sus contraseñas en una única bóveda cifrada en su equipo. No se envía nada a ninguna parte salvo que elija una función que necesite la red, y cada una de ellas se describe en esta ayuda.
+
+Primeros pasos:
+
+1. Cree la bóveda. Elija una contraseña maestra: una frase larga de varias palabras es segura y fácil de recordar. MasterSafe rechaza las contraseñas muy fáciles de adivinar. No se puede recuperar si la olvida, por eso importa el paso siguiente.
+2. Cree una clave de recuperación (Recuperación). El botón «Crear la clave de recuperación automáticamente» lo hace en un solo paso. Vea «Recuperación y contraseña maestra olvidada».
+3. Añada Windows Hello o una llave de seguridad en Ajustes si quiere entrar más rápido. Su contraseña maestra siempre sigue funcionando.
+4. Añada sus cuentas y contraseñas: escríbalas, suelte una imagen de código QR en la ventana o impórtelas desde KeePass. Vea «Añadir e importar».
+
+La página de códigos muestra recordatorios de los pasos que aún no ha hecho. Cada uno tiene un botón «Ahora no» y puede desactivarlos todos en Ajustes.
+
+### Authenticator codes
+title: Códigos del autenticador
+summary: Lea, copie, busque, ordene y renombre sus códigos.
+body:
+La página Códigos del autenticador lista todas las cuentas con su código actual.
+
+- Los códigos TOTP cambian con un horario fijo, normalmente cada 30 segundos. La barra y la cuenta atrás muestran cuándo llega el siguiente. Los códigos HOTP avanzan con un contador y no tienen cuenta atrás.
+- Copiar código pone el código en el portapapeles. Se quita de nuevo pasado el tiempo que eligió en Ajustes (2 minutos al principio), y copiar otro secreto reinicia esa espera.
+- Con más de tres cuentas aparecen un cuadro de búsqueda y uno de orden. La búsqueda coincide con el emisor (por ejemplo GitHub) y la etiqueta (normalmente su usuario). El orden se recuerda.
+- Renombrar cambia solo el emisor y la etiqueta. El secreto y los códigos no cambian.
+- Eliminar quita una cuenta de inmediato tras una confirmación. Asegúrese antes de poder entrar a ese servicio de otra forma: sin el secreto no hay manera de recuperar los códigos, salvo desde una copia.
+
+### Adding and importing
+title: Añadir e importar
+summary: Tipos de enlaces, imágenes QR y exportaciones de KeePass.
+body:
+Añadir una cuenta:
+- Añadir cuenta: escriba el emisor, la etiqueta y la clave secreta que muestra el servicio.
+- Importar: pegue el enlace otpauth:// que hay detrás de un código QR (por ejemplo otpauth://totp/Emisor:usuario?secret=...).
+- Imagen de código QR: arrastre una imagen PNG, JPG o BMP del código QR a la ventana con la bóveda desbloqueada, o elíjala con «Elegir una imagen...». Se pueden soltar varias imágenes a la vez. Una cuenta que ya está en su bóveda no se añade dos veces.
+
+Traer datos de KeePass o KeePassXC:
+- En KeePass elija Archivo, Exportar, KeePass XML (2.x). En KeePassXC elija Base de datos, Exportar a CSV (o XML). Después use «Elegir un archivo exportado...» en la página Importar, o suelte el archivo en la ventana.
+- Un resumen muestra qué se añadirá y qué se omite (entradas de la papelera, versiones antiguas, duplicados, archivos demasiado grandes). No se añade nada hasta que elija Importar.
+- Los grupos pasan a ser carpetas, los campos de contraseña de un solo uso pasan a ser cuentas del autenticador y los archivos adjuntos (exportaciones KeePass XML) vienen incluidos, hasta 5 MB cada uno.
+- El archivo exportado no está cifrado. Elimínelo en cuanto lo haya importado. La página tiene un botón «Mostrar archivo» para ello. Abrir archivos .kdbx directamente aún no es posible.
+
+MasterSafe comprueba cada cuenta y archivo que lee. Los archivos dañados o inesperados se rechazan con un mensaje en vez de importarse a medias.
+
+### Passwords
+title: Contraseñas
+summary: Guarde credenciales, cree contraseñas seguras y cópielas con seguridad.
+body:
+La página Contraseñas guarda credenciales en su bóveda cifrada.
+
+- Rellene el formulario y elija Guardar. «Generar contraseña segura» crea una aleatoria.
+- La barra de fortaleza bajo el campo de contraseña estima lo difícil que es adivinarla. Es una estimación: no ve todos los patrones débiles, así que una contraseña larga y aleatoria o una frase de varias palabras sin relación es siempre la opción más segura.
+- Copiar usuario y Copiar contraseña ponen el valor en el portapapeles. Se quita de nuevo pasado el tiempo fijado en Ajustes y se mantiene fuera del historial del portapapeles de Windows (Win+V) y del portapapeles en la nube, para que no quede allí.
+- Abrir sitio abre la dirección de la entrada en su navegador. Solo se abren direcciones http y https, y una dirección http sin cifrar viene con una advertencia.
+- La búsqueda coincide con el título, el usuario, la dirección, la carpeta y las etiquetas. El cuadro de orden ordena por título, por cambios recientes o por carpeta.
+- Marque varias entradas para eliminarlas o moverlas juntas. Cambiar la búsqueda o la carpeta quita las marcas, así que nunca se elimina por error algo que no ve.
+
+### Folders and icons
+title: Carpetas e iconos
+summary: Organice las contraseñas en carpetas, con los iconos que elija.
+body:
+La lista de la izquierda de la página Contraseñas muestra sus carpetas y cuántas contraseñas tiene cada una. Elija una carpeta para ver sus contraseñas y las de sus subcarpetas.
+
+- Carpeta nueva: escriba un nombre en el cuadro bajo la lista y elija Carpeta nueva. Se crea dentro de la carpeta seleccionada. Un nombre como Trabajo/Remoto crea los dos niveles.
+- Renombrar la seleccionada renombra una carpeta con todo su contenido. Eliminar carpeta quita solo la carpeta: sus contraseñas suben un nivel y nunca se eliminan.
+- Cambiar icono da a la carpeta uno de 24 iconos. Elija la carpeta simple para volver atrás.
+- Mover contraseñas: ponga la Carpeta en el formulario de la entrada, marque varias entradas y use «Mover la selección a», o arrastre una entrada a una carpeta. Arrastrar una entrada marcada mueve todas las marcadas.
+- Haga clic derecho en una carpeta para las mismas acciones. Arrastre el divisor para cambiar el ancho de la lista y haga doble clic en él para ajustarlo de nuevo a los nombres.
+
+Las carpetas son solo para contraseñas. Las cuentas del autenticador se guardan aparte.
+
+### Attached files
+title: Archivos adjuntos
+summary: Guarde documentos junto a una entrada de contraseña.
+body:
+Una entrada puede llevar archivos, por ejemplo un texto con códigos de recuperación o una clave de licencia.
+
+- En el formulario de la entrada elija «Adjuntar un archivo...» y luego Guardar. Cada archivo puede pesar hasta 5 MB y toda la bóveda puede contener 50 MB de adjuntos.
+- Los archivos se guardan cifrados dentro de su bóveda, junto con las contraseñas, y forman parte de las copias de recuperación. Una bóveda sin adjuntos conserva su formato anterior.
+- «Guardar como...» escribe una copia en el lugar que elija. Esa copia es un archivo normal y ya no está protegida por su bóveda, así que elimínela cuando termine.
+- Los nombres se limpian: un archivo nunca puede guardarse fuera de la carpeta que eligió.
+
+### Recycle bin and history
+title: Papelera e historial
+summary: Deshaga una eliminación y encuentre una contraseña antigua.
+body:
+Papelera de reciclaje
+- Al eliminar una contraseña pasa a la Papelera, al final de la lista de carpetas, con sus archivos adjuntos. Permanece allí 30 días y se puede restaurar a su carpeta.
+- Eliminar definitivamente, o Vaciar la papelera, quita las entradas de inmediato. No se puede deshacer.
+- Pasados 30 días, la aplicación quita sola las entradas de la papelera al abrir la bóveda.
+
+Versiones anteriores
+- Cuando cambia el título, el usuario, la contraseña, la dirección o las notas de una entrada, los valores antiguos se guardan como versión anterior, hasta diez por entrada. Abra la entrada con Editar para verlas.
+- «Usar esta versión» devuelve los valores antiguos al formulario (solo se guardan cuando elige Guardar), y «Copiar su contraseña» es útil cuando un sitio aún espera la antigua.
+
+Ambas cosas se guardan dentro de la bóveda cifrada. Por eso las contraseñas antiguas permanecen en la bóveda hasta que su entrada se elimina definitivamente.
+
+### Password health
+title: Salud de contraseñas
+summary: Encuentre contraseñas débiles, repetidas y antiguas.
+body:
+La parte superior de la página es una Revisión de seguridad de MasterSafe: el tiempo de bloqueo, el bloqueo con el equipo, el bloqueo de capturas de pantalla, el vaciado del portapapeles, la clave y la copia de recuperación, un segundo método de desbloqueo y la comprobación de filtraciones. Cada línea dice «Bien» o «Mejorar» y qué cambiar. No se cambia nada por usted.
+
+Debajo, la página comprueba sus contraseñas en este equipo:
+
+- Débiles: fáciles de adivinar por ser cortas, simples, muy comunes o construidas con el título o el usuario.
+- Repetidas: la misma contraseña se usa en más de una entrada. Si un sitio la filtra, los demás también corren riesgo.
+- Antiguas: sin cambiar desde hace más de un año.
+
+Cada línea tiene un botón Abrir que le lleva a la entrada.
+
+Comprobación opcional de filtraciones
+También puede buscar sus contraseñas en filtraciones de datos conocidas con el servicio Pwned Passwords de Have I Been Pwned (haveibeenpwned.com, de Troy Hunt). Está desactivada hasta que la permita en Ajustes. Al ejecutarla, su contraseña nunca se envía: MasterSafe calcula su hash SHA-1 en su equipo y envía solo los 5 primeros caracteres a api.pwnedpasswords.com. El servicio responde con todos los hashes que empiezan igual y la comparación se hace aquí. Una contraseña encontrada en una filtración debe cambiarse sea cual sea su fortaleza.
+
+### Keyboard and mouse
+title: Teclado y ratón
+summary: Atajos y acciones rápidas.
+body:
+En la página Contraseñas los atajos actúan sobre la entrada actual: la última en la que hizo clic o que editó, o la única mostrada.
+
+- Ctrl+F: buscar
+- Ctrl+N: entrada nueva
+- Ctrl+B: copiar el usuario
+- Ctrl+C: copiar la contraseña (dentro de un cuadro de texto copia el texto seleccionado como de costumbre)
+- Ctrl+U: abrir el sitio
+- Supr: mover la entrada a la papelera (tras una confirmación)
+
+Con el ratón:
+- Doble clic en una entrada para copiar su contraseña.
+- Clic derecho en una entrada o una carpeta para un menú.
+- Arrastre una entrada a una carpeta para moverla, o a la Papelera para eliminarla.
+- Suelte una imagen de código QR en cualquier parte de la ventana para importar una cuenta.
+
+### Accessibility
+title: Accesibilidad
+summary: Lectores de pantalla, teclado, tamaño del texto y contraste.
+body:
+MasterSafe está hecho para poder usarse sin ratón y con tecnologías de apoyo.
+
+- Lectores de pantalla (Narrador, NVDA): cada control tiene nombre, los títulos de página son encabezados y mensajes como «Copiado» se leen en voz alta. Los códigos se leen cuando los pide, no cada segundo.
+- Teclado: pulse Alt y la letra subrayada para ir a una página, F1 para esta ayuda, Ctrl+L para bloquear, Tab y Mayús+Tab para moverse, Intro o Espacio para pulsar un botón. Todo lo que se puede hacer arrastrando también se puede hacer con un botón.
+- Tamaño del texto y de la ventana: Ajustes, «Tamaño del texto y de la ventana» (100 a 200 %), o pulse Ctrl y más o menos en cualquier momento. Ctrl y 0 vuelve a lo normal.
+- Contraste: Ajustes, Tema, «Alto contraste». Con «Seguir al sistema», el modo de alto contraste de Windows lo activa solo.
+- Tiempo: aparece un aviso 30 segundos antes de que la bóveda se bloquee sola. Elija «Mantener desbloqueada» o pulse cualquier tecla. Puede cambiar el tiempo en Ajustes.
+- Idioma: Ajustes, Idioma (inglés, español, finés).
+
+Si algo resulta difícil de usar con sus herramientas, cuéntenoslo: vea «Acerca de, licencia y soporte».
+
+### Backups
+title: Copias de seguridad
+summary: Copias cifradas de sus cuentas.
+body:
+La pantalla Copias escribe un archivo .sauth cifrado con sus cuentas del autenticador. Solo su contraseña maestra puede abrirlo. Nunca se produce una exportación en texto plano.
+
+Destinos:
+- Carpeta local: elija una carpeta de este dispositivo.
+- WebDAV en la nube: escriba la dirección de la carpeta (debe empezar por https://) más el usuario y la contraseña de un servidor WebDAV como Nextcloud u ownCloud. Use una contraseña de aplicación si su servidor la ofrece.
+
+Use Exportar para crear una copia, Actualizar para listar las existentes e Importar la seleccionada para restaurar una. Las copias se cifran con Argon2id y AES-256-GCM.
+
+Esta copia contiene solo cuentas. Para proteger también sus contraseñas y archivos adjuntos, use las copias de recuperación, descritas en el tema siguiente.
+
+### Recovery and the forgotten master password
+title: Recuperación y contraseña maestra olvidada
+summary: Clave de recuperación, copias de recuperación y empezar de nuevo.
+body:
+Nadie puede restablecer una contraseña maestra, porque sus datos están cifrados con ella. Prepárese mientras aún la recuerda.
+
+1. Abra Recuperación y cree una clave de recuperación. Lo más fácil es «Crear la clave de recuperación automáticamente»: MasterSafe elige una frase segura, pregunta dónde guardar el archivo de clave y luego muestra la frase una sola vez para que la anote. O escriba una frase propia. Guarde el archivo de clave en un lugar seguro y lejos de este equipo, y guarde la frase por escrito aparte.
+2. Cree una copia de recuperación. Contiene sus cuentas, contraseñas, carpetas y archivos adjuntos, cerrados de modo que solo su clave de recuperación pueda abrirlos. Guárdela donde quiera, incluso en la nube.
+3. Opcional: active «Guardar copias de recuperación automáticamente» y elija una carpeta. Un minuto después de que cambie algo, MasterSafe escribe allí una copia nueva y conserva las cinco más recientes. Nunca escribe una con la bóveda bloqueada o vacía.
+
+Las copias de recuperación usan un esquema híbrido que combina un intercambio de claves clásico con uno poscuántico (ML-KEM-768), por lo que siguen protegidas incluso frente a futuros ordenadores cuánticos.
+
+Si olvida la contraseña:
+- En la pantalla de entrada elija «¿Olvidó su contraseña maestra?».
+- Restaure desde una copia de recuperación: elija el archivo de copia, su archivo de clave, su frase y una contraseña maestra nueva.
+- O empiece una bóveda nueva. Su bóveda anterior se mueve al archivo, no se elimina. Si encuentra la contraseña más tarde, abra la bóveda antigua desde la página Bóvedas.
+- Windows Hello o una llave de seguridad aún pueden abrir su bóveda. Si es así, cambie la contraseña maestra en Ajustes.
+
+### Unlock methods
+title: Métodos de desbloqueo
+summary: Windows Hello y llaves de seguridad.
+body:
+Además de la contraseña maestra puede desbloquear con:
+
+- Windows Hello: usa una clave que guarda Windows (en el TPM si su equipo lo tiene) y que solo funciona tras verificarse con su PIN, huella o rostro.
+- Una llave de seguridad FIDO2: la llave calcula un secreto que nunca sale de ella. Necesita el PIN de la llave y un toque. La mayoría de las llaves actuales admiten la función hmac-secret que esto requiere. Se puede configurar una llave de seguridad por bóveda.
+
+Añádalos o quítelos en Ajustes. La contraseña maestra siempre sigue funcionando y no se puede quitar. Los intentos fallidos con Windows Hello o una llave están limitados por Windows y por la propia llave.
+
+### Privacy and locking
+title: Privacidad y bloqueo
+summary: Cómo evita MasterSafe que se filtren los secretos.
+body:
+Ajustes, «Privacidad y bloqueo» y General:
+
+- Pausa de entrada: tras 5 contraseñas maestras erróneas seguidas, la entrada se pausa 30 segundos y luego 1, 2, 5 y por último 15 minutos con cada error más. Una contraseña correcta lo reinicia, y el siguiente desbloqueo le dice cuántas contraseñas erróneas se introdujeron. El contador sobrevive al reinicio de la aplicación. Esto detiene los intentos en su teclado. No puede detener a quien copia el archivo de la bóveda y adivina en otro sitio: para eso sirven la lenta derivación de clave Argon2id y una contraseña maestra larga. Nunca se elimina nada por contraseñas erróneas.
+- Bloqueo automático: la bóveda se bloquea tras los minutos de inactividad que fije (5 al principio).
+- Bloquear al bloquear o suspender Windows (activado por defecto) y, opcionalmente, al minimizar la ventana.
+- Mantener la ventana fuera de las capturas y de la pantalla compartida (activado por defecto, Windows): la ventana se ve negra en las capturas. Desactívelo si necesita hacer una captura de MasterSafe.
+- Portapapeles: elija 30 segundos, 1 minuto o 2 minutos. Las copias se mantienen fuera del historial del portapapeles de Windows y del portapapeles en la nube.
+- Al bloquear se quitan los datos descifrados de las pantallas respaldadas en memoria y se borra la clave de sesión.
+
+### Settings and the tray
+title: Ajustes y la bandeja
+summary: Temas, recordatorios y la bandeja del sistema.
+body:
+- Tema: Sistema, Claro, Oscuro o Alto contraste, aplicado de inmediato.
+- Idioma: inglés, español o finés. Cambia por completo al reiniciar MasterSafe.
+- Fortaleza de la protección de la contraseña: «Probar y reforzar» mide este equipo y hace que adivinar su contraseña maestra sea lo más lento posible mientras desbloquear siga tardando alrededor de un segundo. Escriba su contraseña maestra para confirmar. No cambia nada más.
+- Recordatorios: muestre u oculte los avisos de la página de códigos (clave de recuperación, copias, actualizaciones).
+- Seguir en la bandeja: cerrar o minimizar la ventana la oculta en el área de notificaciones en vez de salir. Ábrala de nuevo con un clic en el icono de la bandeja. Su menú muestra la ventana, abre Acerca de o sale.
+- Cambiar la contraseña maestra: vuelve a proteger su bóveda con una contraseña nueva. Windows Hello y la llave de seguridad siguen funcionando.
+
+En Windows 11 un icono nuevo de la bandeja empieza en la zona de iconos ocultos (la flecha junto al reloj). Para que esté siempre visible, arrástrelo a la barra de tareas o actívelo en Configuración, Personalización, Barra de tareas, Otros iconos de la bandeja del sistema.
+
+### Updates
+title: Actualizaciones
+summary: Obtenga versiones nuevas con seguridad.
+body:
+Ajustes tiene una sección Actualizaciones.
+
+- «Buscar actualizaciones» pregunta a GitHub por la versión más reciente. Opcionalmente, MasterSafe puede hacerlo una vez tras desbloquear. Está desactivado por defecto, porque contacta con github.com.
+- «Descargar y verificar» guarda el instalador de su sistema y comprueba su firma ML-DSA-65 y su suma SHA-256 con la clave de firma del proyecto, que está integrada en la aplicación. Una descarga que no se verifica se elimina. Después cierra MasterSafe y ejecuta usted el instalador. Las actualizaciones nunca se instalan solas y su bóveda no se toca.
+- No se envía nada sobre usted ni su bóveda. Solo se solicita la información pública de la versión.
+
+También puede verificar cualquier descarga a mano con la herramienta de línea de comandos de MasterSafe. La huella de la clave se publica en el README y en SECURITY.md del proyecto.
+
+### Vaults and files
+title: Bóvedas y archivos
+summary: Dónde se guardan sus datos y cómo abrir otra bóveda.
+body:
+Sus datos son un único archivo cifrado, una bóveda, guardado en la carpeta de MasterSafe.
+Windows: %LocalAppData%\MasterSafe. Linux: ~/.local/share/MasterSafe (legible solo por usted).
+
+La página Bóvedas muestra estas ubicaciones y lista sus bóvedas:
+- Abrir un archivo de bóveda: use una bóveda de una memoria USB u otra carpeta. MasterSafe deja el archivo donde está.
+- Empezar una bóveda nueva: mueve la bóveda actual al archivo y crea una vacía.
+- Abra de nuevo una bóveda archivada, muestre un archivo en su carpeta o elimine una bóveda antigua. Eliminar pide confirmación y no se puede deshacer.
+
+Para pasar a otro equipo, copie allí vault.sauth, instale MasterSafe y elija «Ya tengo un archivo de bóveda». Desinstalar nunca quita su bóveda. Guardar es seguro ante fallos y la versión anterior de la bóveda se conserva como vault.sauth.bak.
+
+### Security model
+title: Modelo de seguridad
+summary: Cómo se protegen sus datos y cuáles son los límites.
+body:
+MasterSafe está construido con la seguridad en primer lugar.
+
+- Su contraseña maestra se refuerza con Argon2id (128 MiB de memoria por defecto, hasta 512 MiB ajustados a su equipo) hasta una clave de 256 bits.
+- La bóveda, incluidos los archivos adjuntos, se comprime y se cifra con AES-256-GCM, que además autentica los datos para detectar manipulaciones.
+- La bóveda se cifra con una clave aleatoria. Esa clave se guarda una vez por cada forma de desbloqueo (contraseña maestra, Windows Hello, llave de seguridad), cada una protegida por separado.
+- Las versiones se firman con la firma poscuántica ML-DSA-65, de modo que se puede demostrar que una descarga es genuina. Las copias de recuperación usan un esquema híbrido ML-KEM-768 más ECDH P-384.
+- Los archivos que abre (bóvedas, copias, exportaciones de KeePass, imágenes QR, descargas) se tratan como no fiables: tamaños, ajustes de derivación de clave, anidamiento y cantidades se limitan antes de leer nada.
+- Los secretos nunca se escriben en disco en texto plano, nunca se registran y no se envían por la red.
+
+Límites que debe conocer
+- Mientras la bóveda está desbloqueada, su contenido está en memoria. Un malware que se ejecute como usted puede leerlo. Mantenga su equipo actualizado y use el bloqueo automático.
+- Una copia guardada con «Guardar como...» o una exportación de otro programa no está protegida.
+- Ningún software puede prometer ser inquebrantable. Lo que más importa es una contraseña maestra larga y única.
+
+### Troubleshooting
+title: Solución de problemas
+summary: Preguntas frecuentes y qué hacer.
+body:
+Olvidé mi contraseña maestra.
+Vea «Recuperación y contraseña maestra olvidada». Sin una clave de recuperación o un método de desbloqueo que aún funcione, los datos no se pueden abrir.
+
+La entrada dice «Demasiadas contraseñas erróneas».
+Espere a que termine la cuenta atrás. Protege contra los intentos de adivinar. Una contraseña correcta después funciona con normalidad.
+
+Un código no se acepta.
+Los códigos dependen del reloj. Compruebe que la hora y la zona horaria de su equipo son correctas y pruebe el siguiente código.
+
+La ventana sale negra en mi captura.
+Es el ajuste que mantiene MasterSafe fuera de las capturas. Desactívelo en Ajustes, Privacidad y bloqueo, mientras captura.
+
+Copiar una contraseña no hace nada.
+Otro programa puede estar usando el portapapeles. Inténtelo de nuevo. Si sigue fallando, cierre los gestores de portapapeles.
+
+Falta el icono de la bandeja.
+En Windows 11 mire bajo la flecha junto al reloj y arrastre el icono a la barra de tareas.
+
+El instalador muestra una advertencia de SmartScreen.
+El instalador aún no está firmado con un certificado Authenticode de pago. Compruebe la descarga con «Descargar y verificar» en una actualización posterior, o con la herramienta de línea de comandos, y compare la huella de la clave con la del README del proyecto.
+
+### About, licence and support
+title: Acerca de, licencia y soporte
+summary: Quién hace MasterSafe y dónde leer más.
+body:
+MasterSafe Authenticator está escrito por Gabriel Vergara Ezcurdia. Es gratuito para uso personal y no comercial; vea el archivo LICENSE para los términos. Sus componentes de terceros y sus licencias figuran en THIRD-PARTY-NOTICES.md.
+
+- Artículo sobre MasterSafe: https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/
+- Sitio web: https://www.gabriel-vergara.com/
+- Código fuente, versiones e incidencias: https://github.com/GabrielVergara/MasterSafeAuthenticator
+
+La ventana Acerca de tiene botones para todo esto.
+
+Para informar de un problema de seguridad, siga SECURITY.md en el proyecto y no lo publique abiertamente.

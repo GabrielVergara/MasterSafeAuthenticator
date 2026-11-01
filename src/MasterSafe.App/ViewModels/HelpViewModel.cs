@@ -6,6 +6,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MasterSafe.App.Help;
+using MasterSafe.App.Services;
 
 namespace MasterSafe.App.ViewModels;
 
@@ -22,7 +23,7 @@ public sealed partial class HelpViewModel : ViewModelBase
 
     public HelpViewModel()
     {
-        Topics = new ObservableCollection<HelpTopic>(HelpContent.Topics);
+        Topics = new ObservableCollection<HelpTopic>(Loc.LocalizeHelp(HelpContent.Topics));
         _selectedTopic = Topics.Count > 0 ? Topics[0] : null;
     }
 
@@ -35,7 +36,7 @@ public sealed partial class HelpViewModel : ViewModelBase
     partial void OnSearchTextChanged(string value)
     {
         var q = value.Trim();
-        var matches = HelpContent.Topics
+        var matches = Loc.LocalizeHelp(HelpContent.Topics)
             .Where(t => q.Length == 0
                 || t.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || t.Summary.Contains(q, StringComparison.OrdinalIgnoreCase)

@@ -54,6 +54,9 @@ public sealed class AppSettings
     /// <summary>How large the text and the window are shown, in percent (100, 125, 150, 175 or 200).</summary>
     public int TextScalePercent { get; set; } = 100;
 
+    /// <summary>"System" (follow the computer), "en", "es" or "fi".</summary>
+    public string Language { get; set; } = "System";
+
     /// <summary>Show reminders (recovery key, backup, update) at the top of the codes page.</summary>
     public bool ShowReminders { get; set; } = true;
 

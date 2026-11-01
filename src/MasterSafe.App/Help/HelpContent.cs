@@ -226,6 +226,7 @@ public static class HelpContent
               switches it on by itself.
             - Time: a warning appears 30 seconds before the vault locks by itself. Choose "Keep unlocked" or
               press any key. You can change the time in Settings.
+            - Language: Settings, Language (English, Spanish, Finnish).
 
             If something is hard to use with your tools, please tell us: see "About, licence and support".
             """),
@@ -319,6 +320,7 @@ public static class HelpContent
             "Themes, reminders and the system tray.",
             """
             - Theme: System, Light, Dark or High contrast, applied immediately.
+            - Language: English, Spanish or Finnish. It changes completely when MasterSafe is restarted.
             - Strength of the password protection: "Test and strengthen" measures this computer and makes
               guessing your master password as slow as it can be while unlocking still takes about a second.
               Type your master password to confirm. Nothing else changes.
@@ -374,7 +376,8 @@ public static class HelpContent
             """
             MasterSafe is built security-first.
 
-            - Your master password is stretched with Argon2id (128 MiB of memory) into a 256-bit key.
+            - Your master password is stretched with Argon2id (128 MiB of memory by default, up to 512 MiB tuned to
+              your computer) into a 256-bit key.
             - The vault, including attached files, is compressed and encrypted with AES-256-GCM, which also
               authenticates the data to detect tampering.
             - The vault is encrypted with one random key. That key is stored once for each way of unlocking

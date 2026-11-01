@@ -178,6 +178,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Press Ctrl+B, Ctrl+C, Ctrl+U, Ctrl+F, Ctrl+N and Delete on the Passwords page after clicking an entry | Copies user name, copies password, opens the site, focuses search, starts a new entry, asks to delete |
 | Drag an entry onto a folder, and onto Recycle bin | It moves; dropping on the bin asks nothing but can be restored |
 | Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/ |
+| Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Settings, Text and window size 150%, then Ctrl+0 | Everything is larger and reflows without clipping; Ctrl+0 returns to 100% |
 | Windows Settings, Accessibility, Contrast themes, switch one on, theme "Follow the system" | The app uses the High contrast theme |
 | Leave the app idle until 30 s before the auto-lock | A warning with "Keep unlocked" appears; pressing it keeps the vault open |

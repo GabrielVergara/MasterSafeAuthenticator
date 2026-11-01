@@ -27,7 +27,7 @@ This page says what is in place, how it is checked, and what is still missing. I
 ## Known gaps
 
 - Orca (Linux screen reader) has not been tried; Avalonia's Linux accessibility support is less complete than on Windows.
-- Only English text exists; Finnish and Spanish are planned (language is part of accessibility).
+- Languages: English, Spanish and Finnish. Some messages built in code from changing parts may still appear in English.
 - No dyslexia-friendly font option or line-spacing setting yet.
 - The first-run guide is a Help topic and reminders, not yet a step-by-step wizard.
 

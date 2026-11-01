@@ -141,6 +141,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _breachCheckEnabled = saved.BreachCheckEnabled;
             _showReminders = saved.ShowReminders;
             _textScalePercent = NearestTextScale(saved.TextScalePercent);
+            _language = Loc.Choices.Contains(saved.Language) ? saved.Language : "System";
             _checkForUpdatesOnStart = saved.CheckForUpdatesOnStart;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
@@ -170,6 +171,21 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnShowRemindersChanged(bool value) => SaveSettings();
 
     partial void OnTextScalePercentChanged(int value) => SaveSettings();
+
+    /// <summary>"System", "en", "es" or "fi". Takes full effect the next time the program starts.</summary>
+    [ObservableProperty]
+    private string _language = "System";
+
+    public IReadOnlyList<string> Languages => Loc.Choices;
+
+    partial void OnLanguageChanged(string value)
+    {
+        SaveSettings();
+        LanguageNote = Loc.T("The language changes completely the next time MasterSafe starts.");
+    }
+
+    [ObservableProperty]
+    private string? _languageNote;
 
     /// <summary>The offered size closest to <paramref name="percent"/>; 100 when it is 0 or missing.</summary>
     public static int NearestTextScale(int percent)
@@ -204,6 +220,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.BreachCheckEnabled = BreachCheckEnabled;
             settings.ShowReminders = ShowReminders;
             settings.TextScalePercent = TextScalePercent;
+            settings.Language = Language;
             settings.CheckForUpdatesOnStart = CheckForUpdatesOnStart;
             _store.Save(settings);
         }

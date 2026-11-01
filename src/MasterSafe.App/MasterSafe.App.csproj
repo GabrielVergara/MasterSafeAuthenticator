@@ -29,5 +29,7 @@
   <ItemGroup>
     <!-- The release signing key (public), so an update can be checked against it. Same file as signing/masterSafe-release.pub. -->
     <EmbeddedResource Include="..\..\signing\masterSafe-release.pub" LogicalName="masterSafe-release.pub" />
+    <!-- Translations: English text => translated text, plus the help topics. -->
+    <EmbeddedResource Include="Languages\*.txt" LogicalName="Languages.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

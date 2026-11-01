@@ -20,6 +20,7 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - Import from **KeePass and KeePassXC** (XML or CSV) with a preview before anything is added.
 
 **Security**
+- Available in **English, Spanish and Finnish** (follows your computer; see [docs/Translating.md](docs/Translating.md)), with screen-reader names, keyboard access, text zoom and a high-contrast theme ([docs/Accessibility.md](docs/Accessibility.md)).
 - Vault contents encrypted with **AES-256-GCM**; the master password is stretched with **Argon2id** (128 MiB by default, up to 512 MiB tuned to your computer); the
   header and key slots are authenticated; saves are atomic and keep a `.bak` copy.
 - Unlock with the master password, **Windows Hello** or a **FIDO2 security key** (tested with a Thales SafeNet key).

@@ -29,6 +29,20 @@ public partial class App : Application
     {
         AutoHideReveal.Install();
 
+        // The language is chosen before any window exists, so even the first screen is in it.
+        Loc.Install();
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime)
+        {
+            try
+            {
+                Loc.Use(new SettingsStore(AppPaths.Default.SettingsPath).Load().Language);
+            }
+            catch (Exception)
+            {
+                Loc.Use("System");
+            }
+        }
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // The splash is the lifetime's main window until start-up work finishes, so the app

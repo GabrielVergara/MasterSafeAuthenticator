@@ -12,6 +12,9 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **Time:** a warning with "Keep unlocked" 30 seconds before the automatic lock.
 - New [accessibility statement](docs/Accessibility.md).
 
+### Languages
+- **Spanish (Español) and Finnish (Suomi)** besides English: every screen, the Help and the check-up messages. The language follows the computer and can be chosen in Settings; a change applies fully after a restart. See [docs/Translating.md](docs/Translating.md) for how texts are translated and how to add a language. A test fails when a text on a screen has no translation.
+
 ### Security
 - **Security check-up** at the top of the Health page: looks at the lock time, lock on computer lock, screen capture block, clipboard clearing, recovery key, recovery backup, second unlock method and breach check, and says what to change. Nothing is changed for you.
 - **Test and strengthen** in Settings: measures this computer and moves the vault to the strongest Argon2id setting (up to 512 MiB) that still unlocks in about a second. The master password does not change; the page also shows the current setting.
