@@ -47,7 +47,7 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 <https://www.gabriel-vergara.com/articles/mastersafe-authenticator/>.
 
 Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
-a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
+a mobile app. See [docs/Roadmap.md](docs/Roadmap.md), the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md) and [how MasterSafe compares with other apps](docs/Comparison.md).
 
 ## Download and install
 

@@ -16,36 +16,43 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
 - 1.5.1: attacker-style review: trusted recovery key kept in the vault, stronger password protection kept when the password changes, every lock and Exit clears a copied secret, process memory protection on Windows and Linux. Linux tests can also run in Docker.
 
-## Next (1.6): icons and deep protection
+## Next (1.6): easier to use, harder to attack
 
-Icons come first: they are visible to everyone and do not change how a vault is opened.
+The aim is to be as safe as we can and easy for anyone to use. The work order is in
+[Release-1.6-Prompt.md](Release-1.6-Prompt.md), and how MasterSafe compares with other apps is in
+[Comparison.md](Comparison.md). The gaps found in the 1.5.1 review come first.
 
 | Item | Why |
 | --- | --- |
+| One running copy at a time | Two running copies can each save, and the second overwrites the first |
+| Security settings inside the vault | Today `settings.json` can be edited by malware to switch off auto-lock or clipboard clearing, or to point the app at a vault on a network share, which makes Windows send the user's network login hash there. The recovery key is already protected this way |
+| Notice an older copy of the vault | Someone able to replace the vault file can put back an older copy, for example to bring back a password you changed. The app cannot tell today. A save counter kept outside the vault file would show it |
+| Version bound into the release signature | A signature covers the file only, so an old signed installer could be offered as a new one if GitHub were compromised |
 | Letter icons for passwords and authenticator accounts | Finding the right entry at a glance, with no logos and no network. See the plan below |
+| Tap to reveal codes (optional) | Hides codes until clicked, against shoulder surfing |
+| Hide revealed passwords when the window loses focus | Revealed passwords already hide after 20 seconds |
+| More health checks and expiry dates | Duplicates, `http://` addresses and expiring passwords, all offline |
 | Website icon for a password (optional) | Fetches the site's own icon, only when you ask. Off by default, with only the strictest settings. See the plan below |
+| Attacker review and a review pack | Every release gets this review. The pack lets an independent reviewer start quickly |
 
-The deep protection work follows:
+## After that (1.7): deep protection
 
 | Item | Why |
 | --- | --- |
 | Data key rotation | Old copies and exported backups stop being useful after a password change |
-| Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed. Moved from 1.5 |
-| Hide revealed passwords when the window loses focus | Revealed passwords already hide after 20 seconds |
-| Security settings inside the vault | Today `settings.json` can be edited by malware to switch off auto-lock or clipboard clearing, or to point the app at a vault on a network share, which makes Windows send the user's network login hash there. The recovery key is already protected this way |
+| Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed |
 | Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |
 | Keep secrets out of .NET strings | Hold decrypted passwords as wipeable buffers and decrypt only while copying. A large internal change that touches every screen |
-| Bind the vault to this computer (optional) | A second key protected by the TPM or Windows DPAPI is needed besides the master password, so a copied vault file cannot be guessed offline from another machine. One extra recovery step when moving computers; losing the TPM means the recovery key is needed. Linux uses Secret Service |
-| Hardware-only unlock (optional) | Allow turning off master-password sign-in once a security key and a recovery key exist. The recovery key becomes essential |
 | Event history | A small encrypted list of recent security events (failed sign-ins, exports, saved attachments), shown in Settings |
 | Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
 | Printable large-print recovery sheet | A recovery copy that does not depend on a file |
-| One running copy at a time | Two running copies can each save, and the second overwrites the first |
-| Version bound into the release signature | A signature covers the file only, so an old signed installer could be offered as a new one if GitHub were compromised |
+| Key file (optional) | A small file needed alongside the master password, so a stolen vault cannot be guessed without it. Easier to move between computers than binding to one |
+| Bind the vault to this computer (optional) | A second key protected by the TPM or Windows DPAPI is needed besides the master password, so a copied vault file cannot be guessed offline from another machine. One extra recovery step when moving computers; losing the TPM means the recovery key is needed. Linux uses Secret Service |
+| Hardware-only unlock (optional) | Allow turning off master-password sign-in once a security key and a recovery key exist. The recovery key becomes essential |
 
-The two optional unlock changes come last: they change how a vault is opened and need migration and rollback tests.
+The last three change how a vault is opened, so they come last and need migration and rollback tests.
 
-## After that (1.7)
+## 1.8: KeePass and more keys
 
 | Item | Notes |
 | --- | --- |
@@ -61,6 +68,7 @@ The two optional unlock changes come last: they change how a vault is opened and
 | Import from Google Authenticator (migration QR), Aegis, 2FAS, Bitwarden JSON | Each with a preview screen |
 | macOS build | The code is cross-platform; needs a signed and notarised package |
 | Mobile app (Android and iOS) | Shares the Core, Crypto and Backup libraries. Recovery backups already work across devices |
+| Independent security review | The largest gap against the audited apps in [Comparison.md](Comparison.md). Needs funding or a volunteer reviewer, and free audit programmes may expect an open-source license |
 | Reproducible builds | So a download can be checked against the source. Build attestations are already in place |
 | Authenticode signing and Store packaging | **Postponed: costs money and is not critical for now.** Reduces the SmartScreen "unsafe download" warning, which depends on signing and on download reputation over time. Options: a standard (OV) code-signing certificate, Azure Artifact Signing (organisations in the EU, individuals only in the USA and Canada), or publishing through the Microsoft Store, where Microsoft signs the package (the app would need MSIX packaging and a plan for where the vault is kept) |
 
@@ -113,7 +121,7 @@ settings below are fixed; none of them can be loosened.
 
 ## Features other apps have
 
-Compared on 2026-11-01 with the published feature lists of KeePassXC, Aegis, Bitwarden and 1Password. This project stays
+Compared on 2026-11-01 with the published feature lists of KeePassXC, Aegis, Bitwarden and 1Password. The full table is in [Comparison.md](Comparison.md). This project stays
 offline first, so each idea is judged by what it adds to the attack surface as well as what it gives.
 
 **Worth doing, low risk**
