@@ -191,7 +191,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 RefreshNotices();
             }
         };
-        Health = new HealthViewModel(() => Passwords.Snapshot(), () => Settings.BreachCheckEnabled, new BreachChecker(BreachChecker.CreateClient()), _clock)
+        Health = new HealthViewModel(() => Passwords.Snapshot(), () => Settings.BreachCheckEnabled, new BreachChecker(BreachChecker.CreateClient()), _clock,
+            () => new CheckupInput(
+                Settings.AutoLockMinutes, Settings.LockOnSessionLock, Settings.BlockScreenCapture,
+                Settings.SelectedClipboardDelay.Seconds, Recovery!.HasKey, Recovery.AutoBackupEnabled,
+                Settings.BreachCheckEnabled, Settings.UnlockMethods.Count))
         {
             OpenEntry = id =>
             {

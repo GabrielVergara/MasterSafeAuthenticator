@@ -168,6 +168,8 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Create a new vault with the master password `aaaaaaaaaaaa` or `password123456` | Refused as too easy to guess; a phrase of several words is accepted |
 | Delete a password, open Recycle bin, Restore | It is back in its folder with its attached files; Delete for good asks first |
 | Edit a password twice | "Earlier versions" lists the old ones; "Copy its password" works |
+| Health page, Security check-up at the top | Eight settings are listed, each "Good" or "Improve" with advice; changing a setting and reopening the page updates it |
+| Reveal a password with the eye button and wait 20 seconds | It is hidden again |
 | Password health with a weak and a reused password | Both are listed; with the breach check off the button says why it is off |
 | Settings, allow the breach check, run it with a known leaked password such as `Password123!` | The entry appears under "Found in known data breaches" |
 | Settings, Check for updates | A message about the newest version; with a newer release "Download and verify" saves a verified installer |

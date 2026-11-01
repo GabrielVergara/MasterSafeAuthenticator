@@ -31,6 +31,7 @@ public sealed partial class HealthViewModel : ViewModelBase
     private readonly Func<bool> _breachCheckAllowed;
     private readonly BreachChecker? _checker;
     private readonly Func<DateTimeOffset> _clock;
+    private readonly Func<CheckupInput>? _checkupInput;
     private readonly Dictionary<Guid, int> _breachCounts = [];
 
     /// <summary>Creates the page.</summary>
@@ -42,8 +43,10 @@ public sealed partial class HealthViewModel : ViewModelBase
         Func<IReadOnlyList<PasswordEntry>>? entries = null,
         Func<bool>? breachCheckAllowed = null,
         BreachChecker? checker = null,
-        Func<DateTimeOffset>? clock = null)
+        Func<DateTimeOffset>? clock = null,
+        Func<CheckupInput>? checkupInput = null)
     {
+        _checkupInput = checkupInput;
         _entries = entries ?? (() => []);
         _breachCheckAllowed = breachCheckAllowed ?? (() => false);
         _checker = checker;
@@ -61,6 +64,13 @@ public sealed partial class HealthViewModel : ViewModelBase
 
     /// <summary>Passwords found in known breaches.</summary>
     public ObservableCollection<HealthRow> Breached { get; } = [];
+
+    /// <summary>How the app's own settings fare (lock time, recovery key, backups and so on).</summary>
+    public ObservableCollection<CheckupItem> Checkup { get; } = [];
+
+    /// <summary>One-line summary of the settings check-up.</summary>
+    [ObservableProperty]
+    private string _checkupSummary = string.Empty;
 
     /// <summary>One-line summary of the report.</summary>
     [ObservableProperty]
@@ -96,6 +106,18 @@ public sealed partial class HealthViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsBreachCheckAllowed));
         OnPropertyChanged(nameof(BreachCheckNote));
         CheckBreachesCommand.NotifyCanExecuteChanged();
+
+        Checkup.Clear();
+        if (_checkupInput is not null)
+        {
+            foreach (var item in SecurityCheckup.Run(_checkupInput()))
+            {
+                Checkup.Add(item);
+            }
+
+            var open = Checkup.Count(c => !c.IsGood);
+            CheckupSummary = open == 0 ? "Your settings look good." : $"{open} of {Checkup.Count} settings could be stronger.";
+        }
 
         var report = PasswordHealth.Analyze(_entries(), _clock(), _breachCounts.Count > 0 ? _breachCounts : null);
         Fill(Weak, report.Weak);

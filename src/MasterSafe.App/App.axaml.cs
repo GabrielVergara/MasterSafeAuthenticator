@@ -27,6 +27,8 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        AutoHideReveal.Install();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // The splash is the lifetime's main window until start-up work finishes, so the app

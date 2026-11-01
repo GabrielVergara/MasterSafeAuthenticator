@@ -166,7 +166,12 @@ public static class HelpContent
             "Password health",
             "Find weak, reused and old passwords.",
             """
-            The Password health page checks your passwords on this computer:
+            The top of the page is a Security check-up of MasterSafe itself: the lock time, locking with the
+            computer, the screen capture block, clipboard clearing, the recovery key and backup, a second way
+            to unlock and the breach check. Each line says "Good" or "Improve" and what to change. Nothing is
+            changed for you.
+
+            Below it, the page checks your passwords on this computer:
 
             - Weak: easy to guess because they are short, simple, very common, or built from the title or
               user name.
