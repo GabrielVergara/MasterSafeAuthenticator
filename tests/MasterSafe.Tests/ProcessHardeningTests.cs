@@ -59,15 +59,21 @@ public sealed class ProcessHardeningTests : IDisposable
 
         ProcessHardening.RestrictToCurrentUser(_folder);
 
-        var security = new DirectoryInfo(_folder).GetAccessControl();
+        var who = AllowedSids(_folder);
+        using var me = WindowsIdentity.GetCurrent();
+        who.Should().BeEquivalentTo(me.User!.Value, new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Value);
+    }
+
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private static List<string> AllowedSids(string folder)
+    {
+        var security = new DirectoryInfo(folder).GetAccessControl();
         security.AreAccessRulesProtected.Should().BeTrue("access is no longer inherited from the parent folder");
-        var who = security.GetAccessRules(true, false, typeof(SecurityIdentifier)).Cast<FileSystemAccessRule>()
+        return security.GetAccessRules(true, false, typeof(SecurityIdentifier)).Cast<FileSystemAccessRule>()
             .Where(r => r.AccessControlType == AccessControlType.Allow)
             .Select(r => ((SecurityIdentifier)r.IdentityReference).Value)
             .Distinct()
             .ToList();
-        using var me = WindowsIdentity.GetCurrent();
-        who.Should().BeEquivalentTo(me.User!.Value, new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Value);
     }
 
     [Fact]

@@ -1,0 +1,11 @@
+title = "MasterSafe Authenticator secret scanning"
+
+[extend]
+useDefault = true
+
+# Keyboard shortcut names in XAML, such as Gesture="Ctrl+NumPad0", look like random keys to the generic rule.
+# Only that exact attribute form is ignored, and only in the app's XAML files.
+[[allowlists]]
+description = "KeyBinding gesture names"
+paths = ['''src/MasterSafe\.App/.*\.axaml$''']
+regexes = ['''Gesture="[A-Za-z0-9+]+"''']
