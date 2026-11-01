@@ -10,7 +10,11 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **High contrast theme**, also chosen automatically when Windows high contrast is on and the theme is "Follow the system".
 - **Keyboard:** access keys on the navigation (Alt and the underlined letter), F1 for help, Ctrl+L to lock.
 - **Time:** a warning with "Keep unlocked" 30 seconds before the automatic lock.
+- **Easier reading** in Settings: more space between letters, words and lines.
 - New [accessibility statement](docs/Accessibility.md).
+
+### Getting started
+- **First-run guide:** after a new vault is created, one page lists the steps that matter (recovery key, quicker unlock, first account, passwords), shows what is done and goes to the right page. Every step can be skipped.
 
 ### Languages
 - **Spanish (Español) and Finnish (Suomi)** besides English: every screen, the Help and the check-up messages. The language follows the computer and can be chosen in Settings; a change applies fully after a restart. See [docs/Translating.md](docs/Translating.md) for how texts are translated and how to add a language. A test fails when a text on a screen has no translation.
@@ -18,6 +22,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ### Security
 - **Security check-up** at the top of the Health page: looks at the lock time, lock on computer lock, screen capture block, clipboard clearing, recovery key, recovery backup, second unlock method and breach check, and says what to change. Nothing is changed for you.
 - **Test and strengthen** in Settings: measures this computer and moves the vault to the strongest Argon2id setting (up to 512 MiB) that still unlocks in about a second. The master password does not change; the page also shows the current setting.
+- **Quick lock:** "Lock vault" in the tray menu and, if you turn it on in Settings, Ctrl+Alt+L from any program (Windows).
 - **Revealed passwords hide again** by themselves after 20 seconds.
 - **Signing is now offline.** The release workflow no longer has the signing key: it builds, tests, records a build attestation and drafts the release. `scripts/sign-release.ps1` signs on the maintainer's computer after checking the attestation and checksums of every file. See [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
 - All GitHub Actions are pinned to exact commits.

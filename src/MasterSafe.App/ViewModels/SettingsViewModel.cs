@@ -137,6 +137,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _autoLockMinutes = saved.AutoLockMinutes;
             _lockOnSessionLock = saved.LockOnSessionLock;
             _lockOnMinimize = saved.LockOnMinimize;
+            _globalLockHotkey = saved.GlobalLockHotkey;
+            _easyReading = saved.EasyReading;
             _blockScreenCapture = saved.BlockScreenCapture;
             _breachCheckEnabled = saved.BreachCheckEnabled;
             _showReminders = saved.ShowReminders;
@@ -163,6 +165,22 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnLockOnSessionLockChanged(bool value) => SaveSettings();
 
     partial void OnLockOnMinimizeChanged(bool value) => SaveSettings();
+
+    /// <summary>Ctrl+Alt+L locks the vault from any program (Windows).</summary>
+    [ObservableProperty]
+    private bool _globalLockHotkey;
+
+    /// <summary>Shown when the shortcut could not be turned on.</summary>
+    [ObservableProperty]
+    private string? _lockHotkeyNote;
+
+    partial void OnGlobalLockHotkeyChanged(bool value) => SaveSettings();
+
+    /// <summary>More space between letters, words and lines.</summary>
+    [ObservableProperty]
+    private bool _easyReading;
+
+    partial void OnEasyReadingChanged(bool value) => SaveSettings();
 
     partial void OnBlockScreenCaptureChanged(bool value) => SaveSettings();
 
@@ -216,6 +234,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.ClipboardClearSeconds = SelectedClipboardDelay.Seconds;
             settings.LockOnSessionLock = LockOnSessionLock;
             settings.LockOnMinimize = LockOnMinimize;
+            settings.GlobalLockHotkey = GlobalLockHotkey;
+            settings.EasyReading = EasyReading;
             settings.BlockScreenCapture = BlockScreenCapture;
             settings.BreachCheckEnabled = BreachCheckEnabled;
             settings.ShowReminders = ShowReminders;

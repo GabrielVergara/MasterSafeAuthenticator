@@ -133,6 +133,9 @@ public partial class App : Application
                 case TrayCommands.HideWindow:
                     window.Hide();
                     break;
+                case TrayCommands.LockVault:
+                    viewModel.LockNow();
+                    break;
                 case TrayCommands.About:
                     if (!window.IsVisible)
                     {
@@ -169,12 +172,26 @@ public partial class App : Application
         };
 
         // Keep the window out of screenshots and screen sharing unless the user turned that off.
-        window.Opened += (_, _) => WindowCaptureProtection.Apply(window, viewModel.Settings.BlockScreenCapture);
+        // The system-wide lock shortcut needs the real window, so it is applied once the window is open.
+        var hotkey = new GlobalLockHotkey(window, viewModel.LockNow);
+        void ApplyHotkey() => viewModel.Settings.LockHotkeyNote = hotkey.Apply(viewModel.Settings.GlobalLockHotkey)
+            ? null
+            : Loc.T("Ctrl+Alt+L could not be turned on. Another program may be using it.");
+
+        window.Opened += (_, _) =>
+        {
+            WindowCaptureProtection.Apply(window, viewModel.Settings.BlockScreenCapture);
+            ApplyHotkey();
+        };
         viewModel.Settings.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SettingsViewModel.BlockScreenCapture))
             {
                 WindowCaptureProtection.Apply(window, viewModel.Settings.BlockScreenCapture);
+            }
+            else if (e.PropertyName == nameof(SettingsViewModel.GlobalLockHotkey))
+            {
+                ApplyHotkey();
             }
         };
 

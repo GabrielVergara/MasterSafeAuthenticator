@@ -478,6 +478,26 @@ public class VaultSecurityTests
     }
 
     [Fact]
+    public async Task ANewVault_OpensTheGuide_AndAnExistingVaultOpensTheCodes()
+    {
+        var repo = new MemoryRepo();
+        var vm = new MainWindowViewModel(NewVault(repo));
+        vm.Login.IsCreateMode = true;
+
+        await vm.UnlockVaultAsync("a long new master password");
+
+        vm.CurrentPage.Should().Be(vm.Guide);
+        vm.Guide.Steps.Should().HaveCount(4).And.OnlyContain(s => s.Action.CanExecute(null));
+        vm.Guide.Steps[0].IsDone.Should().BeFalse("no recovery key was made yet");
+        vm.Guide.FinishCommand.Execute(null);
+        vm.CurrentPage.Should().Be(vm.Dashboard);
+
+        var again = new MainWindowViewModel(NewVault(repo));
+        await again.UnlockVaultAsync("a long new master password");
+        again.CurrentPage.Should().Be(again.Dashboard);
+    }
+
+    [Fact]
     public async Task ViewModel_UnlockMethod_FullFlow()
     {
         var repo = new MemoryRepo();

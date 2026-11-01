@@ -144,6 +144,7 @@ MasterSafe on tehty käytettäväksi ilman hiirtä ja apuvälineiden kanssa.
 - Kontrasti: Asetukset, Teema, "Korkea kontrasti". "Seuraa järjestelmää" -valinnalla Windowsin korkean kontrastin tila ottaa sen käyttöön itse.
 - Aika: varoitus ilmestyy 30 sekuntia ennen kuin holvi lukittuu itsestään. Valitse "Pidä avattuna" tai paina mitä tahansa näppäintä. Voit muuttaa aikaa Asetuksissa.
 - Kieli: Asetukset, Kieli (englanti, espanja, suomi).
+- Lukeminen: Asetukset, "Helpompi lukea" lisää tilaa kirjainten, sanojen ja rivien väliin.
 
 Jos jokin on vaikea käyttää työkaluillasi, kerro meille: katso "Tietoja, lisenssi ja tuki".
 
@@ -198,6 +199,7 @@ Asetukset, "Yksityisyys ja lukitus" ja Yleiset:
 
 - Kirjautumistauko: 5 väärän pääsalasanan jälkeen peräkkäin kirjautuminen keskeytyy 30 sekunniksi, sitten 1, 2, 5 ja lopulta 15 minuutiksi jokaisella uudella virheellä. Oikea salasana nollaa sen, ja seuraava avaus kertoo, montako väärää salasanaa syötettiin. Laskuri säilyy sovelluksen uudelleenkäynnistyksen yli. Tämä estää arvaamisen näppäimistölläsi. Se ei voi estää sitä, joka kopioi holvitiedoston ja arvaa muualla: sitä varten ovat hidas Argon2id-avainjohdanta ja pitkä pääsalasana. Mitään ei koskaan poisteta väärien salasanojen vuoksi.
 - Automaattinen lukitus: holvi lukittuu asettamiesi käyttämättömyysminuuttien jälkeen (aluksi 5).
+- Pikalukitus: Ctrl+L sovelluksessa, "Lukitse holvi" ilmoitusalueen valikossa ja halutessasi Ctrl+Alt+L mistä tahansa ohjelmasta (Windows, oletuksena pois päältä).
 - Lukitse, kun Windows lukitaan tai menee lepotilaan (oletuksena päällä) ja halutessasi myös ikkunan pienennyksen yhteydessä.
 - Pidä ikkuna poissa kuvakaappauksista ja näytön jaosta (oletuksena päällä, Windows): ikkuna näkyy mustana kaappauksissa. Poista käytöstä, jos tarvitset kuvakaappauksen MasterSafesta.
 - Leikepöytä: valitse 30 sekuntia, 1 minuutti tai 2 minuuttia. Kopiot pidetään poissa Windowsin leikepöytähistoriasta ja pilvileikepöydältä.

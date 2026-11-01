@@ -121,5 +121,13 @@
       <Setter Property="Foreground" Value="#FFFFFF" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
+      <!-- Easier reading (WCAG 1.4.12 text spacing): more room between letters and lines, on every screen. -->
+    <Style Selector="Window.easyRead TextBlock">
+      <Setter Property="LetterSpacing" Value="0.8" />
+      <Setter Property="LineSpacing" Value="6" />
+    </Style>
+    <Style Selector="Window.easyRead TextBox">
+      <Setter Property="LetterSpacing" Value="0.8" />
+    </Style>
   </Application.Styles>
 </Application>

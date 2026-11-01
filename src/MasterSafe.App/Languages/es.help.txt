@@ -144,6 +144,7 @@ MasterSafe está hecho para poder usarse sin ratón y con tecnologías de apoyo.
 - Contraste: Ajustes, Tema, «Alto contraste». Con «Seguir al sistema», el modo de alto contraste de Windows lo activa solo.
 - Tiempo: aparece un aviso 30 segundos antes de que la bóveda se bloquee sola. Elija «Mantener desbloqueada» o pulse cualquier tecla. Puede cambiar el tiempo en Ajustes.
 - Idioma: Ajustes, Idioma (inglés, español, finés).
+- Lectura: Ajustes, «Lectura más fácil» añade espacio entre letras, palabras y líneas.
 
 Si algo resulta difícil de usar con sus herramientas, cuéntenoslo: vea «Acerca de, licencia y soporte».
 
@@ -198,6 +199,7 @@ Ajustes, «Privacidad y bloqueo» y General:
 
 - Pausa de entrada: tras 5 contraseñas maestras erróneas seguidas, la entrada se pausa 30 segundos y luego 1, 2, 5 y por último 15 minutos con cada error más. Una contraseña correcta lo reinicia, y el siguiente desbloqueo le dice cuántas contraseñas erróneas se introdujeron. El contador sobrevive al reinicio de la aplicación. Esto detiene los intentos en su teclado. No puede detener a quien copia el archivo de la bóveda y adivina en otro sitio: para eso sirven la lenta derivación de clave Argon2id y una contraseña maestra larga. Nunca se elimina nada por contraseñas erróneas.
 - Bloqueo automático: la bóveda se bloquea tras los minutos de inactividad que fije (5 al principio).
+- Bloqueo rápido: Ctrl+L dentro de la aplicación, «Bloquear bóveda» en el menú de la bandeja y, opcionalmente, Ctrl+Alt+L desde cualquier programa (Windows, desactivado por defecto).
 - Bloquear al bloquear o suspender Windows (activado por defecto) y, opcionalmente, al minimizar la ventana.
 - Mantener la ventana fuera de las capturas y de la pantalla compartida (activado por defecto, Windows): la ventana se ve negra en las capturas. Desactívelo si necesita hacer una captura de MasterSafe.
 - Portapapeles: elija 30 segundos, 1 minuto o 2 minutos. Las copias se mantienen fuera del historial del portapapeles de Windows y del portapapeles en la nube.

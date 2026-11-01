@@ -33,6 +33,12 @@ public sealed class AppSettings
     /// <summary>Lock the vault when the window is minimized.</summary>
     public bool LockOnMinimize { get; set; }
 
+    /// <summary>Ctrl+Alt+L locks the vault from any program (Windows).</summary>
+    public bool GlobalLockHotkey { get; set; }
+
+    /// <summary>More space between letters, words and lines, which many people with dyslexia or low vision find easier.</summary>
+    public bool EasyReading { get; set; }
+
     /// <summary>Keep the window out of screenshots and screen sharing (Windows).</summary>
     public bool BlockScreenCapture { get; set; } = true;
 

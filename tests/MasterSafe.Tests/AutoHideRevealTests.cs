@@ -4,7 +4,6 @@
 // License: See LICENSE
 
 using Avalonia.Controls;
-using Avalonia.Threading;
 using FluentAssertions;
 using MasterSafe.App.Services;
 using Xunit;
@@ -16,33 +15,34 @@ public sealed class AutoHideRevealTests
     [Fact]
     public void ARevealedPassword_IsHiddenAgainAfterTheDelay()
     {
-        HeadlessUi.Run(() =>
+        var original = AutoHideReveal.Delay;
+        AutoHideReveal.Delay = TimeSpan.FromMilliseconds(50);
+        try
         {
-            var original = AutoHideReveal.Delay;
-            AutoHideReveal.Delay = TimeSpan.FromMilliseconds(50);
-            try
+            TextBox? box = null;
+            HeadlessUi.Run(() =>
             {
                 AutoHideReveal.Install();
-                var window = new Window { Content = new TextBox { PasswordChar = '●' } };
-                var box = (TextBox)window.Content;
-                window.Show();
-
+                box = new TextBox { PasswordChar = '●' };
+                new Window { Content = box }.Show();
                 box.RevealPassword = true;
                 box.RevealPassword.Should().BeTrue();
+            });
 
-                var until = DateTime.UtcNow.AddSeconds(5);
-                while (box.RevealPassword && DateTime.UtcNow < until)
-                {
-                    Thread.Sleep(20);
-                    Dispatcher.UIThread.RunJobs();
-                }
-
-                box.RevealPassword.Should().BeFalse("the password is hidden again by itself");
-            }
-            finally
+            // The wait happens off the UI thread, so its loop is free to run the timer.
+            var hidden = false;
+            var until = DateTime.UtcNow.AddSeconds(10);
+            while (!hidden && DateTime.UtcNow < until)
             {
-                AutoHideReveal.Delay = original;
+                Thread.Sleep(20);
+                HeadlessUi.Run(() => hidden = !box!.RevealPassword);
             }
-        });
+
+            hidden.Should().BeTrue("the password is hidden again by itself");
+        }
+        finally
+        {
+            AutoHideReveal.Delay = original;
+        }
     }
 }

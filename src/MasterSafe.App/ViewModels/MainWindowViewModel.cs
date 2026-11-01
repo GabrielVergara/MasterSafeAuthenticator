@@ -47,6 +47,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             Recovery.Refresh();
             RefreshNotices();
         }
+        else if (value is GuideViewModel guide)
+        {
+            Recovery.Refresh();
+            guide.Refresh();
+        }
 
         ActiveSection = value switch
         {
@@ -132,6 +137,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>The password health page.</summary>
     public HealthViewModel Health { get; }
+
+    /// <summary>The first-run guide, shown once after a new vault is created.</summary>
+    public GuideViewModel Guide { get; }
+
+    private bool _showGuideNext;
 
     public SettingsViewModel Settings { get; }
 
@@ -284,6 +294,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             await InitializeLoginAsync();
             await UnlockVaultAsync(password);
         };
+        Guide = new GuideViewModel(GuideSteps, () => CurrentPage = Dashboard);
         Settings.ChangePasswordHandler = (current, next) => ChangeMasterPasswordAsync(current, next);
         Settings.StrengthenHandler = StrengthenProtectionAsync;
         Settings.AddMethodHandler = AddUnlockMethodAsync;
@@ -523,6 +534,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        _showGuideNext = Login.IsCreateMode;
         Login.IsBusy = true;
         try
         {
@@ -784,8 +796,25 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         IsUnlocked = true;
         NotifyActivity();
-        CurrentPage = Dashboard;
+        CurrentPage = _showGuideNext ? Guide : Dashboard;
+        _showGuideNext = false;
     }
+
+    private IReadOnlyList<GuideStep> GuideSteps() =>
+    [
+        new(Loc.T("Set up a recovery key"),
+            Loc.T("Nobody can reset a forgotten master password. A recovery key is the only way back in, so this step matters most."),
+            Recovery.HasKey, Loc.T("Open Recovery"), ShowRecoveryCommand),
+        new(Loc.T("Add a quicker way to unlock"),
+            Loc.T("Windows Hello or a security key saves typing the master password every time. This is optional."),
+            Settings.UnlockMethods.Count >= 2, Loc.T("Open Settings"), ShowSettingsCommand),
+        new(Loc.T("Add your first account"),
+            Loc.T("Type a secret key, or drop a QR code image on this window."),
+            Dashboard.Accounts.Count > 0, Loc.T("Add account"), ShowAddAccountCommand),
+        new(Loc.T("Bring in your passwords"),
+            Loc.T("Import them from KeePass or KeePassXC, or add them one at a time on the Passwords page."),
+            Passwords.Snapshot().Count > 0, Loc.T("Open Import"), ShowImportCommand),
+    ];
 
     [RelayCommand]
     private void ShowDashboard() => CurrentPage = Dashboard;

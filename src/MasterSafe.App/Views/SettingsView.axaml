@@ -46,6 +46,8 @@
             </ComboBox>
             <TextBlock Classes="hint" TextWrapping="Wrap" Text="Makes everything larger. You can also press Ctrl and plus or minus at any time, and Ctrl and 0 to go back to normal." />
           </StackPanel>
+          <CheckBox Content="Easier reading: more space between letters, words and lines"
+                    IsChecked="{Binding EasyReading, Mode=TwoWay}" />
           <CheckBox Content="Show reminders on the codes page (recovery key, backups, updates)"
                     IsChecked="{Binding ShowReminders, Mode=TwoWay}" />
           <CheckBox Content="Keep running in the system tray when the window is closed or minimized"
@@ -72,6 +74,9 @@
                     IsChecked="{Binding LockOnSessionLock, Mode=TwoWay}" />
           <CheckBox Content="Lock the vault when the window is minimized"
                     IsChecked="{Binding LockOnMinimize, Mode=TwoWay}" />
+          <CheckBox Content="Lock the vault from any program with Ctrl+Alt+L (Windows)"
+                    IsChecked="{Binding GlobalLockHotkey, Mode=TwoWay}" />
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding LockHotkeyNote}" TextWrapping="Wrap" />
           <CheckBox Content="Keep this window out of screenshots and screen sharing (Windows)"
                     IsChecked="{Binding BlockScreenCapture, Mode=TwoWay}" />
           <TextBlock Classes="hint" TextWrapping="Wrap"

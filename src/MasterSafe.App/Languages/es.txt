@@ -330,3 +330,30 @@ Your vault uses an older format. Change the master password once to move it to t
 Type your master password first. => Primero escriba su contraseña maestra.
 The language changes completely the next time MasterSafe starts. => El idioma cambia por completo la próxima vez que se inicie MasterSafe.
 Version {0} is available. Open Settings to download and verify it. => La versión {0} está disponible. Abra Ajustes para descargarla y verificarla.
+# Quick lock, tray and reading
+Lock the vault from any program with Ctrl+Alt+L (Windows) => Bloquear la bóveda desde cualquier programa con Ctrl+Alt+L (Windows)
+Ctrl+Alt+L could not be turned on. Another program may be using it. => No se pudo activar Ctrl+Alt+L. Puede que otro programa lo esté usando.
+Easier reading: more space between letters, words and lines => Lectura más fácil: más espacio entre letras, palabras y líneas
+Show window => Mostrar ventana
+Hide window => Ocultar ventana
+Lock vault => Bloquear bóveda
+Copy recent code => Copiar el código reciente
+About => Acerca de
+Exit => Salir
+# First-run guide
+Your vault is ready => Su bóveda está lista
+A few steps make it safe and useful. You can do them now or later, in any order. => Unos pocos pasos la hacen segura y útil. Puede darlos ahora o más tarde, en cualquier orden.
+Go to my codes => Ir a mis códigos
+Done => Hecho
+To do => Pendiente
+Set up a recovery key => Cree una clave de recuperación
+Nobody can reset a forgotten master password. A recovery key is the only way back in, so this step matters most. => Nadie puede restablecer una contraseña maestra olvidada. Una clave de recuperación es la única forma de volver a entrar, así que este paso es el más importante.
+Open Recovery => Abrir Recuperación
+Add a quicker way to unlock => Añada una forma más rápida de desbloquear
+Windows Hello or a security key saves typing the master password every time. This is optional. => Windows Hello o una llave de seguridad evitan escribir la contraseña maestra cada vez. Es opcional.
+Open Settings => Abrir Ajustes
+Add your first account => Añada su primera cuenta
+Type a secret key, or drop a QR code image on this window. => Escriba una clave secreta o suelte una imagen de código QR en esta ventana.
+Bring in your passwords => Traiga sus contraseñas
+Import them from KeePass or KeePassXC, or add them one at a time on the Passwords page. => Impórtelas desde KeePass o KeePassXC, o añádalas una a una en la página Contraseñas.
+Open Import => Abrir Importar

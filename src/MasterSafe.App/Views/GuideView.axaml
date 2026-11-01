@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             x:Class="MasterSafe.App.Views.GuideView"
+             x:DataType="vm:GuideViewModel">
+  <ScrollViewer>
+    <StackPanel Spacing="16" MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,14,0">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Your vault is ready" Classes="h1" />
+        <TextBlock Classes="hint" TextWrapping="Wrap"
+                   Text="A few steps make it safe and useful. You can do them now or later, in any order." />
+      </StackPanel>
+
+      <ItemsControl ItemsSource="{Binding Steps}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:GuideStep">
+            <Border Classes="card" Margin="0,0,0,12">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="{Binding Title}" Classes="h2" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Mark}" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Detail}" Classes="hint" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center"
+                        Content="{Binding ActionText}" Command="{Binding Action}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <Button Classes="accent" Content="Go to my codes" HorizontalAlignment="Left" Command="{Binding FinishCommand}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

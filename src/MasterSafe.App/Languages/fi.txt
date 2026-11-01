@@ -328,3 +328,30 @@ Done. The vault now uses {0} MiB and {1} passes. Unlocking takes about a second.
 Your master password is stretched with Argon2id using {0} MiB of memory and {1} passes. => Pääsalasanasi vahvistetaan Argon2id-menetelmällä, jossa käytetään {0} MiB muistia ja {1} kierrosta.
 Your vault uses an older format. Change the master password once to move it to the current one. => Holvisi käyttää vanhaa muotoa. Vaihda pääsalasana kerran siirtääksesi sen nykyiseen muotoon.
 Version {0} is available. Open Settings to download and verify it. => Versio {0} on saatavilla. Avaa Asetukset ladataksesi ja varmentaaksesi sen.
+# Quick lock, tray and reading
+Lock the vault from any program with Ctrl+Alt+L (Windows) => Lukitse holvi mistä tahansa ohjelmasta painamalla Ctrl+Alt+L (Windows)
+Ctrl+Alt+L could not be turned on. Another program may be using it. => Ctrl+Alt+L-yhdistelmää ei voitu ottaa käyttöön. Jokin toinen ohjelma saattaa käyttää sitä.
+Easier reading: more space between letters, words and lines => Helpompi lukea: enemmän tilaa kirjainten, sanojen ja rivien väliin
+Show window => Näytä ikkuna
+Hide window => Piilota ikkuna
+Lock vault => Lukitse holvi
+Copy recent code => Kopioi viimeisin koodi
+About => Tietoja
+Exit => Lopeta
+# First-run guide
+Your vault is ready => Holvisi on valmis
+A few steps make it safe and useful. You can do them now or later, in any order. => Muutama vaihe tekee siitä turvallisen ja hyödyllisen. Voit tehdä ne nyt tai myöhemmin, missä järjestyksessä tahansa.
+Go to my codes => Siirry koodeihini
+Done => Valmis
+To do => Tekemättä
+Set up a recovery key => Luo palautusavain
+Nobody can reset a forgotten master password. A recovery key is the only way back in, so this step matters most. => Kukaan ei voi nollata unohtunutta pääsalasanaa. Palautusavain on ainoa tie takaisin, joten tämä vaihe on tärkein.
+Open Recovery => Avaa Palautus
+Add a quicker way to unlock => Lisää nopeampi avaustapa
+Windows Hello or a security key saves typing the master password every time. This is optional. => Windows Hellon tai suojausavaimen ansiosta pääsalasanaa ei tarvitse kirjoittaa joka kerta. Tämä on valinnainen.
+Open Settings => Avaa Asetukset
+Add your first account => Lisää ensimmäinen tilisi
+Type a secret key, or drop a QR code image on this window. => Kirjoita salainen avain tai pudota QR-koodikuva tähän ikkunaan.
+Bring in your passwords => Tuo salasanasi
+Import them from KeePass or KeePassXC, or add them one at a time on the Passwords page. => Tuo ne KeePassista tai KeePassXC:stä tai lisää ne yksitellen Salasanat-sivulla.
+Open Import => Avaa Tuo

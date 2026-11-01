@@ -101,6 +101,6 @@ public class BackupTests
         tray.MenuItemClicked += (_, id) => clicked = id;
         tray.RequestShowWindow();
         clicked.Should().Be(TrayCommands.ShowWindow);
-        TrayCommands.DefaultMenu.Should().HaveCount(5);
+        TrayCommands.DefaultMenu.Should().HaveCount(6);
     }
 }

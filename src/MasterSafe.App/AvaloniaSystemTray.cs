@@ -42,7 +42,7 @@ public sealed class AvaloniaSystemTray : ISystemTray
             foreach (var item in menu)
             {
                 var id = item.Id;
-                var menuItem = new NativeMenuItem(item.Label);
+                var menuItem = new NativeMenuItem(MasterSafe.App.Services.Loc.T(item.Label));
                 menuItem.Click += (_, _) => MenuItemClicked?.Invoke(this, id);
                 nativeMenu.Add(menuItem);
             }

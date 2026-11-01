@@ -179,6 +179,9 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Drag an entry onto a folder, and onto Recycle bin | It moves; dropping on the bin asks nothing but can be restored |
 | Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/ |
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
+| Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
+| Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |
+| Create a new vault | The first-run guide opens with four steps; each button goes to its page; "Go to my codes" leaves it; the next unlock goes straight to the codes |
 | Settings, Text and window size 150%, then Ctrl+0 | Everything is larger and reflows without clipping; Ctrl+0 returns to 100% |
 | Windows Settings, Accessibility, Contrast themes, switch one on, theme "Follow the system" | The app uses the High contrast theme |
 | Leave the app idle until 30 s before the auto-lock | A warning with "Keep unlocked" appears; pressing it keeps the vault open |

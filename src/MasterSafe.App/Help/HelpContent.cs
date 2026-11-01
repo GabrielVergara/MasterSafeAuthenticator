@@ -227,6 +227,7 @@ public static class HelpContent
             - Time: a warning appears 30 seconds before the vault locks by itself. Choose "Keep unlocked" or
               press any key. You can change the time in Settings.
             - Language: Settings, Language (English, Spanish, Finnish).
+            - Reading: Settings, "Easier reading" adds space between letters, words and lines.
 
             If something is hard to use with your tools, please tell us: see "About, licence and support".
             """),
@@ -307,6 +308,8 @@ public static class HelpContent
               and guesses elsewhere: that is what the slow Argon2id key derivation and a long master
               password are for. Nothing is ever deleted because of wrong passwords.
             - Automatic lock: the vault locks after the minutes of inactivity you set (5 at first).
+            - Quick lock: Ctrl+L inside the app, "Lock vault" in the tray menu, and optionally Ctrl+Alt+L from
+              any program (Windows, off by default).
             - Lock when Windows locks or sleeps (on by default) and, optionally, when the window is
               minimized.
             - Keep the window out of screenshots and screen sharing (on by default, Windows): the window shows

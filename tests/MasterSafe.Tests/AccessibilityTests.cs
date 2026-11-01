@@ -46,7 +46,7 @@ public sealed class AccessibilityTests
 
     private static List<object> Pages(MainWindowViewModel vm) =>
     [
-        vm.Dashboard, vm.Passwords, vm.Health, vm.AccountEditor, vm.Import, vm.Backup, vm.Recovery, vm.Vaults, vm.Settings, vm.Help,
+        vm.Dashboard, vm.Guide, vm.Passwords, vm.Health, vm.AccountEditor, vm.Import, vm.Backup, vm.Recovery, vm.Vaults, vm.Settings, vm.Help,
     ];
 
     private static void Show(MainWindow window, MainWindowViewModel vm, object page)

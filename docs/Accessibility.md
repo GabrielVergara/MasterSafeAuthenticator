@@ -13,7 +13,7 @@ This page says what is in place, how it is checked, and what is still missing. I
 | Contrast | Light, dark and a **High contrast** theme (also chosen automatically when Windows high contrast is on and the theme is "Follow the system"). The colour pairs of the light and dark themes are checked against the 4.5:1 ratio by a test. Colour is never the only signal: errors, the strength bar and the recycle bin also use words and icons |
 | Time limits | The automatic lock shows a warning 30 seconds ahead with a "Keep unlocked" button, and every keypress or click counts as activity. The sign-in pause is shown in words and counts down in text |
 | Motion | The app has no animation apart from a thin progress bar for the code timer |
-| Cognitive load | Plain language, one task per screen, confirmations for destructive actions with an undo (recycle bin), a step-by-step first-run guide in Help, and errors that say what to do |
+| Cognitive load | Plain language, one task per screen, confirmations for destructive actions with an undo (recycle bin), a first-run guide after a new vault is created, and errors that say what to do |
 | Motor | No action needs a double-click, a drag or a long press. Targets are at least the size of standard controls |
 
 ## How it is checked
@@ -28,8 +28,7 @@ This page says what is in place, how it is checked, and what is still missing. I
 
 - Orca (Linux screen reader) has not been tried; Avalonia's Linux accessibility support is less complete than on Windows.
 - Languages: English, Spanish and Finnish. Some messages built in code from changing parts may still appear in English.
-- No dyslexia-friendly font option or line-spacing setting yet.
-- The first-run guide is a Help topic and reminders, not yet a step-by-step wizard.
+- Easier reading adds space between letters and lines (WCAG 1.4.12), but no dyslexia-specific font is bundled.
 
 To report an accessibility problem, open an issue at <https://github.com/GabrielVergara/MasterSafeAuthenticator/issues> and say
 which assistive technology you use. These reports are treated like bugs.
