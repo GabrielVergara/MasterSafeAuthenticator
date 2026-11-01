@@ -409,6 +409,32 @@ public class VaultSecurityTests
     }
 
     [Fact]
+    public async Task AutoLock_WarnsThirtySecondsAhead_AndKeepUnlockedRestartsTheCountdown()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var vault = NewVault(new MemoryRepo());
+        await vault.SaveContentsAsync("pw", Sample);
+        var vm = new MainWindowViewModel(vault, clock: () => now);
+        await vm.UnlockVaultAsync("pw");
+        vm.Settings.AutoLockMinutes = 1;
+
+        now = now.AddSeconds(29);
+        vm.LockIfIdle();
+        vm.IsLockWarningVisible.Should().BeFalse();
+
+        now = now.AddSeconds(5);
+        vm.LockIfIdle();
+        vm.IsLockWarningVisible.Should().BeTrue();
+        vm.LockWarningSeconds.Should().Be(26);
+
+        vm.KeepUnlockedCommand.Execute(null);
+        vm.IsLockWarningVisible.Should().BeFalse();
+        vm.LockIfIdle();
+        vm.IsLockWarningVisible.Should().BeFalse();
+        vm.IsUnlocked.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task ViewModel_UnlockMethod_FullFlow()
     {
         var repo = new MemoryRepo();

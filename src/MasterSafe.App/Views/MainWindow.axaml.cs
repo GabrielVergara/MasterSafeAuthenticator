@@ -3,6 +3,7 @@
 // Author:  Gabriel Vergara Ezcurdia
 // License: See LICENSE
 
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -19,7 +20,7 @@ public partial class MainWindow : Window
         DataContextChanged += OnDataContextChanged;
 
         // Any input restarts the auto-lock countdown, even when a control handles it.
-        AddHandler(PointerMovedEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(PointerPressedEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(KeyDownEvent, OnActivity, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
@@ -81,6 +82,22 @@ public partial class MainWindow : Window
 
         vm.ImportDroppedFiles(paths);
         e.Handled = true;
+    }
+
+    private Point? _lastPointer;
+
+    /// <summary>
+    /// Avalonia also raises "moved" events when the content under a resting mouse changes (the codes refresh every
+    /// few seconds), which would keep the auto-lock from ever starting. Only a real change of position counts.
+    /// </summary>
+    private void OnPointerMoved(object? sender, PointerEventArgs e)
+    {
+        var position = e.GetPosition(this);
+        if (_lastPointer != position)
+        {
+            _lastPointer = position;
+            OnActivity(sender, e);
+        }
     }
 
     private void OnActivity(object? sender, RoutedEventArgs e) => (DataContext as MainWindowViewModel)?.NotifyActivity();

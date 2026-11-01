@@ -18,6 +18,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **Daily vault snapshots:** the first save of each day keeps a copy of the vault as it was, and the last 7 are kept (only for vaults in the app's own folder).
 - **Process hardening (Windows):** DLLs are not loaded from remote or low-integrity places, system folders come first, legacy extension points are off, Windows Error Reporting does not collect memory dumps, and the data folder is limited to your account and the system.
 - Fixed: changing the theme from a background thread could throw.
+- Fixed: the automatic lock could be held off by the mouse resting on the window, because the code refresh counted as mouse movement.
 
 ## 1.4.0 (2026-11-01)
 
