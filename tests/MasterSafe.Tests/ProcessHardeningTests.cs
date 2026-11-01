@@ -52,7 +52,8 @@ public sealed class ProcessHardeningTests : IDisposable
     [Fact]
     public void WindowsPrompts_LiftTheMemoryBlockOnlyWhileTheyAreOpen()
     {
-        if (!OperatingSystem.IsWindows())
+        // The block does not stop an administrator, so the check means nothing on such an account (GitHub's test machines).
+        if (!OperatingSystem.IsWindows() || new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
         {
             return;
         }
