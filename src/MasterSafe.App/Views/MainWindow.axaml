@@ -40,6 +40,8 @@
           <Button Classes="nav" Content="Abou_t" Command="{Binding ShowAboutCommand}" />
           <Button Classes="nav" Content="_Lock vault" Command="{Binding LockCommand}"
                   ToolTip.Tip="Lock the vault and require your master password again" />
+          <Button Classes="nav" Content="E_xit" Command="{Binding ExitCommand}"
+                  ToolTip.Tip="Lock the vault and close MasterSafe completely" />
         </StackPanel>
 
         <StackPanel Spacing="2">

@@ -164,6 +164,19 @@ public sealed class SecurityReviewTests : IDisposable
     }
 
     [Fact]
+    public void Exit_CanBeChosenOnTheSignInScreenAndInTheSidebar()
+    {
+        var vm = new MainWindowViewModel();
+        var exits = 0;
+        vm.ExitRequested = () => exits++;
+
+        vm.ExitCommand.Execute(null);
+        vm.Login.ExitCommand.Execute(null);
+
+        exits.Should().Be(2);
+    }
+
+    [Fact]
     public async Task Locking_ClearsThePasswordTypedToStrengthenTheVault()
     {
         var (vault, _, _) = NewVault();

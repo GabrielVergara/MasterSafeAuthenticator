@@ -183,6 +183,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
 | Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |
+| Exit button in the sidebar, and on the sign-in screen, with "Keep running in the system tray" on | The program closes completely and the tray icon goes away |
 | Create a new vault | The first-run guide opens with four steps; each button goes to its page; "Go to my codes" leaves it; the next unlock goes straight to the codes |
 | Settings, Text and window size 150%, then Ctrl+0 | Everything is larger and reflows without clipping; Ctrl+0 returns to 100% |
 | Windows Settings, Accessibility, Contrast themes, switch one on, theme "Follow the system" | The app uses the High contrast theme |

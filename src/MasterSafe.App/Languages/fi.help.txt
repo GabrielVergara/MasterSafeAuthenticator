@@ -213,7 +213,8 @@ body:
 - Kieli: englanti, espanja tai suomi. Vaihtuu kokonaan, kun MasterSafe käynnistetään uudelleen.
 - Salasanasuojauksen vahvuus: "Testaa ja vahvista" mittaa tämän tietokoneen ja tekee pääsalasanasi arvaamisesta niin hidasta kuin mahdollista, kun avaus kestää silti noin sekunnin. Vahvista kirjoittamalla pääsalasanasi. Mikään muu ei muutu.
 - Muistutukset: näytä tai piilota koodisivun ilmoitukset (palautusavain, varmuuskopiot, päivitykset).
-- Jatka toimintaa ilmoitusalueella: ikkunan sulkeminen tai pienentäminen piilottaa sen ilmoitusalueelle sen sijaan, että sovellus sulkeutuisi. Avaa se uudelleen napsauttamalla ilmoitusalueen kuvaketta. Sen valikosta voi näyttää ikkunan, avata Tietoja tai poistua.
+- Jatka toimintaa ilmoitusalueella: ikkunan sulkeminen tai pienentäminen piilottaa sen ilmoitusalueelle sen sijaan, että sovellus sulkeutuisi. Avaa se uudelleen napsauttamalla ilmoitusalueen kuvaketta. Sen valikosta voi näyttää tai piilottaa ikkunan, lukita holvin, avata Tietoja tai lopettaa.
+- Lopeta: sivupalkin ja kirjautumisnäytön Lopeta-painike lukitsee holvin ja sulkee MasterSafen kokonaan ilmoitusalueen asetuksesta riippumatta.
 - Vaihda pääsalasana: suojaa holvisi uudelleen uudella salasanalla. Windows Hello ja suojausavain toimivat edelleen.
 
 Windows 11:ssä uusi ilmoitusalueen kuvake alkaa piilotettujen kuvakkeiden alueelta (kellon vieressä oleva nuoli). Pitääksesi sen aina näkyvissä vedä se tehtäväpalkkiin tai ota se käyttöön kohdassa Asetukset, Mukauttaminen, Tehtäväpalkki, Muut ilmaisinalueen kuvakkeet.

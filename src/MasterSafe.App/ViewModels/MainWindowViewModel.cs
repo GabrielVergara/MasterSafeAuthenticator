@@ -100,6 +100,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void LockShortcut() => LockNow();
 
+    /// <summary>Closes the program. Set by the application.</summary>
+    public Action? ExitRequested
+    {
+        get => Login.ExitRequested;
+        set => Login.ExitRequested = value;
+    }
+
+    [RelayCommand]
+    private void Exit() => ExitRequested?.Invoke();
+
     /// <summary>Opens the help (shortcut F1) when the vault is unlocked.</summary>
     [RelayCommand]
     private void HelpShortcut()

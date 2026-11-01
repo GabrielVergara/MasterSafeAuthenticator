@@ -329,8 +329,10 @@ public static class HelpContent
               Type your master password to confirm. Nothing else changes.
             - Reminders: show or hide the notices on the codes page (recovery key, backups, updates).
             - Keep running in the tray: closing or minimizing the window hides it to the notification area
-              instead of exiting. Open it again by clicking the tray icon. Its menu shows the window, opens
-              About, or exits.
+              instead of exiting. Open it again by clicking the tray icon. Its menu shows or hides the window,
+              locks the vault, opens About, or exits.
+            - Exit: the Exit button in the sidebar and on the sign-in screen locks the vault and closes MasterSafe
+              completely, whatever the tray setting.
             - Change master password: re-protects your vault with a new password. Windows Hello and a security
               key keep working.
 

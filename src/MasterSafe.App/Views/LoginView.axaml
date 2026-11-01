@@ -61,6 +61,8 @@
               Command="{Binding Forgot.OpenVaultFileCommand}" />
       <Button Content="Forgot your master password?" HorizontalAlignment="Center" IsVisible="{Binding !IsCreateMode}"
               Command="{Binding ShowForgotCommand}" />
+      <Button Content="E_xit" HorizontalAlignment="Center" Command="{Binding ExitCommand}"
+              ToolTip.Tip="Lock the vault and close MasterSafe completely" />
     </StackPanel>
     </Grid>
   </Border>

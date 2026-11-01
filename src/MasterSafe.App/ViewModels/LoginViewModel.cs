@@ -49,6 +49,12 @@ public sealed partial class LoginViewModel : ViewModelBase
     [RelayCommand]
     private void ShowForgot() => Forgot.IsOpen = true;
 
+    /// <summary>Closes the program. Set by the application.</summary>
+    public Action? ExitRequested { get; set; }
+
+    [RelayCommand]
+    private void Exit() => ExitRequested?.Invoke();
+
     /// <summary>Guidance shown while a new master password is typed.</summary>
     public string PasswordHint
     {

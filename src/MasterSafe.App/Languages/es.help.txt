@@ -213,7 +213,8 @@ body:
 - Idioma: inglés, español o finés. Cambia por completo al reiniciar MasterSafe.
 - Fortaleza de la protección de la contraseña: «Probar y reforzar» mide este equipo y hace que adivinar su contraseña maestra sea lo más lento posible mientras desbloquear siga tardando alrededor de un segundo. Escriba su contraseña maestra para confirmar. No cambia nada más.
 - Recordatorios: muestre u oculte los avisos de la página de códigos (clave de recuperación, copias, actualizaciones).
-- Seguir en la bandeja: cerrar o minimizar la ventana la oculta en el área de notificaciones en vez de salir. Ábrala de nuevo con un clic en el icono de la bandeja. Su menú muestra la ventana, abre Acerca de o sale.
+- Seguir en la bandeja: cerrar o minimizar la ventana la oculta en el área de notificaciones en vez de salir. Ábrala de nuevo con un clic en el icono de la bandeja. Su menú muestra u oculta la ventana, bloquea la bóveda, abre Acerca de o sale.
+- Salir: el botón Salir de la barra lateral y de la pantalla de entrada bloquea la bóveda y cierra MasterSafe por completo, sea cual sea el ajuste de la bandeja.
 - Cambiar la contraseña maestra: vuelve a proteger su bóveda con una contraseña nueva. Windows Hello y la llave de seguridad siguen funcionando.
 
 En Windows 11 un icono nuevo de la bandeja empieza en la zona de iconos ocultos (la flecha junto al reloj). Para que esté siempre visible, arrástrelo a la barra de tareas o actívelo en Configuración, Personalización, Barra de tareas, Otros iconos de la bandeja del sistema.

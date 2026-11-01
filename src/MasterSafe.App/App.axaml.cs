@@ -118,6 +118,17 @@ public partial class App : Application
         MainWindow window,
         MainWindowViewModel viewModel)
     {
+        // Really closes the program, whatever the tray setting. Locking first wipes the session key.
+        void ExitProgram()
+        {
+            _shuttingDown = true;
+            viewModel.LockNow();
+            _tray?.Dispose();
+            desktop.Shutdown();
+        }
+
+        viewModel.ExitRequested = ExitProgram;
+
         _tray = new AvaloniaSystemTray();
         _tray.Show(AppInfo.ProductName, TrayCommands.DefaultMenu);
 
@@ -145,9 +156,7 @@ public partial class App : Application
                     window.ShowAbout();
                     break;
                 case TrayCommands.Exit:
-                    _shuttingDown = true;
-                    _tray?.Dispose();
-                    desktop.Shutdown();
+                    ExitProgram();
                     break;
             }
         };

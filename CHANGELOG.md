@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased (1.5.0)
+## 1.5.0 (2026-11-01)
 
 ### Accessibility
 - **Screen readers:** every input, button, list and progress bar now has an accessible name, headings carry their level, status messages are announced, and the automatic-lock warning is announced at once. A test opens every page and fails if a control has no name.
@@ -14,6 +14,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - New [accessibility statement](docs/Accessibility.md).
 
 ### Getting started
+- **Exit button** in the sidebar and on the sign-in screen: locks the vault and closes the program, whatever the tray setting.
 - **First-run guide:** after a new vault is created, one page lists the steps that matter (recovery key, quicker unlock, first account, passwords), shows what is done and goes to the right page. Every step can be skipped.
 
 ### Languages
