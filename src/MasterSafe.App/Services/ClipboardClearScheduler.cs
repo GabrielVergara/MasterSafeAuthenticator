@@ -54,7 +54,10 @@ public static class ClipboardPolicy
 /// <param name="startTimer">Starts a one-shot timer that runs the action when it ends; disposing the result cancels it.</param>
 public sealed class ClipboardClearScheduler(Func<TimeSpan, Func<Task>, IDisposable> startTimer)
 {
+    private const int ClearAttempts = 5;
+
     private IDisposable? _timer;
+    private Func<Task>? _pending;
     private int _generation;
 
     /// <summary>True while a clear is waiting to happen.</summary>
@@ -73,6 +76,7 @@ public sealed class ClipboardClearScheduler(Func<TimeSpan, Func<Task>, IDisposab
 
         Cancel();
         var generation = _generation;
+        _pending = () => ClearIfStillThereAsync(text, read, clear);
 
         _timer = startTimer(after ?? ClipboardPolicy.ClearAfter, async () =>
         {
@@ -82,22 +86,12 @@ public sealed class ClipboardClearScheduler(Func<TimeSpan, Func<Task>, IDisposab
                 return;
             }
 
-            _timer?.Dispose();
-            _timer = null;
-
-            try
-            {
-                if (await read() == text)
-                {
-                    await clear();
-                }
-            }
-            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException or IOException)
-            {
-                // The clipboard is busy; the copy simply stays until the next one.
-            }
+            await TakePending();
         });
     }
+
+    /// <summary>Clears a waiting secret straight away, for when the vault locks or the program closes.</summary>
+    public Task ClearNowAsync() => TakePending();
 
     /// <summary>Stops waiting without clearing anything.</summary>
     public void Cancel()
@@ -105,5 +99,34 @@ public sealed class ClipboardClearScheduler(Func<TimeSpan, Func<Task>, IDisposab
         _generation++;
         _timer?.Dispose();
         _timer = null;
+        _pending = null;
+    }
+
+    private Task TakePending()
+    {
+        var pending = _pending;
+        Cancel();
+        return pending?.Invoke() ?? Task.CompletedTask;
+    }
+
+    private static async Task ClearIfStillThereAsync(string text, Func<Task<string?>> read, Func<Task> clear)
+    {
+        // Windows lets only one program use the clipboard at a time, and this is the last chance to clear it.
+        for (var attempt = 0; attempt < ClearAttempts; attempt++)
+        {
+            try
+            {
+                if (await read() == text)
+                {
+                    await clear();
+                }
+
+                return;
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException or IOException)
+            {
+                await Task.Delay(100);
+            }
+        }
     }
 }

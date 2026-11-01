@@ -8,7 +8,9 @@ using System.Security.Cryptography;
 using System.Text;
 using MasterSafe.Crypto;
 using Windows.Security.Credentials;
+using Windows.Foundation;
 using Windows.Security.Cryptography;
+using Windows.Win32;
 
 namespace MasterSafe.Platform;
 
@@ -21,6 +23,10 @@ namespace MasterSafe.Platform;
 /// </summary>
 public sealed class WindowsHelloProvider : ISecretProvider
 {
+    // The name Windows gives its Hello prompt. Bitwarden and KeePassXC look for the same one.
+    private const string PromptWindowClass = "Credential Dialog Xaml Host";
+    private const int PromptSearchTries = 50;
+
     private static readonly byte[] KdfInfo = Encoding.UTF8.GetBytes("MasterSafe.WindowsHello.v1");
 
     /// <inheritdoc />
@@ -48,7 +54,7 @@ public sealed class WindowsHelloProvider : ISecretProvider
     /// <inheritdoc />
     public async Task<SecretEnrollment> EnrollAsync(string slotId, CancellationToken cancellationToken = default)
     {
-        var created = await KeyCredentialManager.RequestCreateAsync(CredentialName(slotId), KeyCredentialCreationOption.ReplaceExisting);
+        var created = await WithPromptInFrontAsync(KeyCredentialManager.RequestCreateAsync(CredentialName(slotId), KeyCredentialCreationOption.ReplaceExisting));
         EnsureSuccess(created.Status);
 
         var challenge = RandomNumberGenerator.GetBytes(32);
@@ -83,7 +89,7 @@ public sealed class WindowsHelloProvider : ISecretProvider
 
     private static async Task<byte[]> DeriveKeyAsync(KeyCredential credential, byte[] challenge, string slotId)
     {
-        var signed = await credential.RequestSignAsync(CryptographicBuffer.CreateFromByteArray(challenge));
+        var signed = await WithPromptInFrontAsync(credential.RequestSignAsync(CryptographicBuffer.CreateFromByteArray(challenge)));
         EnsureSuccess(signed.Status);
 
         CryptographicBuffer.CopyToByteArray(signed.Result, out var signature);
@@ -95,6 +101,24 @@ public sealed class WindowsHelloProvider : ISecretProvider
         {
             CryptographicOperations.ZeroMemory(signature);
         }
+    }
+
+    // The Hello calls take no owner window, so the prompt can open behind the program. It is brought forward once it appears.
+    private static async Task<T> WithPromptInFrontAsync<T>(IAsyncOperation<T> operation)
+    {
+        var request = operation.AsTask();
+        for (var tries = 0; tries < PromptSearchTries && !request.IsCompleted; tries++)
+        {
+            var prompt = PInvoke.FindWindow(PromptWindowClass, null);
+            if (!prompt.IsNull && PInvoke.SetForegroundWindow(prompt))
+            {
+                break;
+            }
+
+            await Task.WhenAny(request, Task.Delay(100));
+        }
+
+        return await request;
     }
 
     private static void EnsureSuccess(KeyCredentialStatus status)

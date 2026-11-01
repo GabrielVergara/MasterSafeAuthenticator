@@ -82,6 +82,17 @@ public sealed class UpdateAndBreachTests : IDisposable
         info.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData("MasterSafe-Authenticator-..\\..\\evil-win-x64-setup.exe")]
+    [InlineData("MasterSafe-Authenticator-../../evil-win-x64-setup.exe")]
+    [InlineData("MasterSafe-Authenticator-a b-win-x64-setup.exe")]
+    public void AnInstallerNameThatIsNotPlain_IsNeverPicked(string name)
+    {
+        var info = new UpdateInfo("v9.9.9", new Version(9, 9, 9), string.Empty, string.Empty, [new ReleaseAsset(name, "https://example.com", 1)], true);
+
+        UpdateChecker.PickInstaller(info, windows: true, Architecture.X64).Should().BeNull();
+    }
+
     [Fact]
     public async Task AnUnreachableServer_IsAnError_NotACrash()
     {

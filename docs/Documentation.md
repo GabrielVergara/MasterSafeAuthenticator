@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.5.0  
+**Version:** 1.5.1  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -126,6 +126,7 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Task | Windows | Linux |
 | --- | --- | --- |
 | Build and test | `dotnet build MasterSafe.slnx -c Release` then `dotnet test MasterSafe.slnx -c Release` | same commands |
+| Test on Linux with Docker | `docker run --rm -v "${PWD}:/src:ro" mcr.microsoft.com/dotnet/sdk:10.0 bash /src/scripts/linux-check.sh`. Runs the tests and starts the real app as an ordinary user. It does not replace a test on a real desktop | n/a |
 | Run | `dotnet run --project src/MasterSafe.App` | same command |
 | Installer | `./installer/build-windows.ps1 -Version <v>` (needs Inno Setup 6) | `bash installer/linux/build-linux.sh <v> linux-x64` (or `linux-arm64`) |
 | Cross-build for Linux from Windows | `dotnet publish src/MasterSafe.App -c Release -r linux-x64 --self-contained -p:MasterSafeTargetOs=linux` | n/a |
@@ -184,6 +185,15 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
 | Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |
 | Exit button in the sidebar, and on the sign-in screen, with "Keep running in the system tray" on | The program closes completely and the tray icon goes away |
+| Copy a password, then press Exit | The clipboard is empty after the program closes |
+| Copy a password, then press Lock | The clipboard is emptied at once |
+| With "Lock when minimized" on, copy a password and minimize | The vault locks and the clipboard is emptied at once |
+| With the tray and "Lock when minimized" settings on, copy a password and close the window | The program stays in the tray, the vault locks and the clipboard is emptied at once |
+| With the tray setting on and "Lock when minimized" off, copy a password and close the window | The vault stays unlocked in the tray until its lock time, and the password can be pasted until its normal wait ends |
+| With the tray setting off, copy a password and close the window | The program closes and the clipboard is empty |
+| Unlock with Windows Hello and with a security key | Both still work with the memory protection on |
+| Use a screen reader on the sign-in screen | It still works with the memory protection on |
+| Change a value in `RecoveryPublicKey` in `settings.json`, then unlock | Recovery says the key does not match, and no backup is written, by hand or automatically |
 | Create a new vault | The first-run guide opens with four steps; each button goes to its page; "Go to my codes" leaves it; the next unlock goes straight to the codes |
 | Settings, Text and window size 150%, then Ctrl+0 | Everything is larger and reflows without clipping; Ctrl+0 returns to 100% |
 | Windows Settings, Accessibility, Contrast themes, switch one on, theme "Follow the system" | The app uses the High contrast theme |

@@ -541,19 +541,19 @@
           "Avalonia.Fonts.Inter": "[12.1.4, )",
           "Avalonia.Themes.Fluent": "[12.1.4, )",
           "CommunityToolkit.Mvvm": "[8.4.2, )",
-          "MasterSafe.Backup": "[1.5.0, )",
-          "MasterSafe.Core": "[1.5.0, )",
-          "MasterSafe.Crypto": "[1.5.0, )",
-          "MasterSafe.Platform": "[1.5.0, )",
-          "MasterSafe.QR": "[1.5.0, )"
+          "MasterSafe.Backup": "[1.5.1, )",
+          "MasterSafe.Core": "[1.5.1, )",
+          "MasterSafe.Crypto": "[1.5.1, )",
+          "MasterSafe.Platform": "[1.5.1, )",
+          "MasterSafe.QR": "[1.5.1, )"
         }
       },
       "mastersafe.backup": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Core": "[1.5.0, )",
-          "MasterSafe.Crypto": "[1.5.0, )",
-          "MasterSafe.PostQuantum": "[1.5.0, )"
+          "MasterSafe.Core": "[1.5.1, )",
+          "MasterSafe.Crypto": "[1.5.1, )",
+          "MasterSafe.PostQuantum": "[1.5.1, )"
         }
       },
       "mastersafe.core": {
@@ -563,13 +563,13 @@
         "type": "Project",
         "dependencies": {
           "Konscious.Security.Cryptography.Argon2": "[1.3.1, )",
-          "MasterSafe.Core": "[1.5.0, )"
+          "MasterSafe.Core": "[1.5.1, )"
         }
       },
       "mastersafe.data": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Core": "[1.5.0, )",
+          "MasterSafe.Core": "[1.5.1, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.14, )",
           "SQLitePCLRaw.bundle_e_sqlite3": "[3.0.5, )",
           "SQLitePCLRaw.core": "[3.0.5, )",
@@ -580,7 +580,7 @@
       "mastersafe.platform": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Crypto": "[1.5.0, )"
+          "MasterSafe.Crypto": "[1.5.1, )"
         }
       },
       "mastersafe.postquantum": {
@@ -589,7 +589,7 @@
       "mastersafe.qr": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Core": "[1.5.0, )",
+          "MasterSafe.Core": "[1.5.1, )",
           "SkiaSharp": "[4.154.0, )",
           "SkiaSharp.NativeAssets.Linux": "[4.154.0, )",
           "ZXing.Net": "[0.16.11, )"

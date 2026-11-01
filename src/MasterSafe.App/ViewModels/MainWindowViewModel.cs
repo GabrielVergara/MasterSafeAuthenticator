@@ -224,7 +224,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             },
         };
         Vaults = new VaultsViewModel(services, _providers);
-        Recovery = new RecoveryViewModel(services, BuildContents);
+        Recovery = new RecoveryViewModel(services, BuildContents) { SaveRequested = PersistAsync };
         Recovery.IsVaultUnlocked = () => IsUnlocked;
         Recovery.Clock = _clock;
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
@@ -395,6 +395,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             Lock();
         }
     }
+
+    /// <summary>Removes a copied secret from the clipboard. Set by the application.</summary>
+    public Func<Task>? ClearClipboard { get; set; }
 
     /// <summary>Shows or clears the pause after too many wrong passwords, and keeps the countdown going.</summary>
     public void UpdateLockout()
@@ -890,6 +893,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             _sessionKey = null;
         }
 
+        // However the vault locks, a copied secret goes with it.
+        _ = ClearClipboard?.Invoke();
+
         IsUnlocked = false;
         CurrentPage = Login;
 
@@ -943,6 +949,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Passwords = Passwords.Snapshot(),
         Folders = Passwords.FolderSnapshot(),
         FolderIcons = Passwords.IconSnapshot(),
+        RecoveryKeyFingerprint = Recovery.TrustedKeyFingerprint,
         AttachmentData = Passwords.AttachmentSnapshot(),
     };
 
@@ -966,6 +973,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         Dashboard.Load(contents.Accounts);
         Passwords.Load(contents.Passwords, contents.Folders, contents.AttachmentData, contents.FolderIcons);
+        Recovery.TrustedKeyFingerprint = contents.RecoveryKeyFingerprint;
+        Recovery.Refresh();
         Login.MasterPassword = string.Empty;
         Login.ConfirmPassword = string.Empty;
         Login.IsCreateMode = false;

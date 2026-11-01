@@ -14,6 +14,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - 1.4.0: sign-in pause after wrong passwords, lock on Windows lock or sleep, screen-capture protection, recycle bin and entry history, password strength and health report, optional breach check, signed update check, automatic recovery backups with reminders, search, sort and rename on the codes page, shortcuts, right-click menus, drag and drop, a rewritten Help and About.
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
+- 1.5.1: attacker-style review: trusted recovery key kept in the vault, stronger password protection kept when the password changes, every lock and Exit clears a copied secret, process memory protection on Windows and Linux. Linux tests can also run in Docker.
 
 ## Next (1.6): icons and deep protection
 
@@ -31,7 +32,7 @@ The deep protection work follows:
 | Data key rotation | Old copies and exported backups stop being useful after a password change |
 | Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed. Moved from 1.5 |
 | Hide revealed passwords when the window loses focus | Revealed passwords already hide after 20 seconds |
-| Security settings inside the vault | Today `settings.json` can be edited by malware to switch off auto-lock or clipboard clearing |
+| Security settings inside the vault | Today `settings.json` can be edited by malware to switch off auto-lock or clipboard clearing, or to point the app at a vault on a network share, which makes Windows send the user's network login hash there. The recovery key is already protected this way |
 | Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |
 | Keep secrets out of .NET strings | Hold decrypted passwords as wipeable buffers and decrypt only while copying. A large internal change that touches every screen |
 | Bind the vault to this computer (optional) | A second key protected by the TPM or Windows DPAPI is needed besides the master password, so a copied vault file cannot be guessed offline from another machine. One extra recovery step when moving computers; losing the TPM means the recovery key is needed. Linux uses Secret Service |
@@ -39,6 +40,8 @@ The deep protection work follows:
 | Event history | A small encrypted list of recent security events (failed sign-ins, exports, saved attachments), shown in Settings |
 | Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
 | Printable large-print recovery sheet | A recovery copy that does not depend on a file |
+| One running copy at a time | Two running copies can each save, and the second overwrites the first |
+| Version bound into the release signature | A signature covers the file only, so an old signed installer could be offered as a new one if GitHub were compromised |
 
 The two optional unlock changes come last: they change how a vault is opened and need migration and rollback tests.
 

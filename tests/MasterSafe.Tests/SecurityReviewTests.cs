@@ -164,6 +164,90 @@ public sealed class SecurityReviewTests : IDisposable
     }
 
     [Fact]
+    public async Task ChangingThePassword_KeepsTheStrongerProtection()
+    {
+        var (vault, _, _) = NewVault();
+        await vault.SaveContentsAsync("old-password", Sample);
+        var strong = new Argon2Parameters { MemorySizeKib = 4096, Iterations = 2, DegreeOfParallelism = 1 };
+        await vault.RotateMasterPasswordAsync("old-password", "middle-password", strong);
+
+        await vault.RotateMasterPasswordAsync("middle-password", "new-password");
+
+        var slot = (await vault.ListSlotsAsync()).Single(s => s.Type == SlotTypes.Password);
+        slot.Kdf!.MemorySizeKib.Should().Be(4096);
+        slot.Kdf.Iterations.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task TheTrustedRecoveryKey_IsKeptInsideTheVault()
+    {
+        var (vault, _, _) = NewVault();
+        var attachment = new PasswordAttachment { Id = Guid.NewGuid(), Name = "a.txt", Size = 1 };
+        var entry = new PasswordEntry { Title = "With a file", Password = "pw" }.WithAttachments([attachment]);
+        await vault.SaveContentsAsync("password-here", new VaultContents
+        {
+            Passwords = [entry],
+            RecoveryKeyFingerprint = "abc",
+            AttachmentData = new Dictionary<Guid, byte[]> { [attachment.Id] = [1] },
+        });
+
+        (await vault.OpenContentsAsync("password-here")).RecoveryKeyFingerprint.Should().Be("abc");
+    }
+
+    [Fact]
+    public async Task ClearingNow_RemovesAWaitingSecret_ButNotSomethingElse()
+    {
+        var clipboard = "secret";
+        var scheduler = new ClipboardClearScheduler((_, _) => new StubTimer());
+        scheduler.Schedule("secret", () => Task.FromResult<string?>(clipboard), () =>
+        {
+            clipboard = string.Empty;
+            return Task.CompletedTask;
+        });
+
+        await scheduler.ClearNowAsync();
+
+        clipboard.Should().BeEmpty();
+        scheduler.IsPending.Should().BeFalse();
+
+        clipboard = "the user copied this";
+        scheduler.Schedule("secret", () => Task.FromResult<string?>(clipboard), () =>
+        {
+            clipboard = string.Empty;
+            return Task.CompletedTask;
+        });
+        await scheduler.ClearNowAsync();
+        clipboard.Should().Be("the user copied this");
+    }
+
+    [Fact]
+    public async Task ClearingNow_TriesAgain_WhenAnotherProgramHoldsTheClipboard()
+    {
+        var clipboard = "secret";
+        var busy = 2;
+        var scheduler = new ClipboardClearScheduler((_, _) => new StubTimer());
+        scheduler.Schedule(
+            "secret",
+            () => busy-- > 0 ? throw new IOException("busy") : Task.FromResult<string?>(clipboard),
+            () =>
+            {
+                clipboard = string.Empty;
+                return Task.CompletedTask;
+            });
+
+        await scheduler.ClearNowAsync();
+
+        clipboard.Should().BeEmpty();
+    }
+
+    private sealed class StubTimer : IDisposable
+    {
+        public void Dispose()
+        {
+        }
+    }
+
+    [Fact]
     public void Exit_CanBeChosenOnTheSignInScreenAndInTheSidebar()
     {
         var vm = new MainWindowViewModel();

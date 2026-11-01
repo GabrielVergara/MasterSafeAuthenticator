@@ -29,7 +29,7 @@
 	<Deterministic>true</Deterministic>
 	<Company>MasterSafe</Company>
 	<Product>MasterSafe</Product>
-	<Version>1.5.0</Version>
+	<Version>1.5.1</Version>
 	<Authors>Gabriel Vergara Ezcurdia</Authors>
 	<Copyright>Copyright (c) Gabriel Vergara Ezcurdia</Copyright>
   </PropertyGroup>

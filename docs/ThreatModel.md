@@ -51,7 +51,7 @@ flowchart TD
 
 An unlocked application can always be read by software running as the same user. To shorten the window, the
 vault locks after a period of inactivity (set in Settings), wipes the data key and decrypted data when it
-locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 minutes (your choice; 2 minutes at first), and keeps them out of the Windows clipboard history and cloud clipboard (a new copy restarts the wait; text that is no longer a copied secret is not touched).
+locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 minutes (your choice; 2 minutes at first), and keeps them out of the Windows clipboard history and cloud clipboard (a new copy restarts the wait; text that is no longer a copied secret is not touched). Every lock, and closing the program, clears a copied secret at once.
 
 ## Out of scope
 
@@ -60,6 +60,7 @@ locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 m
 - Screen capture of codes while they are displayed.
 - Windows clipboard history or cloud clipboard capturing a copied value before it is cleared.
 - Physical attacks on the TPM.
+- A program running as you while the vault is unlocked. It can log keystrokes and read the screen. MasterSafe blocks ordinary memory reads, except while a Windows Hello prompt is open, but a program that rewrites that permission, or one running as an administrator, gets past it. No password manager can fully stop this.
 - Weak master passwords. The application requires at least 12 characters and refuses very weak passwords; a longer passphrase is much safer.
 
 ## Known gaps (planned)

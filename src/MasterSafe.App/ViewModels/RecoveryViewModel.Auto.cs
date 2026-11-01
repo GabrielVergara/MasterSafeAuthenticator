@@ -171,6 +171,13 @@ public sealed partial class RecoveryViewModel
             return;
         }
 
+        if (!await TrustKeyAsync(settings.RecoveryPublicKey))
+        {
+            AutoBackupStatus = UntrustedKeyStatus;
+            Refresh();
+            return;
+        }
+
         try
         {
             var contents = _contents();

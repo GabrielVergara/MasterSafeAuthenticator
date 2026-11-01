@@ -47,6 +47,9 @@ internal static class ClipboardHelper
         return false;
     }
 
+    /// <summary>Clears a copied secret now, if it is still on the clipboard.</summary>
+    public static Task ClearNowAsync() => Scheduler.ClearNowAsync();
+
     private static IDisposable StartTimer(TimeSpan interval, Func<Task> action)
     {
         var timer = new DispatcherTimer { Interval = interval };

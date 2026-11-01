@@ -536,6 +536,55 @@ public sealed class ManagementTests : IDisposable
     }
 
     [Fact]
+    public async Task Recovery_AKeySwappedInTheSettingsFile_NeverReceivesABackup()
+    {
+        var folder = Path.Combine(_root, "attacker-share");
+        Directory.CreateDirectory(folder);
+        _dialogs.FolderResult = folder;
+        var settings = _settings.Load();
+        settings.RecoveryPublicKey = Convert.ToBase64String(new byte[32]);
+        _settings.Save(settings);
+
+        var page = new RecoveryViewModel(_services, () => Sample) { TrustedKeyFingerprint = "the key the vault trusts" };
+        page.Refresh();
+        page.HasKey.Should().BeFalse();
+        page.CanCreateKey.Should().Be(page.IsSupported);
+
+        await page.CreateBackupCommand.ExecuteAsync(null);
+
+        page.Status.Should().Contain("not the one this vault trusts");
+        Directory.GetFiles(folder).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Recovery_AVaultWithNoTrustedKeyYet_StartsTrustingTheOneInUse()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        var saves = 0;
+        _dialogs.SaveResult = Path.Combine(_root, "pin.msrk");
+        _dialogs.FolderResult = _root;
+        var page = new RecoveryViewModel(_services, () => Sample)
+        {
+            Passphrase = KeyPassphrase,
+            ConfirmPassphrase = KeyPassphrase,
+            SaveRequested = () =>
+            {
+                saves++;
+                return Task.CompletedTask;
+            },
+        };
+
+        await page.CreateKeyCommand.ExecuteAsync(null);
+
+        page.TrustedKeyFingerprint.Should().Be(RecoveryViewModel.KeyFingerprint(_settings.Load().RecoveryPublicKey!));
+        saves.Should().Be(1);
+    }
+
+    [Fact]
     public void Recovery_WithoutServices_ReportsUnavailable()
     {
         var page = new RecoveryViewModel();

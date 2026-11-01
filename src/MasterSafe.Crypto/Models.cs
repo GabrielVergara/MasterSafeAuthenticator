@@ -159,6 +159,12 @@ public sealed class VaultContents
     public IReadOnlyDictionary<string, string> FolderIcons { get; init; } = new Dictionary<string, string>();
 
     /// <summary>
+    /// The fingerprint of the recovery key this vault trusts. It lives here, encrypted, because the settings file is not
+    /// protected: someone who could swap the key there would receive every later recovery backup.
+    /// </summary>
+    public string? RecoveryKeyFingerprint { get; init; }
+
+    /// <summary>
     /// The bytes of the files attached to password entries, by attachment id. They are not part of the JSON; they are
     /// stored in their own section (see <see cref="VaultContentsCodec"/>).
     /// </summary>

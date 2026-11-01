@@ -157,6 +157,7 @@ public static class VaultContentsCodec
             Passwords = passwords,
             Folders = contents.Folders,
             FolderIcons = contents.FolderIcons,
+            RecoveryKeyFingerprint = contents.RecoveryKeyFingerprint,
             AttachmentData = kept,
         };
     }

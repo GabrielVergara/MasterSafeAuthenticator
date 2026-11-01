@@ -596,3 +596,5 @@ Loaded the version from {0} => Versión del {0} cargada
 Automatic recovery backup saved at {0} => Copia de recuperación automática guardada a las {0}
 E_xit => Sa_lir
 Lock the vault and close MasterSafe completely => Bloquea la bóveda y cierra MasterSafe por completo
+This recovery key is not the one this vault trusts, so no backup was written. The settings file may have been changed. Create a new recovery key. => Esta clave de recuperación no es la que esta bóveda reconoce, así que no se escribió ninguna copia. El archivo de ajustes puede haber sido modificado. Cree una clave de recuperación nueva.
+The recovery key in the settings does not match the one this vault trusts. It may have been changed. Create a new recovery key. => La clave de recuperación de los ajustes no coincide con la que esta bóveda reconoce. Puede haber sido modificada. Cree una clave de recuperación nueva.

@@ -128,8 +128,13 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
             ? "-win-x64-setup.exe"
             : architecture == Architecture.Arm64 ? "-linux-arm64.tar.gz" : "-linux-x64.tar.gz";
         return info.Assets.FirstOrDefault(a => a.Name.StartsWith("MasterSafe-Authenticator-", StringComparison.Ordinal)
-                                               && a.Name.EndsWith(suffix, StringComparison.Ordinal));
+                                               && a.Name.EndsWith(suffix, StringComparison.Ordinal)
+                                               && IsPlainFileName(a.Name));
     }
+
+    // The name comes from the server and becomes a path on this computer, so it must not be able to leave the folder.
+    private static bool IsPlainFileName(string name)
+        => !name.Contains("..", StringComparison.Ordinal) && name.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_');
 
     /// <summary>
     /// Downloads the installer for this system with its signature and checksum into a new folder under

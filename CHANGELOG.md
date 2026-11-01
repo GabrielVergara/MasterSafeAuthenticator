@@ -2,8 +2,21 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.5.1 (2026-11-01)
 
+### Security
+Found by reviewing the code the way an attacker would:
+
+- **The recovery key can no longer be swapped.** It was only in the settings file, which is not protected, so anyone able to edit that file could have received every later recovery backup. The vault now keeps the fingerprint of the key it trusts. If the key in the settings differs, no backup is written and the app asks for a new recovery key.
+- **Changing the master password keeps the protection you chose.** A vault strengthened with "Test and strengthen" dropped back to the default settings at the next password change.
+- **A copied secret no longer outlives the program.** Exit left it on the clipboard for good, because nothing remained to clear it. Exiting and every kind of lock now clear it straight away, also a lock caused by minimizing, and a busy clipboard is tried again. Closing the window with the tray setting off also locks properly.
+- **Other programs cannot simply read MasterSafe's memory.** Windows: other programs of your account can no longer open the process to read it. Linux: core dumps and attaching are turned off. This stops ordinary reads, not an administrator.
+  The Windows Hello prompt belongs to Windows, so the block is lifted only while that prompt is open.
+- A file name from a release can no longer lead outside the download folder.
+
+### Other
+- Closing the window to the tray now locks the vault when "Lock when minimized" is on, as minimizing does.
+- The Windows Hello prompt now comes to the front instead of opening behind the program.
 - The article link in About, Help and the README now opens the live site, not the test copy.
 - Documentation: the roadmap, threat model, OWASP checklist and signing notes now match 1.5.0.
 

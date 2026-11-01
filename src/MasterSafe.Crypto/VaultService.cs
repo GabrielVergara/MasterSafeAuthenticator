@@ -215,7 +215,7 @@ public sealed class VaultService : IVaultService
         try
         {
             var passwordSlot = FindSlot(vault, SlotTypes.Password);
-            var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, kdf ?? _kdfParameters);
+            var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, kdf ?? StrongerOf(passwordSlot.Kdf));
             var slots = vault.Slots.Select(s => s.Id == passwordSlot.Id ? replacement : s).ToList();
             await WriteCurrentAsync(vault.VaultId, slots, dataKey, DecodeCurrent(vault, dataKey), cancellationToken).ConfigureAwait(false);
             await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
@@ -378,6 +378,15 @@ public sealed class VaultService : IVaultService
             CryptographicOperations.ZeroMemory(kek);
         }
     }
+
+    /// <summary>
+    /// The settings for a new password: never weaker than the vault has now. The slot's values can be trusted here because
+    /// they were just used to unlock it, and changing them would have made that fail.
+    /// </summary>
+    private Argon2Parameters StrongerOf(Argon2Parameters? current)
+        => current is not null && Cost(current) >= Cost(_kdfParameters) ? current : _kdfParameters;
+
+    private static long Cost(Argon2Parameters kdf) => (long)kdf.MemorySizeKib * kdf.Iterations;
 
     private byte[] UnwrapWithPassword(VaultFile vault, string masterPassword)
     {

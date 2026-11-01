@@ -53,7 +53,7 @@ public partial class App : Application
 
             var mainWindow = new MainWindow();
             var (vault, services) = CreateServices(mainWindow);
-            var mainViewModel = new MainWindowViewModel(vault, PlatformServices.CreateUnlockProviders(), startIdleTimer: true, services: services);
+            var mainViewModel = new MainWindowViewModel(vault, [.. PlatformServices.CreateUnlockProviders().Select(p => p.SlotType == SlotTypes.WindowsHello ? new SystemPromptProvider(p) : p)], startIdleTimer: true, services: services);
             mainWindow.DataContext = mainViewModel;
             ApplyTheme(mainViewModel.Settings.SelectedTheme);
 
@@ -91,7 +91,6 @@ public partial class App : Application
         }
 
         // Free protections: harder DLL planting, no error-report dumps of the unlocked vault, data folder for this user only.
-        ProcessHardening.Apply(Path.GetFileName(Environment.ProcessPath));
         ProcessHardening.RestrictToCurrentUser(paths.DataFolder);
 
         var settings = new SettingsStore(paths.SettingsPath);
@@ -118,16 +117,31 @@ public partial class App : Application
         MainWindow window,
         MainWindowViewModel viewModel)
     {
-        // Really closes the program, whatever the tray setting. Locking first wipes the session key.
-        void ExitProgram()
+        // Really closes the program, whatever the tray setting. Locking first wipes the session key, and a copied secret
+        // goes too: once the program has closed, nothing is left to clear it later.
+        async void ExitProgram()
         {
+            if (_shuttingDown)
+            {
+                return;
+            }
+
             _shuttingDown = true;
+            var clearing = ClipboardHelper.ClearNowAsync();
             viewModel.LockNow();
-            _tray?.Dispose();
-            desktop.Shutdown();
+            try
+            {
+                await Task.WhenAny(clearing, Task.Delay(TimeSpan.FromSeconds(1)));
+            }
+            finally
+            {
+                _tray?.Dispose();
+                desktop.Shutdown();
+            }
         }
 
         viewModel.ExitRequested = ExitProgram;
+        viewModel.ClearClipboard = ClipboardHelper.ClearNowAsync;
 
         _tray = new AvaloniaSystemTray();
         _tray.Show(AppInfo.ProductName, TrayCommands.DefaultMenu);
@@ -182,7 +196,7 @@ public partial class App : Application
 
         // Keep the window out of screenshots and screen sharing unless the user turned that off.
         // The system-wide lock shortcut needs the real window, so it is applied once the window is open.
-        var hotkey = new GlobalLockHotkey(window, viewModel.LockNow);
+        var hotkey = new GlobalLockHotkey(window, () => viewModel.LockNow());
         void ApplyHotkey() => viewModel.Settings.LockHotkeyNote = hotkey.Apply(viewModel.Settings.GlobalLockHotkey)
             ? null
             : Loc.T("Ctrl+Alt+L could not be turned on. Another program may be using it.");
@@ -210,7 +224,17 @@ public partial class App : Application
             if (viewModel.Settings.MinimizeToTray && _tray.IsSupported && !_shuttingDown)
             {
                 e.Cancel = true;
+                if (viewModel.Settings.LockOnMinimize)
+                {
+                    viewModel.LockNow();
+                }
+
                 window.Hide();
+            }
+            else if (!_shuttingDown)
+            {
+                e.Cancel = true;
+                ExitProgram();
             }
         };
 

@@ -594,3 +594,5 @@ Loaded the version from {0} => Ladattu versio ajalta {0}
 Automatic recovery backup saved at {0} => Automaattinen palautusvarmuuskopio tallennettu klo {0}
 E_xit => Lop_eta
 Lock the vault and close MasterSafe completely => Lukitsee holvin ja sulkee MasterSafen kokonaan
+This recovery key is not the one this vault trusts, so no backup was written. The settings file may have been changed. Create a new recovery key. => Tämä palautusavain ei ole se, johon tämä holvi luottaa, joten varmuuskopiota ei kirjoitettu. Asetustiedostoa on ehkä muutettu. Luo uusi palautusavain.
+The recovery key in the settings does not match the one this vault trusts. It may have been changed. Create a new recovery key. => Asetusten palautusavain ei vastaa avainta, johon tämä holvi luottaa. Sitä on ehkä muutettu. Luo uusi palautusavain.

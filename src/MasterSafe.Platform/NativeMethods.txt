@@ -6,3 +6,5 @@ WebAuthNFreeAssertion
 WebAuthNGetErrorName
 GetForegroundWindow
 GetDesktopWindow
+FindWindow
+SetForegroundWindow

@@ -80,6 +80,43 @@ public sealed partial class RecoveryViewModel : ViewModelBase
     public void ClearSecrets()
     {
         Passphrase = ConfirmPassphrase = GeneratedPassphrase = string.Empty;
+        TrustedKeyFingerprint = null;
+    }
+
+    /// <summary>The fingerprint of the recovery key the open vault trusts; null until it has one.</summary>
+    public string? TrustedKeyFingerprint { get; set; }
+
+    /// <summary>Saves the vault after the trusted key changed. Set by the main view model.</summary>
+    public Func<Task>? SaveRequested { get; set; }
+
+    /// <summary>The fingerprint stored in the vault for a recovery key.</summary>
+    public static string KeyFingerprint(string publicKey)
+        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(publicKey))).ToLowerInvariant();
+
+    private const string UntrustedKeyStatus = "This recovery key is not the one this vault trusts, so no backup was written. The settings file may have been changed. Create a new recovery key.";
+
+    private bool IsUntrusted(string publicKey)
+        => TrustedKeyFingerprint is not null && TrustedKeyFingerprint != KeyFingerprint(publicKey);
+
+    /// <summary>Checks the key before a backup is encrypted to it. A vault with no trusted key yet starts trusting this one.</summary>
+    private async Task<bool> TrustKeyAsync(string publicKey)
+    {
+        if (TrustedKeyFingerprint is null)
+        {
+            await RememberKeyAsync(publicKey);
+            return true;
+        }
+
+        return !IsUntrusted(publicKey);
+    }
+
+    private async Task RememberKeyAsync(string publicKey)
+    {
+        TrustedKeyFingerprint = KeyFingerprint(publicKey);
+        if (SaveRequested is not null)
+        {
+            await SaveRequested();
+        }
     }
 
     /// <summary>Creates the page. With no services it shows that it is unavailable.</summary>
@@ -106,10 +143,14 @@ public sealed partial class RecoveryViewModel : ViewModelBase
     public void Refresh()
     {
         var settings = _services?.SettingsStore.Load();
-        HasKey = !string.IsNullOrEmpty(settings?.RecoveryPublicKey);
+        var key = settings?.RecoveryPublicKey;
+        var untrusted = !string.IsNullOrEmpty(key) && IsUntrusted(key);
+        HasKey = !string.IsNullOrEmpty(key) && !untrusted;
         KeyInfo = HasKey
             ? $"Recovery key set up on {Format(settings!.RecoveryKeyCreatedUtc)}. Key id: {ShortId(settings.RecoveryKeyId)}."
-            : "No recovery key yet.";
+            : untrusted
+                ? "The recovery key in the settings does not match the one this vault trusts. It may have been changed. Create a new recovery key."
+                : "No recovery key yet.";
         LastBackupInfo = string.IsNullOrEmpty(settings?.LastRecoveryBackupUtc)
             ? "No recovery backup yet."
             : $"Last recovery backup: {Format(settings.LastRecoveryBackupUtc)}.";
@@ -191,6 +232,7 @@ public sealed partial class RecoveryViewModel : ViewModelBase
             settings.RecoveryKeyId = created.KeyId;
             settings.RecoveryKeyCreatedUtc = created.CreatedUtc;
             _services.SettingsStore.Save(settings);
+            await RememberKeyAsync(settings.RecoveryPublicKey);
 
             Passphrase = ConfirmPassphrase = string.Empty;
             Status = $"Saved to {path}. Keep that file and its passphrase somewhere other than this computer, for example a USB stick in a safe place.";
@@ -218,6 +260,13 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         if (string.IsNullOrEmpty(settings.RecoveryPublicKey))
         {
             Status = "Create a recovery key first.";
+            return;
+        }
+
+        if (!await TrustKeyAsync(settings.RecoveryPublicKey))
+        {
+            Status = UntrustedKeyStatus;
+            Refresh();
             return;
         }
 
