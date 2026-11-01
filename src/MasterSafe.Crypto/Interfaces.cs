@@ -44,6 +44,12 @@ public interface IVaultRepository
 
     /// <summary>Returns true if a vault already exists.</summary>
     Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes earlier copies of the vault kept for safety. Every unlock method of a copy still opens it, and it holds the same
+    /// data key as the current vault, so copies must go when a password is changed or an unlock method is removed.
+    /// </summary>
+    Task ForgetOldCopiesAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 }
 
 /// <summary>

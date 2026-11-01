@@ -45,7 +45,6 @@ public static class TrayCommands
     public const string ShowWindow = "show";
     public const string HideWindow = "hide";
     public const string LockVault = "lock";
-    public const string CopyRecentCode = "copy-recent";
     public const string About = "about";
     public const string Exit = "exit";
 
@@ -55,7 +54,6 @@ public static class TrayCommands
         new(ShowWindow, "Show window"),
         new(HideWindow, "Hide window"),
         new(LockVault, "Lock vault"),
-        new(CopyRecentCode, "Copy recent code"),
         new(About, "About"),
         new(Exit, "Exit"),
     ];

@@ -51,5 +51,8 @@ public sealed class SwitchableVaultRepository : IVaultRepository
     public Task SaveAsync(VaultFile vault, CancellationToken cancellationToken = default) => _inner.SaveAsync(vault, cancellationToken);
 
     /// <inheritdoc />
+    public Task ForgetOldCopiesAsync(CancellationToken cancellationToken = default) => _inner.ForgetOldCopiesAsync(cancellationToken);
+
+    /// <inheritdoc />
     public Task<bool> ExistsAsync(CancellationToken cancellationToken = default) => _inner.ExistsAsync(cancellationToken);
 }

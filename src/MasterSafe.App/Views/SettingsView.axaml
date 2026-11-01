@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:MasterSafe.App.Views"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              xmlns:conv="clr-namespace:MasterSafe.App.Converters"
              x:Class="MasterSafe.App.Views.SettingsView"
@@ -116,7 +117,7 @@
               <DataTemplate x:DataType="vm:UnlockMethodRowViewModel">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
                   <StackPanel>
-                    <TextBlock Text="{Binding Label}" />
+                    <TextBlock Tag="data" Text="{Binding Label}" />
                     <TextBlock Text="{Binding Added}" Classes="hint" />
                   </StackPanel>
                   <Button Grid.Column="1" Classes="danger" Content="Remove" IsVisible="{Binding CanRemove}"
@@ -147,7 +148,7 @@
                      Text="A stronger setting makes guessing your master password slower for an attacker. MasterSafe tests this computer and picks the strongest setting that still unlocks in about a second. Your password does not change." />
           <StackPanel>
             <TextBlock Text="Master password" Classes="label" />
-            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding StrengthenPassword, Mode=TwoWay}" />
+            <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding StrengthenPassword, Mode=TwoWay}" />
           </StackPanel>
           <Button Classes="accent" Content="Test and strengthen" HorizontalAlignment="Left" Command="{Binding StrengthenCommand}" />
           <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding StrengthenStatus}" TextWrapping="Wrap" />
@@ -160,15 +161,15 @@
           <TextBlock Classes="hint" Text="The new password protects your vault key from now on. Windows Hello keeps working. Choose a long passphrase you will remember." />
           <StackPanel>
             <TextBlock Text="Current password" Classes="label" />
-            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding CurrentPassword, Mode=TwoWay}" />
+            <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding CurrentPassword, Mode=TwoWay}" />
           </StackPanel>
           <StackPanel>
             <TextBlock Text="New password" Classes="label" />
-            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding NewPassword, Mode=TwoWay}" />
+            <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding NewPassword, Mode=TwoWay}" />
           </StackPanel>
           <StackPanel>
             <TextBlock Text="Confirm new password" Classes="label" />
-            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding ConfirmNewPassword, Mode=TwoWay}" />
+            <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding ConfirmNewPassword, Mode=TwoWay}" />
           </StackPanel>
           <Button Classes="accent" Content="Change password" HorizontalAlignment="Left"
                   Command="{Binding ChangePasswordCommand}" />

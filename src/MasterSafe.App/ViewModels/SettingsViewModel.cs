@@ -287,10 +287,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
         try
         {
             StrengthenStatus = await StrengthenHandler(StrengthenPassword);
-            StrengthenPassword = string.Empty;
         }
         finally
         {
+            StrengthenPassword = string.Empty;
             IsStrengthening = false;
         }
     }

@@ -135,9 +135,8 @@ public sealed class FileVaultRepository : IVaultRepository
                 File.SetUnixFileMode(target, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             }
 
-            var pattern = new System.Text.RegularExpressions.Regex("^" + System.Text.RegularExpressions.Regex.Escape(stem) + @"-\d{8}\.sauth$");
             foreach (var old in Directory.EnumerateFiles(_snapshotFolder)
-                .Where(f => pattern.IsMatch(Path.GetFileName(f)))
+                .Where(f => IsSnapshotOf(_path, f))
                 .OrderByDescending(f => Path.GetFileName(f), StringComparer.Ordinal)
                 .Skip(SnapshotsKept))
             {
@@ -147,6 +146,41 @@ public sealed class FileVaultRepository : IVaultRepository
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             // Snapshots are an extra safety net; the save itself goes on.
+        }
+    }
+
+    /// <inheritdoc />
+    public Task ForgetOldCopiesAsync(CancellationToken cancellationToken = default)
+    {
+        DeleteIfPossible(BackupPath);
+        if (_snapshotFolder is not null && Directory.Exists(_snapshotFolder))
+        {
+            foreach (var snapshot in Directory.EnumerateFiles(_snapshotFolder).Where(f => IsSnapshotOf(_path, f)).ToList())
+            {
+                DeleteIfPossible(snapshot);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>True when <paramref name="file"/> is a daily snapshot of the vault at <paramref name="vaultPath"/>.</summary>
+    public static bool IsSnapshotOf(string vaultPath, string file)
+    {
+        var stem = Path.GetFileNameWithoutExtension(vaultPath);
+        return System.Text.RegularExpressions.Regex.IsMatch(
+            Path.GetFileName(file), "^" + System.Text.RegularExpressions.Regex.Escape(stem) + @"-\d{8}\.sauth$");
+    }
+
+    private static void DeleteIfPossible(string file)
+    {
+        try
+        {
+            File.Delete(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The change itself succeeded. A file that cannot be removed now must not undo it.
         }
     }
 

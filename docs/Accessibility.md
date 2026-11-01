@@ -27,7 +27,7 @@ This page says what is in place, how it is checked, and what is still missing. I
 ## Known gaps
 
 - Orca (Linux screen reader) has not been tried; Avalonia's Linux accessibility support is less complete than on Windows.
-- Languages: English, Spanish and Finnish. Some messages built in code from changing parts may still appear in English.
+- Languages: English, Spanish and Finnish. Error details that come from the operating system or a server stay in the language they arrive in.
 - Easier reading adds space between letters and lines (WCAG 1.4.12), but no dyslexia-specific font is bundled.
 
 To report an accessibility problem, open an issue at <https://github.com/GabrielVergara/MasterSafeAuthenticator/issues> and say

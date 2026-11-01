@@ -207,6 +207,7 @@ public sealed class VaultService : IVaultService
             var contents = await OpenContentsAsync(currentPassword, cancellationToken).ConfigureAwait(false);
             var created = await CreateVaultAsync(newPassword, contents, cancellationToken).ConfigureAwait(false);
             CryptographicOperations.ZeroMemory(created);
+            await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -217,6 +218,7 @@ public sealed class VaultService : IVaultService
             var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, kdf ?? _kdfParameters);
             var slots = vault.Slots.Select(s => s.Id == passwordSlot.Id ? replacement : s).ToList();
             await WriteCurrentAsync(vault.VaultId, slots, dataKey, DecodeCurrent(vault, dataKey), cancellationToken).ConfigureAwait(false);
+            await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -323,6 +325,7 @@ public sealed class VaultService : IVaultService
         CryptographicOperations.ZeroMemory(DecodeCurrentBytes(vault, dataKey));
         await _repository.SaveAsync(CloneWithSlots(vault, vault.Slots.Where(s => s.Id != slotId).ToList()), cancellationToken)
             .ConfigureAwait(false);
+        await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
 
         if (provider is not null)
         {

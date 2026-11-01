@@ -54,6 +54,9 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     /// <summary>How many of the shown entries are ticked.</summary>
     public int SelectedCount => _selected.Count;
 
+    /// <summary>The text of the button that deletes the ticked entries.</summary>
+    public string DeleteSelectedText => $"Delete selected ({SelectedCount})";
+
     /// <summary>True when at least one entry is ticked.</summary>
     public bool HasSelection => _selected.Count > 0;
 
@@ -163,6 +166,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     private void NotifySelectionChanged()
     {
         OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(DeleteSelectedText));
         OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(BulkDeleteQuestion));
     }

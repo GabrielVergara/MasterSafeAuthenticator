@@ -22,7 +22,7 @@
                 <Grid ColumnDefinitions="72,*" Margin="0,0,0,8">
                   <TextBlock Text="{Binding Mark}" FontWeight="SemiBold" />
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Detail}" Classes="hint" TextWrapping="Wrap" />
                   </StackPanel>
                 </Grid>
@@ -48,7 +48,7 @@
               <DataTemplate x:DataType="vm:HealthRow">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
                   <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
@@ -68,7 +68,7 @@
               <DataTemplate x:DataType="vm:HealthRow">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
                   <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
@@ -88,7 +88,7 @@
               <DataTemplate x:DataType="vm:HealthRow">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
                   <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
@@ -108,7 +108,7 @@
               <DataTemplate x:DataType="vm:HealthRow">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
                   <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Reason}" Classes="error" TextWrapping="Wrap" />
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"

@@ -112,6 +112,16 @@ public sealed class VaultCatalog
             File.Move(source + ".bak", target + ".bak");
         }
 
+        // The archived vault is the copy that is kept. Its snapshots would otherwise outlive a later "delete forever".
+        var snapshots = Path.Combine(_paths.DataFolder, "snapshots");
+        if (Directory.Exists(snapshots))
+        {
+            foreach (var snapshot in Directory.EnumerateFiles(snapshots).Where(f => FileVaultRepository.IsSnapshotOf(source, f)).ToList())
+            {
+                File.Delete(snapshot);
+            }
+        }
+
         if (Same(ActivePath, source))
         {
             Activate(_paths.DefaultVaultPath);

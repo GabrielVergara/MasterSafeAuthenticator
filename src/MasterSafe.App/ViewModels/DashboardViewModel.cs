@@ -33,11 +33,14 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
 
     /// <summary>The account waiting for the user to confirm its deletion.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPendingDelete))]
+    [NotifyPropertyChangedFor(nameof(HasPendingDelete), nameof(PendingDeleteQuestion))]
     private OtpItemViewModel? _pendingDelete;
 
     /// <summary>True while a deletion waits for confirmation.</summary>
     public bool HasPendingDelete => PendingDelete is not null;
+
+    /// <summary>The question asked before an account is deleted.</summary>
+    public string PendingDeleteQuestion => $"Delete {PendingDelete?.Issuer}? You may lose access to that account if you cannot sign in to it another way.";
 
     [RelayCommand]
     private void RequestDelete(OtpItemViewModel? item) => PendingDelete = item;

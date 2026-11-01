@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using System.Net;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace MasterSafe.Backup;
@@ -17,6 +18,9 @@ public sealed class WebDavBackupProvider : IBackupProvider
 {
     /// <summary>Largest backup that will be downloaded (100 MiB).</summary>
     public const long MaxDownloadBytes = 100L * 1024 * 1024;
+
+    /// <summary>Largest folder listing accepted from a server.</summary>
+    public const int MaxListingChars = 4 * 1024 * 1024;
 
     private readonly HttpClient _client;
     private readonly Uri _baseUri;
@@ -110,11 +114,26 @@ public sealed class WebDavBackupProvider : IBackupProvider
         using var request = new HttpRequestMessage(new HttpMethod("PROPFIND"), _baseUri);
         request.Headers.Add("Depth", "1");
 
-        using var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         EnsureSuccess(response, "Listing backups failed");
 
-        var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-        return ParseFileNames(body);
+        // The server is outside this computer, so what it sends is limited like any other file from outside.
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var reader = new StreamReader(stream);
+        var body = new char[MaxListingChars + 1];
+        var length = 0;
+        int read;
+        while (length < body.Length && (read = await reader.ReadAsync(body.AsMemory(length), cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            length += read;
+        }
+
+        if (length > MaxListingChars)
+        {
+            throw new InvalidDataException("The server sent a folder listing that is too large.");
+        }
+
+        return ParseFileNames(new string(body, 0, length));
     }
 
     private static IReadOnlyList<string> ParseFileNames(string propfindXml)
@@ -127,9 +146,12 @@ public sealed class WebDavBackupProvider : IBackupProvider
         XDocument document;
         try
         {
-            document = XDocument.Parse(propfindXml);
+            // No DTDs: a server must not be able to define entities (entity expansion).
+            using var text = new StringReader(propfindXml);
+            using var reader = XmlReader.Create(text, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+            document = XDocument.Load(reader);
         }
-        catch (System.Xml.XmlException)
+        catch (XmlException)
         {
             return [];
         }

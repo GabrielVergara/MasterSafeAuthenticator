@@ -242,7 +242,7 @@ La página Bóvedas muestra estas ubicaciones y lista sus bóvedas:
 - Empezar una bóveda nueva: mueve la bóveda actual al archivo y crea una vacía.
 - Abra de nuevo una bóveda archivada, muestre un archivo en su carpeta o elimine una bóveda antigua. Eliminar pide confirmación y no se puede deshacer.
 
-Para pasar a otro equipo, copie allí vault.sauth, instale MasterSafe y elija «Ya tengo un archivo de bóveda». Desinstalar nunca quita su bóveda. Guardar es seguro ante fallos y la versión anterior de la bóveda se conserva como vault.sauth.bak.
+Para pasar a otro equipo, copie allí vault.sauth, instale MasterSafe y elija «Ya tengo un archivo de bóveda». Desinstalar nunca quita su bóveda. Guardar es seguro ante fallos y la versión anterior de la bóveda se conserva como vault.sauth.bak, con copias diarias en la carpeta snapshots. Cambiar la contraseña maestra o quitar un método de desbloqueo elimina esas copias, porque la forma de entrada anterior aún las abre.
 
 ### Security model
 title: Modelo de seguridad

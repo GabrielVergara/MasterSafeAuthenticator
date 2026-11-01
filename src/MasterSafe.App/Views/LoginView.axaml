@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:MasterSafe.App.Views"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.LoginView"
              x:DataType="vm:LoginViewModel">
@@ -16,22 +17,22 @@
 
       <StackPanel>
         <TextBlock Text="Master password" Classes="label" />
-        <TextBox x:Name="PasswordBox" Classes="revealPasswordButton" PasswordChar="●"
+        <v:SecretTextBox x:Name="PasswordBox" Classes="revealPasswordButton"
                  Text="{Binding MasterPassword, Mode=TwoWay}">
-          <TextBox.KeyBindings>
+          <v:SecretTextBox.KeyBindings>
             <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
-          </TextBox.KeyBindings>
-        </TextBox>
+          </v:SecretTextBox.KeyBindings>
+        </v:SecretTextBox>
       </StackPanel>
 
       <StackPanel IsVisible="{Binding IsCreateMode}">
         <TextBlock Text="Confirm master password" Classes="label" />
-        <TextBox Classes="revealPasswordButton" PasswordChar="●"
+        <v:SecretTextBox Classes="revealPasswordButton"
                  Text="{Binding ConfirmPassword, Mode=TwoWay}">
-          <TextBox.KeyBindings>
+          <v:SecretTextBox.KeyBindings>
             <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
-          </TextBox.KeyBindings>
-        </TextBox>
+          </v:SecretTextBox.KeyBindings>
+        </v:SecretTextBox>
         <TextBlock Classes="hint" Margin="0,8,0,0" Text="{Binding PasswordHint}" />
         <TextBlock Classes="hint" Text="It cannot be recovered if you forget it. After signing in you can set up a recovery key." />
       </StackPanel>

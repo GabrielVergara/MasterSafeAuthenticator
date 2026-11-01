@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:MasterSafe.App.Views"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              xmlns:conv="clr-namespace:MasterSafe.App.Converters"
              x:Class="MasterSafe.App.Views.BackupView"
@@ -43,13 +44,13 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="WebDAV password or app password" Classes="label" />
-          <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding WebDavPassword, Mode=TwoWay}" />
+          <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding WebDavPassword, Mode=TwoWay}" />
         </StackPanel>
       </StackPanel>
 
       <StackPanel>
         <TextBlock Text="Master password (encrypts the backup)" Classes="label" />
-        <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding MasterPassword, Mode=TwoWay}" />
+        <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding MasterPassword, Mode=TwoWay}" />
       </StackPanel>
 
       <StackPanel Orientation="Horizontal" Spacing="8">

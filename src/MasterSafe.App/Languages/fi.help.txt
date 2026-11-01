@@ -242,7 +242,7 @@ Holvit-sivu näyttää nämä sijainnit ja luettelee holvisi:
 - Aloita uusi holvi: siirtää nykyisen holvin arkistoon ja luo tyhjän.
 - Avaa arkistoitu holvi uudelleen, näytä tiedosto kansiossaan tai poista vanha holvi. Poisto pyytää vahvistusta, eikä sitä voi perua.
 
-Siirtyäksesi toiselle tietokoneelle kopioi vault.sauth sinne, asenna MasterSafe ja valitse "Minulla on jo holvitiedosto". Asennuksen poistaminen ei koskaan poista holviasi. Tallennus kestää kaatumisen, ja holvin edellinen versio säilytetään nimellä vault.sauth.bak.
+Siirtyäksesi toiselle tietokoneelle kopioi vault.sauth sinne, asenna MasterSafe ja valitse "Minulla on jo holvitiedosto". Asennuksen poistaminen ei koskaan poista holviasi. Tallennus kestää kaatumisen, ja holvin edellinen versio säilytetään nimellä vault.sauth.bak ja päivittäiset kopiot snapshots-kansiossa. Pääsalasanan vaihto tai avaustavan poisto poistaa nämä kopiot, koska vanha avaustapa avaa ne edelleen.
 
 ### Security model
 title: Turvamalli

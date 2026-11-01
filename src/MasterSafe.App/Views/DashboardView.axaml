@@ -62,9 +62,7 @@
     <Border DockPanel.Dock="Top" Classes="card" BorderBrush="{DynamicResource DangerBrush}" Margin="0,0,0,10"
             IsVisible="{Binding HasPendingDelete}">
       <StackPanel Spacing="8">
-        <TextBlock Classes="error">
-          <Run Text="Delete " /><Run Text="{Binding PendingDelete.Issuer}" FontWeight="SemiBold" /><Run Text="? You may lose access to that account if you cannot sign in to it another way." />
-        </TextBlock>
+        <TextBlock Classes="error" TextWrapping="Wrap" Text="{Binding PendingDeleteQuestion}" />
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Button Classes="danger" Content="Yes, delete it" Command="{Binding ConfirmDeleteCommand}" />
           <Button Content="Keep it" Command="{Binding CancelDeleteCommand}" />
@@ -88,8 +86,8 @@
             <Border Classes="card" Margin="0,0,0,10">
               <Grid ColumnDefinitions="*,Auto,Auto">
                 <StackPanel Grid.Column="0" Spacing="2">
-                  <TextBlock Text="{Binding Issuer}" Classes="h2" />
-                  <TextBlock Text="{Binding Label}" Classes="hint" />
+                  <TextBlock Tag="data" Text="{Binding Issuer}" Classes="h2" />
+                  <TextBlock Tag="data" Text="{Binding Label}" Classes="hint" />
                   <TextBlock Text="{Binding DisplayCode}" Classes="code" Margin="0,6,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6" Margin="16,0" Width="72">

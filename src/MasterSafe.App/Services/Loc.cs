@@ -25,7 +25,7 @@ public static partial class Loc
     public static readonly IReadOnlyList<string> Choices = ["System", "en", "es", "fi"];
 
     private static Dictionary<string, string> _exact = new(StringComparer.Ordinal);
-    private static List<(Regex Pattern, string Template)> _templates = [];
+    private static List<(Regex Pattern, string Template, int Fixed)> _templates = [];
     private static Dictionary<string, HelpTopic> _help = new(StringComparer.Ordinal);
     private static bool _installed;
 
@@ -128,7 +128,7 @@ public static partial class Loc
                 var value = Unescape(raw[(at + 4)..]);
                 if (Placeholder().IsMatch(key))
                 {
-                    _templates.Add((ToPattern(key), value));
+                    _templates.Add((ToPattern(key), value, Placeholder().Replace(key, string.Empty).Length));
                 }
                 else
                 {
@@ -163,7 +163,13 @@ public static partial class Loc
         }
 
         FlushTopic();
+
+        // The most specific message wins, so "Deleted {0}." does not take "Deleted folder {0}. Its {1} passwords...".
+        _templates = [.. _templates.OrderByDescending(t => t.Fixed)];
     }
+
+    /// <summary>Longer text is not a message with changing parts, so it is not worth comparing with every template.</summary>
+    private const int MaxMessageLength = 600;
 
     private static readonly Dictionary<string, string> _helpTitles = new(StringComparer.Ordinal);
     private static string _helpTitleValue = string.Empty;
@@ -198,7 +204,12 @@ public static partial class Loc
             return exact;
         }
 
-        foreach (var (pattern, template) in _templates)
+        if (english.Length > MaxMessageLength)
+        {
+            return null;
+        }
+
+        foreach (var (pattern, template, _) in _templates)
         {
             var m = pattern.Match(english);
             if (m.Success)
@@ -206,7 +217,14 @@ public static partial class Loc
                 var result = template;
                 for (var i = 1; i < m.Groups.Count; i++)
                 {
-                    result = result.Replace("{" + (i - 1) + "}", m.Groups[i].Value, StringComparison.Ordinal);
+                    // A part such as "30 seconds" is translated too; names and other text are left as they are.
+                    var part = m.Groups[i].Value;
+                    if (part.Length > 0 && char.IsAsciiDigit(part[0]))
+                    {
+                        part = TryTranslate(part) ?? part;
+                    }
+
+                    result = result.Replace("{" + (i - 1) + "}", part, StringComparison.Ordinal);
                 }
 
                 return result;
@@ -256,6 +274,12 @@ public static partial class Loc
         => property.Changed.Subscribe(new AnonymousObserver<AvaloniaPropertyChangedEventArgs<T>>(e =>
         {
             if (Current == "en" || e.Sender is not AvaloniaObject target || e.NewValue.GetValueOrDefault() is not string text)
+            {
+                return;
+            }
+
+            // Tag="data" marks the user's own text: an entry called "Password" stays "Password".
+            if (target is Control { Tag: "data" })
             {
                 return;
             }

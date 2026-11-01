@@ -371,7 +371,8 @@ public static class HelpContent
 
             To move to another computer, copy vault.sauth there, install MasterSafe and choose "I already have
             a vault file". Uninstalling never removes your vault. Saving is crash-safe, and the previous
-            version of the vault is kept as vault.sauth.bak.
+            version of the vault is kept as vault.sauth.bak, with daily copies in the snapshots folder. Changing the
+            master password or removing an unlock method deletes those copies, because the old way in still opens them.
             """),
         new(
             "Security model",

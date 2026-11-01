@@ -17,13 +17,22 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **First-run guide:** after a new vault is created, one page lists the steps that matter (recovery key, quicker unlock, first account, passwords), shows what is done and goes to the right page. Every step can be skipped.
 
 ### Languages
-- **Spanish (Español) and Finnish (Suomi)** besides English: every screen, the Help and the check-up messages. The language follows the computer and can be chosen in Settings; a change applies fully after a restart. See [docs/Translating.md](docs/Translating.md) for how texts are translated and how to add a language. A test fails when a text on a screen has no translation.
+- **Spanish (Español) and Finnish (Suomi)** besides English: every screen, the Help, the tray menu and the app's messages. System error texts stay in the language they come in. The language follows the computer and can be chosen in Settings; a change applies fully after a restart. See [docs/Translating.md](docs/Translating.md) for how texts are translated and how to add a language. A test fails when a text on a screen has no translation.
 
 ### Security
 - **Security check-up** at the top of the Health page: looks at the lock time, lock on computer lock, screen capture block, clipboard clearing, recovery key, recovery backup, second unlock method and breach check, and says what to change. Nothing is changed for you.
 - **Test and strengthen** in Settings: measures this computer and moves the vault to the strongest Argon2id setting (up to 512 MiB) that still unlocks in about a second. The master password does not change; the page also shows the current setting.
 - **Quick lock:** "Lock vault" in the tray menu and, if you turn it on in Settings, Ctrl+Alt+L from any program (Windows).
 - **Revealed passwords hide again** by themselves after 20 seconds.
+- **Review fixes:**
+  - Changing the master password, strengthening the protection or removing an unlock method now removes `vault.sauth.bak` and the daily snapshots. Those copies still opened with the old password and hold the same data key as the current vault.
+  - Password boxes no longer give their plain text to accessibility tools; they report dots, so a screen reader cannot speak a master password.
+  - Moving a vault to the archive removes its snapshots, so "delete forever" really is the end of it.
+  - The password typed for "Test and strengthen" is cleared when the vault locks or the step fails.
+  - Translation no longer touches your own text (an entry called "Password" keeps that name).
+  - A WebDAV server can no longer send DTDs or an unlimited folder listing.
+  - GitHub workflows have read-only default permissions, and the release tag is no longer placed directly in a script.
+- Removed "Copy recent code" from the tray menu. It did nothing, and it would have put a code on the clipboard without showing which account it belongs to.
 - **Signing is now offline.** The release workflow no longer has the signing key: it builds, tests, records a build attestation and drafts the release. `scripts/sign-release.ps1` signs on the maintainer's computer after checking the attestation and checksums of every file. See [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
 - All GitHub Actions are pinned to exact commits.
 - **NuGet lock files:** CI fails when a package differs from the recorded version and hash.

@@ -34,8 +34,10 @@ jobs:
 
       - name: Build installer
         shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
+          $version = $env:TAG.TrimStart('v')
           ./installer/build-windows.ps1 -Version $version
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

@@ -639,7 +639,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return "Unlock the vault first.";
         }
 
-        var calibrated = await Task.Run(() => Argon2Calibrator.Calibrate());
+        Argon2Parameters calibrated;
+        try
+        {
+            calibrated = await Task.Run(() => Argon2Calibrator.Calibrate());
+        }
+        catch (Exception ex) when (ex is OutOfMemoryException or InvalidOperationException)
+        {
+            return Loc.T("This computer does not have enough free memory for the test. Your vault was not changed.");
+        }
+
         var slots = await _vault.ListSlotsAsync();
         var current = slots.FirstOrDefault(s => s.Type == SlotTypes.Password)?.Kdf;
         if (!Argon2Calibrator.IsWorthChanging(current, calibrated))
@@ -889,6 +898,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;
+        Settings.StrengthenPassword = string.Empty;
         Settings.NewPassword = string.Empty;
         Settings.ConfirmNewPassword = string.Empty;
         Login.MasterPassword = string.Empty;

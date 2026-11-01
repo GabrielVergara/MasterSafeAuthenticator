@@ -22,7 +22,7 @@ public sealed partial class LocalizationTests : IDisposable
 
     public void Dispose() => Loc.Use("en");
 
-    /// <summary>Texts set in XAML that the screens show. Pieces of a sentence built from several parts are not translated as a whole.</summary>
+    /// <summary>Texts set in XAML that the screens show.</summary>
     private static IEnumerable<string> XamlTexts()
     {
         var found = new SortedSet<string>(StringComparer.Ordinal);
@@ -32,7 +32,7 @@ public sealed partial class LocalizationTests : IDisposable
             foreach (Match m in XamlAttribute().Matches(xaml))
             {
                 var value = m.Groups[2].Value.Replace("&amp;", "&", StringComparison.Ordinal).Replace("&quot;", "\"", StringComparison.Ordinal);
-                if (Letters().IsMatch(value) && value != "Delete " && !value.StartsWith("? ", StringComparison.Ordinal) && value != "Delete selected (")
+                if (Letters().IsMatch(value))
                 {
                     found.Add(value);
                 }
@@ -120,6 +120,16 @@ public sealed partial class LocalizationTests : IDisposable
             Loc.Use("en");
             new Button { Content = "Cancel" }.Content.Should().Be("Cancel");
         });
+    }
+
+    [Theory]
+    [InlineData("es", "Deleted folder Work. Its 3 passwords were moved to the top level.", "Carpeta Work eliminada. Sus 3 contraseñas pasaron al nivel superior.")]
+    [InlineData("fi", "Copied code for GitHub. The clipboard clears in 30 seconds.", "Koodi kopioitu: GitHub. Leikepöytä tyhjenee: 30 sekuntia.")]
+    [InlineData("es", "Opened x. This address is not encrypted (http): do not enter your password there.", "x abierto. Esta dirección no está cifrada (http): no escriba allí su contraseña.")]
+    public void TheMostSpecificMessageWins_AndDurationsAreTranslatedToo(string code, string english, string expected)
+    {
+        Loc.Use(code);
+        Loc.T(english).Should().Be(expected);
     }
 
     [Fact]
