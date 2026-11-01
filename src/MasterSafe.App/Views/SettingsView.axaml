@@ -124,6 +124,21 @@
 
       <Border Classes="card">
         <StackPanel Spacing="12">
+          <TextBlock Text="Strength of the password protection" Classes="h2" />
+          <TextBlock Text="{Binding ProtectionSummary}" TextWrapping="Wrap" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="A stronger setting makes guessing your master password slower for an attacker. MasterSafe tests this computer and picks the strongest setting that still unlocks in about a second. Your password does not change." />
+          <StackPanel>
+            <TextBlock Text="Master password" Classes="label" />
+            <TextBox Classes="revealPasswordButton" PasswordChar="●" Text="{Binding StrengthenPassword, Mode=TwoWay}" />
+          </StackPanel>
+          <Button Classes="accent" Content="Test and strengthen" HorizontalAlignment="Left" Command="{Binding StrengthenCommand}" />
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding StrengthenStatus}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
           <TextBlock Text="Change master password" Classes="h2" />
           <TextBlock Classes="hint" Text="The new password protects your vault key from now on. Windows Hello keeps working. Choose a long passphrase you will remember." />
           <StackPanel>

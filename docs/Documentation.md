@@ -169,6 +169,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Delete a password, open Recycle bin, Restore | It is back in its folder with its attached files; Delete for good asks first |
 | Edit a password twice | "Earlier versions" lists the old ones; "Copy its password" works |
 | Health page, Security check-up at the top | Eight settings are listed, each "Good" or "Improve" with advice; changing a setting and reopening the page updates it |
+| Settings, Strength of the password protection, type the master password, Test and strengthen | After a few seconds the vault uses more memory (or says it already uses the most this computer can handle); the password still unlocks it |
 | Reveal a password with the eye button and wait 20 seconds | It is hidden again |
 | Password health with a weak and a reused password | Both are listed; with the breach check off the button says why it is off |
 | Settings, allow the breach check, run it with a known leaked password such as `Password123!` | The entry appears under "Found in known data breaches" |

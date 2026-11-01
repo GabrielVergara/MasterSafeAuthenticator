@@ -100,7 +100,7 @@ public sealed class KeySlot
 }
 
 /// <summary>Display information about a <see cref="KeySlot"/>.</summary>
-public sealed record KeySlotInfo(string Id, string Type, string Label, string CreatedUtc);
+public sealed record KeySlotInfo(string Id, string Type, string Label, string CreatedUtc, Argon2Parameters? Kdf = null);
 
 /// <summary>
 /// Result of an AES-256-GCM encryption operation.

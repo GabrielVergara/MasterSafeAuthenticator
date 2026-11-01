@@ -435,6 +435,49 @@ public class VaultSecurityTests
     }
 
     [Fact]
+    public async Task Calibrator_RaisesMemoryWhileTheTimeAllows_AndNeverGoesBelowTheDefault()
+    {
+        var fast = Argon2Calibrator.Calibrate(TimeSpan.FromSeconds(1), p => TimeSpan.FromMilliseconds(p.MemorySizeKib / 1024.0 * p.Iterations));
+        fast.MemorySizeKib.Should().BeGreaterThan(Argon2Parameters.Default.MemorySizeKib).And.BeLessThanOrEqualTo(Argon2Calibrator.CeilingKib);
+
+        var slow = Argon2Calibrator.Calibrate(TimeSpan.FromSeconds(1), _ => TimeSpan.FromSeconds(30));
+        slow.Should().Be(Argon2Parameters.Default);
+        fast.Validate();
+
+        Argon2Calibrator.IsWorthChanging(Argon2Parameters.Default, fast).Should().BeTrue();
+        Argon2Calibrator.IsWorthChanging(fast, fast).Should().BeFalse();
+        Argon2Calibrator.IsWorthChanging(null, slow).Should().BeTrue();
+        await Task.CompletedTask;
+    }
+
+    [Fact]
+    public async Task RotatingWithNewKdf_KeepsThePassword_AndStoresTheNewSettings()
+    {
+        var repo = new MemoryRepo();
+        var vault = NewVault(repo);
+        await vault.SaveContentsAsync("pw", Sample);
+
+        var stronger = new Argon2Parameters { MemorySizeKib = 2048, Iterations = 2, DegreeOfParallelism = 1 };
+        await vault.RotateMasterPasswordAsync("pw", "pw", stronger);
+
+        var slot = (await vault.ListSlotsAsync()).Single(s => s.Type == SlotTypes.Password);
+        slot.Kdf.Should().Be(stronger);
+        (await vault.OpenContentsAsync("pw")).Accounts.Should().HaveCount(Sample.Accounts.Count);
+    }
+
+    [Fact]
+    public async Task StrengthenSetting_ReportsWhenNothingBetterIsAvailable_AndRejectsAWrongPassword()
+    {
+        var vault = NewVault(new MemoryRepo());
+        await vault.SaveContentsAsync("pw", Sample);
+        var vm = new MainWindowViewModel(vault);
+        await vm.UnlockVaultAsync("pw");
+
+        (await vm.ChangeMasterPasswordAsync("wrong", "wrong", new Argon2Parameters { MemorySizeKib = 2048, Iterations = 2, DegreeOfParallelism = 1 }))
+            .Should().Be("Current password is incorrect.");
+    }
+
+    [Fact]
     public async Task ViewModel_UnlockMethod_FullFlow()
     {
         var repo = new MemoryRepo();

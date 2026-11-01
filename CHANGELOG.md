@@ -14,6 +14,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ### Security
 - **Security check-up** at the top of the Health page: looks at the lock time, lock on computer lock, screen capture block, clipboard clearing, recovery key, recovery backup, second unlock method and breach check, and says what to change. Nothing is changed for you.
+- **Test and strengthen** in Settings: measures this computer and moves the vault to the strongest Argon2id setting (up to 512 MiB) that still unlocks in about a second. The master password does not change; the page also shows the current setting.
 - **Revealed passwords hide again** by themselves after 20 seconds.
 - **Signing is now offline.** The release workflow no longer has the signing key: it builds, tests, records a build attestation and drafts the release. `scripts/sign-release.ps1` signs on the maintainer's computer after checking the attestation and checksums of every file. See [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
 - All GitHub Actions are pinned to exact commits.

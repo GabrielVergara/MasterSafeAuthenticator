@@ -196,9 +196,10 @@ public sealed class VaultService : IVaultService
     }
 
     /// <inheritdoc />
-    public async Task RotateMasterPasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    public async Task RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(newPassword);
+        kdf?.Validate();
 
         var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
         if (vault.Version < CurrentVersion)
@@ -213,7 +214,7 @@ public sealed class VaultService : IVaultService
         try
         {
             var passwordSlot = FindSlot(vault, SlotTypes.Password);
-            var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, _kdfParameters);
+            var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, kdf ?? _kdfParameters);
             var slots = vault.Slots.Select(s => s.Id == passwordSlot.Id ? replacement : s).ToList();
             await WriteCurrentAsync(vault.VaultId, slots, dataKey, DecodeCurrent(vault, dataKey), cancellationToken).ConfigureAwait(false);
         }
@@ -232,7 +233,7 @@ public sealed class VaultService : IVaultService
             return [];
         }
 
-        return vault.Slots.Select(s => new KeySlotInfo(s.Id, s.Type, s.Label, s.CreatedUtc)).ToList();
+        return vault.Slots.Select(s => new KeySlotInfo(s.Id, s.Type, s.Label, s.CreatedUtc, s.Kdf)).ToList();
     }
 
     /// <inheritdoc />

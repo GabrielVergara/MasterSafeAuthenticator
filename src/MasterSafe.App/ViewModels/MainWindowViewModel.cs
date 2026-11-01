@@ -284,7 +284,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             await InitializeLoginAsync();
             await UnlockVaultAsync(password);
         };
-        Settings.ChangePasswordHandler = ChangeMasterPasswordAsync;
+        Settings.ChangePasswordHandler = (current, next) => ChangeMasterPasswordAsync(current, next);
+        Settings.StrengthenHandler = StrengthenProtectionAsync;
         Settings.AddMethodHandler = AddUnlockMethodAsync;
         Settings.RemoveMethodHandler = RemoveUnlockMethodAsync;
 
@@ -615,7 +616,36 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// Changes the master password. Returns null on success or an error message.
     /// Other unlock methods (Windows Hello, security keys) keep working.
     /// </summary>
-    public async Task<string?> ChangeMasterPasswordAsync(string currentPassword, string newPassword)
+    /// <summary>
+    /// Tests this computer and, when it can afford stronger Argon2id settings than the vault has, re-encrypts the vault
+    /// key under them. The password stays the same. Returns the message to show.
+    /// </summary>
+    public async Task<string> StrengthenProtectionAsync(string password)
+    {
+        if (_vault is null || _sessionKey is null)
+        {
+            return "Unlock the vault first.";
+        }
+
+        var calibrated = await Task.Run(() => Argon2Calibrator.Calibrate());
+        var slots = await _vault.ListSlotsAsync();
+        var current = slots.FirstOrDefault(s => s.Type == SlotTypes.Password)?.Kdf;
+        if (!Argon2Calibrator.IsWorthChanging(current, calibrated))
+        {
+            return "Your vault already uses the strongest settings this computer can handle comfortably.";
+        }
+
+        var error = await ChangeMasterPasswordAsync(password, password, calibrated);
+        if (error is not null)
+        {
+            return error;
+        }
+
+        await RefreshUnlockMethodsAsync();
+        return $"Done. The vault now uses {calibrated.MemorySizeKib / 1024} MiB and {calibrated.Iterations} passes. Unlocking takes about a second.";
+    }
+
+    public async Task<string?> ChangeMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null)
     {
         if (_vault is null || _sessionKey is null)
         {
@@ -625,7 +655,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         await _saveLock.WaitAsync();
         try
         {
-            await _vault.RotateMasterPasswordAsync(currentPassword, newPassword);
+            await _vault.RotateMasterPasswordAsync(currentPassword, newPassword, kdf);
             return null;
         }
         catch (InvalidPasswordException)
@@ -725,6 +755,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             Settings.UnlockMethods.Add(new UnlockMethodRowViewModel(slot));
         }
+
+        var kdf = slots.FirstOrDefault(s => s.Type == SlotTypes.Password)?.Kdf;
+        Settings.ProtectionSummary = kdf is null
+            ? "Your vault uses an older format. Change the master password once to move it to the current one."
+            : $"Your master password is stretched with Argon2id using {kdf.MemorySizeKib / 1024} MiB of memory and {kdf.Iterations} passes.";
 
         foreach (var provider in _providers)
         {

@@ -20,7 +20,7 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - Import from **KeePass and KeePassXC** (XML or CSV) with a preview before anything is added.
 
 **Security**
-- Vault contents encrypted with **AES-256-GCM**; the master password is stretched with **Argon2id** (128 MiB); the
+- Vault contents encrypted with **AES-256-GCM**; the master password is stretched with **Argon2id** (128 MiB by default, up to 512 MiB tuned to your computer); the
   header and key slots are authenticated; saves are atomic and keep a `.bak` copy.
 - Unlock with the master password, **Windows Hello** or a **FIDO2 security key** (tested with a Thales SafeNet key).
   Each method is a separate key slot, so changing the master password never re-encrypts the vault.

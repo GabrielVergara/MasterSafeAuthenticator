@@ -78,8 +78,11 @@ public interface IVaultService
     /// <summary>Encrypts and persists the supplied OTP records, preserving stored passwords.</summary>
     Task SaveAsync(string masterPassword, IEnumerable<MasterSafe.Core.OtpAccount> accounts, CancellationToken cancellationToken = default);
 
-    /// <summary>Re-encrypts the vault under a new master password (key rotation).</summary>
-    Task RotateMasterPasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Re-encrypts the vault under a new master password (key rotation). With <paramref name="kdf"/> the new password slot
+    /// uses those key-derivation settings, which is how an existing vault is moved to stronger ones.
+    /// </summary>
+    Task RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, CancellationToken cancellationToken = default);
 
     /// <summary>Lists the unlock methods of the vault (empty for legacy vaults).</summary>
     Task<IReadOnlyList<KeySlotInfo>> ListSlotsAsync(CancellationToken cancellationToken = default);

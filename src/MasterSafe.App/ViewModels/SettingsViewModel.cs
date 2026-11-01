@@ -216,6 +216,48 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void ApplyCurrentTheme() => App.ApplyTheme(SelectedTheme);
 
+    /// <summary>Describes the key-derivation settings of the master password slot, for example "128 MiB, 3 passes".</summary>
+    [ObservableProperty]
+    private string _protectionSummary = string.Empty;
+
+    /// <summary>The master password, typed to move the vault to stronger key-derivation settings.</summary>
+    [ObservableProperty]
+    private string _strengthenPassword = string.Empty;
+
+    [ObservableProperty]
+    private string? _strengthenStatus;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StrengthenCommand))]
+    private bool _isStrengthening;
+
+    /// <summary>Re-encrypts the vault under settings tuned to this computer; given the master password, returns an error or null.</summary>
+    public Func<string, Task<string>>? StrengthenHandler { get; set; }
+
+    private bool CanStrengthen => !IsStrengthening && StrengthenHandler is not null;
+
+    [RelayCommand(CanExecute = nameof(CanStrengthen))]
+    private async Task StrengthenAsync()
+    {
+        if (StrengthenHandler is null || StrengthenPassword.Length == 0)
+        {
+            StrengthenStatus = "Type your master password first.";
+            return;
+        }
+
+        IsStrengthening = true;
+        StrengthenStatus = "Testing how strong the settings can be on this computer. This takes a few seconds...";
+        try
+        {
+            StrengthenStatus = await StrengthenHandler(StrengthenPassword);
+            StrengthenPassword = string.Empty;
+        }
+        finally
+        {
+            IsStrengthening = false;
+        }
+    }
+
     [RelayCommand]
     private async Task ChangePasswordAsync()
     {

@@ -318,7 +318,10 @@ public static class HelpContent
             "Settings and the tray",
             "Themes, reminders and the system tray.",
             """
-            - Theme: System, Light or Dark, applied immediately.
+            - Theme: System, Light, Dark or High contrast, applied immediately.
+            - Strength of the password protection: "Test and strengthen" measures this computer and makes
+              guessing your master password as slow as it can be while unlocking still takes about a second.
+              Type your master password to confirm. Nothing else changes.
             - Reminders: show or hide the notices on the codes page (recovery key, backups, updates).
             - Keep running in the tray: closing or minimizing the window hides it to the notification area
               instead of exiting. Open it again by clicking the tray icon. Its menu shows the window, opens
