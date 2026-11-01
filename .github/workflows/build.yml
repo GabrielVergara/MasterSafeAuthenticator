@@ -21,8 +21,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # Fails when a package differs from the lock files. Refresh them with scripts/update-lock-files.ps1.
       - name: Restore
-        run: dotnet restore MasterSafe.slnx
+        run: dotnet restore MasterSafe.slnx --locked-mode -p:MasterSafeLockFiles=true
 
       - name: Build
         run: dotnet build MasterSafe.slnx --configuration Release --no-restore

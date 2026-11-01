@@ -9,3 +9,8 @@ useDefault = true
 description = "KeyBinding gesture names"
 paths = ['''src/MasterSafe\.App/.*\.axaml$''']
 regexes = ['''Gesture="[A-Za-z0-9+]+"''']
+
+# The package hashes in NuGet lock files are public, and look like random keys to the generic rule.
+[[allowlists]]
+description = "NuGet lock files"
+paths = ['''packages\.(windows|linux)\.lock\.json$''']

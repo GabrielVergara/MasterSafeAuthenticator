@@ -4,6 +4,13 @@
     <MasterSafeWindowsTarget Condition="'$(MasterSafeTargetOs)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">true</MasterSafeWindowsTarget>
     <MasterSafeWindowsTarget Condition="'$(MasterSafeTargetOs)' == 'windows'">true</MasterSafeWindowsTarget>
   </PropertyGroup>
+  <!-- Exact package versions and hashes, checked by CI (scripts/update-lock-files.ps1 refreshes them). Windows and Linux target
+       different frameworks, so each has its own file. Only with -p:MasterSafeLockFiles=true: publishing for a runtime needs other packages. -->
+  <PropertyGroup Condition="'$(MasterSafeLockFiles)' == 'true'">
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <NuGetLockFilePath Condition="'$(MasterSafeWindowsTarget)' == 'true'">packages.windows.lock.json</NuGetLockFilePath>
+    <NuGetLockFilePath Condition="'$(MasterSafeWindowsTarget)' != 'true'">packages.linux.lock.json</NuGetLockFilePath>
+  </PropertyGroup>
   <PropertyGroup>
 	<TargetFramework>net10.0</TargetFramework>
 	<LangVersion>latest</LangVersion>

@@ -26,6 +26,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **Revealed passwords hide again** by themselves after 20 seconds.
 - **Signing is now offline.** The release workflow no longer has the signing key: it builds, tests, records a build attestation and drafts the release. `scripts/sign-release.ps1` signs on the maintainer's computer after checking the attestation and checksums of every file. See [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
 - All GitHub Actions are pinned to exact commits.
+- **NuGet lock files:** CI fails when a package differs from the recorded version and hash.
+- **Fuzzing:** every reader of outside data (setup links, Base32 keys, KeePass exports, vault contents, vault files) is fed randomly damaged input on each build, with a long run every week. Damaged input must be refused cleanly and a damaged vault must never open with changed contents.
 - **Daily vault snapshots:** the first save of each day keeps a copy of the vault as it was, and the last 7 are kept (only for vaults in the app's own folder).
 - **Process hardening (Windows):** DLLs are not loaded from remote or low-integrity places, system folders come first, legacy extension points are off, Windows Error Reporting does not collect memory dumps, and the data folder is limited to your account and the system.
 - Fixed: changing the theme from a background thread could throw.

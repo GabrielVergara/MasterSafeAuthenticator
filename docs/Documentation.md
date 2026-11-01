@@ -133,6 +133,8 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Verify a whole downloaded release folder | `MasterSafe-Cli-<v>-win-x64.exe verify-release <folder> masterSafe-release.pub` | `./MasterSafe-Cli-<v>-linux-x64 verify-release <folder> masterSafe-release.pub` |
 | Verify one file | `MasterSafe.Cli verify <file> <pubkey>` | same command |
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
+| Package lock files | after changing a package: `pwsh scripts/update-lock-files.ps1` and commit the `packages.*.lock.json` files. CI restores in locked mode, so a Dependabot package update fails until they are refreshed | same |
+| Fuzzing | `dotnet test --filter Category=Fuzz`; `MASTERSAFE_FUZZ_ITERATIONS` sets the rounds, `MASTERSAFE_FUZZ_SEED` repeats a failed run. `.github/workflows/fuzz.yml` runs 2 million rounds per reader each week | same |
 | Release | push a tag `v<version>`; `.github/workflows/release.yml` builds and tests Windows and Linux, attests the files and drafts a release. The maintainer then signs offline with `scripts/sign-release.ps1 -Tag v<version> -Publish` (see [ReleaseProcess.md](ReleaseProcess.md)) | |
 
 Continuous integration (`.github/workflows/build.yml`) builds and tests on Ubuntu and Windows for every push and pull

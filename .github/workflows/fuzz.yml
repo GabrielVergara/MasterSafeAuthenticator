@@ -1,0 +1,28 @@
+name: fuzz
+
+# Long runs of the mutation tests in FuzzTests: damaged input must be refused cleanly, never crash or hang the program.
+# Every push runs a short version as part of the normal tests. A failure prints the seed that reproduces it.
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Fuzz
+        env:
+          MASTERSAFE_FUZZ_ITERATIONS: '2000000'
+        run: dotnet test MasterSafe.slnx --configuration Release --filter "Category=Fuzz"
