@@ -9,7 +9,7 @@
       <TextBlock Text="Codes refresh automatically. Copy one and paste it into the website or app asking for it."
                  Classes="hint" />
     </StackPanel>
-    <TextBlock DockPanel.Dock="Bottom" Margin="0,8,0,0" Text="{Binding StatusMessage}" Classes="hint" />
+    <TextBlock AutomationProperties.LiveSetting="Polite" DockPanel.Dock="Bottom" Margin="0,8,0,0" Text="{Binding StatusMessage}" Classes="hint" />
 
     <!-- Reminders -->
     <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Notices}">
@@ -95,7 +95,7 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6" Margin="16,0" Width="72">
                   <TextBlock Text="{Binding SecondsRemaining, StringFormat='{}{0} s'}"
                              HorizontalAlignment="Center" Classes="hint" />
-                  <ProgressBar Minimum="0" Maximum="1" MinWidth="0" Width="72" Height="4" Value="{Binding Progress}" />
+                  <ProgressBar ToolTip.Tip="Time until the next code" Minimum="0" Maximum="1" MinWidth="0" Width="72" Height="4" Value="{Binding Progress}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                   <Button Classes="accent" Content="Copy code"

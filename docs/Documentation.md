@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.4.0  
+**Version:** 1.5.0  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -133,7 +133,7 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Verify a whole downloaded release folder | `MasterSafe-Cli-<v>-win-x64.exe verify-release <folder> masterSafe-release.pub` | `./MasterSafe-Cli-<v>-linux-x64 verify-release <folder> masterSafe-release.pub` |
 | Verify one file | `MasterSafe.Cli verify <file> <pubkey>` | same command |
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
-| Release | push a tag `v<version>`; `.github/workflows/release.yml` builds Windows and Linux and drafts a release. The Windows files are signed on the Windows runner and the Linux packages in the publish job, also on Windows (the Ubuntu runner cannot make ML-DSA signatures) | |
+| Release | push a tag `v<version>`; `.github/workflows/release.yml` builds and tests Windows and Linux, attests the files and drafts a release. The maintainer then signs offline with `scripts/sign-release.ps1 -Tag v<version> -Publish` (see [ReleaseProcess.md](ReleaseProcess.md)) | |
 
 Continuous integration (`.github/workflows/build.yml`) builds and tests on Ubuntu and Windows for every push and pull
 request, and checks packages for known vulnerabilities. CodeQL, SBOM generation and release signing are separate
@@ -175,6 +175,12 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Press Ctrl+B, Ctrl+C, Ctrl+U, Ctrl+F, Ctrl+N and Delete on the Passwords page after clicking an entry | Copies user name, copies password, opens the site, focuses search, starts a new entry, asks to delete |
 | Drag an entry onto a folder, and onto Recycle bin | It moves; dropping on the bin asks nothing but can be restored |
 | Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/ |
+| Settings, Text and window size 150%, then Ctrl+0 | Everything is larger and reflows without clipping; Ctrl+0 returns to 100% |
+| Windows Settings, Accessibility, Contrast themes, switch one on, theme "Follow the system" | The app uses the High contrast theme |
+| Leave the app idle until 30 s before the auto-lock | A warning with "Keep unlocked" appears; pressing it keeps the vault open |
+| Narrator or NVDA: tab through Passwords, Settings and the sign-in screen | Every control is announced with a name; status messages are read; page titles are headings |
+| Use only the keyboard to create an entry, move it to a folder, restore it from the bin and lock | Everything is reachable; Alt+letter changes pages; F1 opens Help |
+| Install for all users (Program Files) from the installer's dialog, then update with a per-user installer | The installer asks which kind; the app starts either way |
 | Passwords, Edit an entry, Attach a file (a PDF under 5 MB), Save, then Lock and unlock | The entry shows "1 attached file"; Edit, then Save as writes an identical copy |
 | Attach a file over 5 MB | A message names the file and the limit; nothing is attached |
 | Select a folder, Change icon, click an icon | The picker closes, the icon shows in the folder list and the folder pickers, and stays after Lock and unlock |

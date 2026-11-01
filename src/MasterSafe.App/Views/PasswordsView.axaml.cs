@@ -53,7 +53,12 @@ public partial class PasswordsView : UserControl
             }
         };
 
-        SizeChanged += (_, _) => ApplyFolderPaneWidth();
+        SizeChanged += (_, _) =>
+        {
+            ApplyLayout();
+            ApplyFolderPaneWidth();
+        };
+        PageScroll.SizeChanged += (_, _) => ApplyLayout();
 
         // Shortcuts only reach this page when the keyboard focus is inside it, so a click anywhere on the page that
         // does not land on a control that takes focus itself (a card, an empty area) focuses the page.
@@ -89,6 +94,47 @@ public partial class PasswordsView : UserControl
         };
     }
 
+    /// <summary>Below this width the entry form no longer fits beside the list and goes underneath it.</summary>
+    private const double NarrowWidth = 880;
+
+    private bool IsNarrow => Bounds.Width > 0 && Bounds.Width < NarrowWidth;
+
+    /// <summary>
+    /// With little room (a small window, or the text size turned up) the three panes cannot sit side by side. The entry
+    /// form then moves below the folders and the list and the whole page scrolls, so nothing is cut off. With plenty of
+    /// room the panes stay side by side and only the list scrolls.
+    /// </summary>
+    private void ApplyLayout()
+    {
+        var narrow = IsNarrow;
+        MainGrid.ColumnDefinitions[3].Width = narrow ? new GridLength(0) : new GridLength(340);
+
+        if (narrow)
+        {
+            MainGrid.Height = double.NaN;
+            Grid.SetRow(EntryForm, 2);
+            Grid.SetColumn(EntryForm, 0);
+            Grid.SetColumnSpan(EntryForm, 3);
+            EntryForm.Margin = new Thickness(0, 14, 0, 0);
+            EntryForm.MinHeight = 560;
+            ListPanel.MaxHeight = 520;
+            ListPanel.MinHeight = 320;
+        }
+        else
+        {
+            MainGrid.Height = PageScroll.Bounds.Height > 0 ? PageScroll.Bounds.Height : double.NaN;
+            Grid.SetRow(EntryForm, 1);
+            Grid.SetColumn(EntryForm, 3);
+            Grid.SetColumnSpan(EntryForm, 1);
+            EntryForm.Margin = new Thickness(2, 0, 0, 0);
+            EntryForm.MinHeight = 0;
+            ListPanel.MaxHeight = double.PositiveInfinity;
+            ListPanel.MinHeight = 0;
+        }
+
+        ApplyFolderPaneWidth();
+    }
+
     private void ApplyFolderPaneWidth()
     {
         if (_vm is null)
@@ -98,7 +144,7 @@ public partial class PasswordsView : UserControl
 
         // The list of passwords and the entry form need their room too, so the folder list never takes more than
         // what is left after them (the form is 340 wide and the list needs about 380).
-        var room = Bounds.Width > 0 ? Bounds.Width - 340 - 380 - 30 : double.MaxValue;
+        var room = Bounds.Width > 0 ? (IsNarrow ? Bounds.Width - 380 - 30 : Bounds.Width - 340 - 380 - 30) : double.MaxValue;
         var width = Math.Min(_vm.EffectiveFolderPaneWidth, Math.Max(150, room));
         MainGrid.ColumnDefinitions[0].Width = new GridLength(width);
     }

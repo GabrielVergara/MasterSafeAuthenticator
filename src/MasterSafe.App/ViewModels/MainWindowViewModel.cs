@@ -64,6 +64,66 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         };
     }
 
+    /// <summary>The size factor of the whole window (1.0 to 2.0), from the text size setting.</summary>
+    public double TextScale => Settings.TextScalePercent / 100.0;
+
+    /// <summary>Seconds left before the vault locks by itself, shown as a warning; null when there is no warning.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLockWarningVisible), nameof(LockWarningText))]
+    private int? _lockWarningSeconds;
+
+    /// <summary>The time before the automatic lock at which the warning appears.</summary>
+    public static readonly TimeSpan LockWarningTime = TimeSpan.FromSeconds(30);
+
+    /// <summary>True while the warning about the coming automatic lock is shown.</summary>
+    public bool IsLockWarningVisible => LockWarningSeconds is not null;
+
+    /// <summary>For example "The vault locks in 20 seconds because nothing was touched."</summary>
+    public string LockWarningText => LockWarningSeconds is { } s
+        ? $"The vault locks in {s} {(s == 1 ? "second" : "seconds")} because nothing was touched."
+        : string.Empty;
+
+    /// <summary>Keeps the vault unlocked: counts as activity and hides the warning.</summary>
+    [RelayCommand]
+    private void KeepUnlocked()
+    {
+        NotifyActivity();
+        LockWarningSeconds = null;
+    }
+
+    /// <summary>Locks the vault now (shortcut Ctrl+L).</summary>
+    [RelayCommand]
+    private void LockShortcut() => LockNow();
+
+    /// <summary>Opens the help (shortcut F1) when the vault is unlocked.</summary>
+    [RelayCommand]
+    private void HelpShortcut()
+    {
+        if (IsUnlocked)
+        {
+            CurrentPage = Help;
+        }
+    }
+
+    /// <summary>Makes the text and the window larger (Ctrl and plus).</summary>
+    [RelayCommand]
+    private void ZoomIn() => Settings.TextScalePercent = StepScale(+1);
+
+    /// <summary>Makes the text and the window smaller (Ctrl and minus).</summary>
+    [RelayCommand]
+    private void ZoomOut() => Settings.TextScalePercent = StepScale(-1);
+
+    /// <summary>Goes back to the normal size (Ctrl and 0).</summary>
+    [RelayCommand]
+    private void ZoomReset() => Settings.TextScalePercent = 100;
+
+    private int StepScale(int direction)
+    {
+        var options = SettingsViewModel.TextScaleOptions;
+        var index = options.ToList().IndexOf(SettingsViewModel.NearestTextScale(Settings.TextScalePercent));
+        return options[Math.Clamp(index + direction, 0, options.Count - 1)];
+    }
+
     public LoginViewModel Login { get; } = new();
 
     public DashboardViewModel Dashboard { get; }
@@ -112,6 +172,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Dashboard = new DashboardViewModel();
         Settings = new SettingsViewModel(services?.SettingsStore);
         _throttle = new UnlockThrottle(_clock, services?.SettingsStore);
+        Settings.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SettingsViewModel.TextScalePercent))
+            {
+                OnPropertyChanged(nameof(TextScale));
+            }
+        };
         Settings.Updates = new UpdatesViewModel(
             TryCreateUpdateChecker(),
             services?.Dialogs);
@@ -219,7 +286,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         if (startIdleTimer && Dispatcher.UIThread.CheckAccess())
         {
-            _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+            _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _idleTimer.Tick += (_, _) => LockIfIdle();
             _idleTimer.Start();
 
@@ -276,11 +343,22 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Locks the vault when there has been no activity for the configured time.</summary>
     public void LockIfIdle()
     {
-        if (IsUnlocked && _vault is not null
-            && _clock() - _lastActivity >= TimeSpan.FromMinutes(Math.Max(1, Settings.AutoLockMinutes)))
+        if (!IsUnlocked || _vault is null)
         {
-            Lock();
+            LockWarningSeconds = null;
+            return;
         }
+
+        var remaining = TimeSpan.FromMinutes(Math.Max(1, Settings.AutoLockMinutes)) - (_clock() - _lastActivity);
+        if (remaining <= TimeSpan.Zero)
+        {
+            LockWarningSeconds = null;
+            Lock();
+            return;
+        }
+
+        // A warning a little before the lock gives slower readers, and people using a screen reader, time to react.
+        LockWarningSeconds = remaining <= LockWarningTime ? (int)Math.Ceiling(remaining.TotalSeconds) : null;
     }
 
     /// <summary>Locks the vault now (for example when Windows locks). Does nothing when it is already locked.</summary>
@@ -739,6 +817,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Recovery.CancelAutoBackup();
         Health.ClearSecrets();
         Dashboard.ResetNotices();
+        LockWarningSeconds = null;
         Backup.MasterPassword = string.Empty;
         Backup.WebDavPassword = string.Empty;
         Settings.CurrentPassword = string.Empty;

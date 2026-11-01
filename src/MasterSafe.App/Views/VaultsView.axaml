@@ -108,7 +108,7 @@
         </StackPanel>
       </Border>
 
-      <TextBlock Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

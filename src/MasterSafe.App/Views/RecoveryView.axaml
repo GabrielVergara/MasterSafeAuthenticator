@@ -94,12 +94,12 @@
             <Button Content="Choose folder..." Command="{Binding ChooseAutoBackupFolderCommand}" />
             <TextBlock Text="{Binding AutoBackupFolder}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
           </StackPanel>
-          <TextBlock Text="{Binding AutoBackupStatus}" TextWrapping="Wrap"
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding AutoBackupStatus}" TextWrapping="Wrap"
                      IsVisible="{Binding AutoBackupStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         </StackPanel>
       </Border>
 
-      <TextBlock Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

@@ -12,13 +12,25 @@ namespace MasterSafe.Crypto;
 public sealed class SwitchableVaultRepository : IVaultRepository
 {
     private volatile FileVaultRepository _inner;
+    private readonly string _home;
 
     /// <summary>Creates the repository pointing at <paramref name="path"/>.</summary>
     public SwitchableVaultRepository(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
-        _inner = new FileVaultRepository(path);
+        _home = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path)) ?? ".";
+        _inner = Create(path);
         Path = path;
+    }
+
+    // Daily snapshots are only kept for vaults that live in the app's own data folder. A vault opened from a USB stick or
+    // from the archive is left exactly as it is, with no extra files next to it.
+    private FileVaultRepository Create(string path)
+    {
+        var folder = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path));
+        return string.Equals(folder, _home, StringComparison.OrdinalIgnoreCase)
+            ? new FileVaultRepository(path, System.IO.Path.Combine(_home, "snapshots"))
+            : new FileVaultRepository(path);
     }
 
     /// <summary>The vault file currently in use.</summary>
@@ -28,7 +40,7 @@ public sealed class SwitchableVaultRepository : IVaultRepository
     public void SetPath(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
-        _inner = new FileVaultRepository(path);
+        _inner = Create(path);
         Path = path;
     }
 

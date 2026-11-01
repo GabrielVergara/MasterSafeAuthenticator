@@ -21,7 +21,7 @@
         <Button Content="Choose an image..." HorizontalAlignment="Left" Command="{Binding BrowseImageCommand}" />
       </StackPanel>
     </Border>
-    <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+    <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" />
     <Border Classes="card" Padding="20" DataContext="{Binding KeePass}" x:DataType="vm:KeePassImportViewModel">
       <StackPanel Spacing="10">
         <TextBlock Text="From KeePass or KeePassXC" Classes="h2" />
@@ -44,7 +44,7 @@
             <Button Content="Show file" Command="{Binding ShowFileCommand}" />
           </StackPanel>
         </StackPanel>
-        <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+        <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" />
       </StackPanel>
     </Border>
   </StackPanel>

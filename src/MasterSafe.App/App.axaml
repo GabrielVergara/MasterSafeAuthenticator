@@ -22,6 +22,20 @@
           <SolidColorBrush x:Key="DangerBrush" Color="#F07167" />
           <SolidColorBrush x:Key="CodeBrush" Color="#E8F1F2" />
         </ResourceDictionary>
+        <ResourceDictionary x:Key="{x:Static local:App.HighContrastVariant}">
+          <SolidColorBrush x:Key="CardBrush" Color="#000000" />
+          <SolidColorBrush x:Key="CardBorderBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="DangerBrush" Color="#FFD400" />
+          <SolidColorBrush x:Key="CodeBrush" Color="#FFFFFF" />
+          <!-- The accent follows the high contrast colour; the rest comes from the dark theme this one is built on. -->
+          <Color x:Key="SystemAccentColor">#FFD400</Color>
+          <Color x:Key="SystemAccentColorLight1">#FFE55C</Color>
+          <Color x:Key="SystemAccentColorLight2">#FFF099</Color>
+          <Color x:Key="SystemAccentColorLight3">#FFF7CC</Color>
+          <Color x:Key="SystemAccentColorDark1">#FFD400</Color>
+          <Color x:Key="SystemAccentColorDark2">#E6BF00</Color>
+          <Color x:Key="SystemAccentColorDark3">#CCA900</Color>
+        </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
   </Application.Resources>

@@ -13,7 +13,7 @@
       <TextBox PlaceholderText="Search the help" Text="{Binding SearchText, Mode=TwoWay}" />
       <TextBlock Text="Nothing matches your search." Classes="hint" Margin="0,6,0,0" IsVisible="{Binding HasNoResults}" />
     </StackPanel>
-    <ListBox
+    <ListBox ToolTip.Tip="Help topics"
              ItemsSource="{Binding Topics}"
              SelectedItem="{Binding SelectedTopic, Mode=TwoWay}">
       <ListBox.ItemTemplate>

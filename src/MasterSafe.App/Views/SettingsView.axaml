@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             xmlns:conv="clr-namespace:MasterSafe.App.Converters"
              x:Class="MasterSafe.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <ScrollViewer>
@@ -13,7 +14,25 @@
           <StackPanel>
             <TextBlock Text="Theme" Classes="label" />
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Themes}"
-                      SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+                      SelectedItem="{Binding SelectedTheme, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Converter={x:Static conv:ThemeNameConverter.Instance}}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Text="Text and window size" Classes="label" />
+            <ComboBox HorizontalAlignment="Left" Width="200" ItemsSource="{Binding TextScaleOptions}"
+                      SelectedItem="{Binding TextScalePercent, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding StringFormat='{}{0}%'}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Classes="hint" TextWrapping="Wrap" Text="Makes everything larger. You can also press Ctrl and plus or minus at any time, and Ctrl and 0 to go back to normal." />
           </StackPanel>
           <CheckBox Content="Show reminders on the codes page (recovery key, backups, updates)"
                     IsChecked="{Binding ShowReminders, Mode=TwoWay}" />
@@ -99,7 +118,7 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-          <TextBlock Text="{Binding UnlockMethodStatus}" TextWrapping="Wrap" />
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding UnlockMethodStatus}" TextWrapping="Wrap" />
         </StackPanel>
       </Border>
 
@@ -121,7 +140,7 @@
           </StackPanel>
           <Button Classes="accent" Content="Change password" HorizontalAlignment="Left"
                   Command="{Binding ChangePasswordCommand}" />
-          <TextBlock Text="{Binding PasswordChangeStatus}" TextWrapping="Wrap" />
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding PasswordChangeStatus}" TextWrapping="Wrap" />
         </StackPanel>
       </Border>
     </StackPanel>

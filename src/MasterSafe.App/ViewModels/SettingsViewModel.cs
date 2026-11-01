@@ -37,6 +37,13 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showReminders = true;
 
+    /// <summary>The sizes offered for the text and the whole window, in percent.</summary>
+    public static IReadOnlyList<int> TextScaleOptions { get; } = [100, 125, 150, 175, 200];
+
+    /// <summary>How large the text and the window are shown, in percent (100 to 200).</summary>
+    [ObservableProperty]
+    private int _textScalePercent = 100;
+
     [ObservableProperty]
     private bool _breachCheckEnabled;
 
@@ -65,7 +72,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string? _passwordChangeStatus;
 
-    public IReadOnlyList<AppTheme> Themes { get; } = [AppTheme.System, AppTheme.Light, AppTheme.Dark];
+    public IReadOnlyList<AppTheme> Themes { get; } = [AppTheme.System, AppTheme.Light, AppTheme.Dark, AppTheme.HighContrast];
 
     /// <summary>
     /// Performs the change (current, new) and returns null on success or an error message.
@@ -133,6 +140,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _blockScreenCapture = saved.BlockScreenCapture;
             _breachCheckEnabled = saved.BreachCheckEnabled;
             _showReminders = saved.ShowReminders;
+            _textScalePercent = NearestTextScale(saved.TextScalePercent);
             _checkForUpdatesOnStart = saved.CheckForUpdatesOnStart;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
@@ -160,6 +168,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnBreachCheckEnabledChanged(bool value) => SaveSettings();
 
     partial void OnShowRemindersChanged(bool value) => SaveSettings();
+
+    partial void OnTextScalePercentChanged(int value) => SaveSettings();
+
+    /// <summary>The offered size closest to <paramref name="percent"/>; 100 when it is 0 or missing.</summary>
+    public static int NearestTextScale(int percent)
+        => percent <= 0 ? 100 : TextScaleOptions.OrderBy(o => Math.Abs(o - percent)).First();
 
     partial void OnCheckForUpdatesOnStartChanged(bool value) => SaveSettings();
 
@@ -189,6 +203,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.BlockScreenCapture = BlockScreenCapture;
             settings.BreachCheckEnabled = BreachCheckEnabled;
             settings.ShowReminders = ShowReminders;
+            settings.TextScalePercent = TextScalePercent;
             settings.CheckForUpdatesOnStart = CheckForUpdatesOnStart;
             _store.Save(settings);
         }

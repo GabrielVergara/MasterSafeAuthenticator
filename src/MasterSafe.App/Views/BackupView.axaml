@@ -65,7 +65,7 @@
                  Height="160" />
       </StackPanel>
 
-      <TextBlock Text="{Binding Status}" Classes="hint" />
+      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" Classes="hint" />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

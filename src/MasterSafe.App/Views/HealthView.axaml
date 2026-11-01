@@ -104,7 +104,7 @@
           <TextBlock Text="Check against known data breaches (optional)" Classes="h2" />
           <TextBlock Classes="hint" TextWrapping="Wrap" Text="{Binding BreachCheckNote}" />
           <Button Content="Check my passwords now" HorizontalAlignment="Left" Command="{Binding CheckBreachesCommand}" />
-          <TextBlock Text="{Binding Status}" TextWrapping="Wrap"
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap"
                      IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         </StackPanel>
       </Border>

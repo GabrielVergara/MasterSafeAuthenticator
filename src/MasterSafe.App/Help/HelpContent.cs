@@ -205,6 +205,26 @@ public static class HelpContent
             - Drop a QR code image anywhere on the window to import an account.
             """),
         new(
+            "Accessibility",
+            "Screen readers, keyboard, text size and contrast.",
+            """
+            MasterSafe is built to be usable without a mouse and with assistive technology.
+
+            - Screen readers (Narrator, NVDA): every control has a name, page titles are headings, and
+              messages such as "Copied" are read out. Codes are read when you ask for them, not every second.
+            - Keyboard: press Alt and the underlined letter to go to a page, F1 for this help, Ctrl+L to lock,
+              Tab and Shift+Tab to move, Enter or Space to press a button. Everything that can be done by
+              dragging can also be done with a button.
+            - Text and window size: Settings, "Text and window size" (100 to 200%), or press Ctrl and plus or
+              minus at any time. Ctrl and 0 returns to normal.
+            - Contrast: Settings, Theme, "High contrast". With "Follow the system", Windows high contrast mode
+              switches it on by itself.
+            - Time: a warning appears 30 seconds before the vault locks by itself. Choose "Keep unlocked" or
+              press any key. You can change the time in Settings.
+
+            If something is hard to use with your tools, please tell us: see "About, licence and support".
+            """),
+        new(
             "Backups",
             "Encrypted copies of your accounts.",
             """

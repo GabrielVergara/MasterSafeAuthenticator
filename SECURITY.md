@@ -46,6 +46,12 @@ the owner decides what is merged.
 
 The rulesets are in the repository settings under Rules, Rulesets.
 
+## How releases are signed
+
+Releases are built by GitHub Actions but signed **offline**, on the maintainer's own computer. The signing key is not in the
+repository or in GitHub secrets, and the signing script refuses to sign a file that does not carry a valid build attestation
+from this repository's release workflow. Details: [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
+
 ## Verifying downloads
 
 Release files carry a SHA-256 checksum and an ML-DSA-65 signature. The public key is

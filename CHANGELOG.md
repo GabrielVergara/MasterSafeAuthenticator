@@ -2,6 +2,23 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased (1.5.0)
+
+### Accessibility
+- **Screen readers:** every input, button, list and progress bar now has an accessible name, headings carry their level, status messages are announced, and the automatic-lock warning is announced at once. A test opens every page and fails if a control has no name.
+- **Text and window size** 100 to 200% in Settings, and Ctrl and plus / minus / 0 anywhere. The layout reflows.
+- **High contrast theme**, also chosen automatically when Windows high contrast is on and the theme is "Follow the system".
+- **Keyboard:** access keys on the navigation (Alt and the underlined letter), F1 for help, Ctrl+L to lock.
+- **Time:** a warning with "Keep unlocked" 30 seconds before the automatic lock.
+- New [accessibility statement](docs/Accessibility.md).
+
+### Security
+- **Signing is now offline.** The release workflow no longer has the signing key: it builds, tests, records a build attestation and drafts the release. `scripts/sign-release.ps1` signs on the maintainer's computer after checking the attestation and checksums of every file. See [docs/ReleaseProcess.md](docs/ReleaseProcess.md).
+- All GitHub Actions are pinned to exact commits.
+- **Daily vault snapshots:** the first save of each day keeps a copy of the vault as it was, and the last 7 are kept (only for vaults in the app's own folder).
+- **Process hardening (Windows):** DLLs are not loaded from remote or low-integrity places, system folders come first, legacy extension points are off, Windows Error Reporting does not collect memory dumps, and the data folder is limited to your account and the system.
+- Fixed: changing the theme from a background thread could throw.
+
 ## 1.4.0 (2026-11-01)
 
 A release about safety and everyday comfort. Nothing changes in how existing vaults are stored: they open as before.

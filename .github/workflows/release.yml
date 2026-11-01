@@ -1,20 +1,24 @@
 name: release
 
-# Run by pushing a tag such as v1.2.0. Builds the installers, signs them with the ML-DSA release key
-# and attaches them to a draft GitHub release for you to review before publishing.
+# Run by pushing a tag such as v1.5.0. Builds and tests the Windows installer and the Linux packages, records where they
+# came from (a signed build attestation), and creates a DRAFT release with the files.
+#
+# The release signing key is NOT in this workflow or anywhere on GitHub. The maintainer signs the draft on their own
+# computer with scripts/sign-release.ps1, which first checks the attestation, then adds the ML-DSA-65 signatures and
+# publishes. See docs/ReleaseProcess.md.
 on:
   push:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.x'
 
@@ -28,38 +32,26 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 
-      - name: Write signing key
-        shell: pwsh
-        env:
-          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
-        run: |
-          if ($env:RELEASE_SIGNING_KEY) {
-            Set-Content -Path "$env:RUNNER_TEMP\release.key" -Value $env:RELEASE_SIGNING_KEY -NoNewline
-          }
-
       - name: Build installer
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
-          $key = if (Test-Path "$env:RUNNER_TEMP\release.key") { "$env:RUNNER_TEMP\release.key" } else { "" }
-          ./installer/build-windows.ps1 -Version $version -SigningKey $key
+          ./installer/build-windows.ps1 -Version $version
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows
           path: |
             artifacts/*-setup.exe
             artifacts/*-setup.exe.sha256
-            artifacts/*-setup.exe.sig
             artifacts/MasterSafe-Cli-*-win-x64.exe
             artifacts/MasterSafe-Cli-*-win-x64.exe.sha256
-            artifacts/MasterSafe-Cli-*-win-x64.exe.sig
 
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.x'
 
@@ -80,54 +72,44 @@ jobs:
           dotnet tool install --global CycloneDX
           dotnet CycloneDX MasterSafe.slnx -o artifacts -fn sbom.cyclonedx.json --json
 
-      # The Linux packages are signed in the publish job below, on Windows: the Ubuntu runner's OpenSSL
-      # has no ML-DSA, and the Windows runner has.
-
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: linux
           path: |
             artifacts/*.tar.gz
             artifacts/*.tar.gz.sha256
-            artifacts/*.tar.gz.sig
             artifacts/MasterSafe-Cli-*-linux-*
             artifacts/sbom.cyclonedx.json
 
   publish:
     needs: [windows, linux]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           path: dist
           merge-multiple: true
 
-      - name: Sign the Linux packages
-        shell: bash
-        env:
-          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
-        run: |
-          if [ -n "$RELEASE_SIGNING_KEY" ]; then
-            printf '%s' "$RELEASE_SIGNING_KEY" > "$RUNNER_TEMP/release.key"
-            for f in dist/*.tar.gz dist/MasterSafe-Cli-*-linux-*; do
-              case "$f" in *.sha256|*.sig) continue;; esac
-              dotnet run --project src/MasterSafe.Cli -c Release -- sign "$f" "$RUNNER_TEMP/release.key"
-            done
-            rm -f "$RUNNER_TEMP/release.key"
-          else
-            echo "::warning::No RELEASE_SIGNING_KEY secret: the Linux packages are not signed."
-          fi
+      - name: Record where the files came from
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: 'dist/*'
 
       - name: Create draft release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           draft: true
           generate_release_notes: true
+          body: |
+            **Draft: not signed yet.** The maintainer signs these files offline with `scripts/sign-release.ps1`
+            (it checks the build attestation first) and then publishes. Check any download with the public key in
+            `signing/` (see SECURITY.md).
           files: |
             dist/*
             signing/masterSafe-release.pub

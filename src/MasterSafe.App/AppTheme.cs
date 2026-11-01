@@ -11,4 +11,7 @@ public enum AppTheme
     System,
     Light,
     Dark,
+
+    /// <summary>Black and white with strong borders, for people who need maximum contrast.</summary>
+    HighContrast,
 }

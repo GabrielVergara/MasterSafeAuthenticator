@@ -26,7 +26,12 @@ public sealed class ViewLocator : IDataTemplate
 
         if (type is not null)
         {
-            return (Control)Activator.CreateInstance(type)!;
+            var view = (Control)Activator.CreateInstance(type)!;
+
+            // Give every input and heading a name a screen reader can speak, once the page has been laid out.
+            view.AttachedToVisualTree += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(
+                () => Services.AccessibilityNamer.Apply(view), Avalonia.Threading.DispatcherPriority.Loaded);
+            return view;
         }
 
         return new TextBlock { Text = "Not Found: " + name };

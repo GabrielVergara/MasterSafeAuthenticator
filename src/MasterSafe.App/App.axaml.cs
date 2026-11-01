@@ -74,6 +74,10 @@ public partial class App : Application
             Directory.CreateDirectory(paths.DataFolder, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         }
 
+        // Free protections: harder DLL planting, no error-report dumps of the unlocked vault, data folder for this user only.
+        ProcessHardening.Apply(Path.GetFileName(Environment.ProcessPath));
+        ProcessHardening.RestrictToCurrentUser(paths.DataFolder);
+
         var settings = new SettingsStore(paths.SettingsPath);
         var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);
         var catalog = new VaultCatalog(paths, repository, settings);
@@ -189,7 +193,10 @@ public partial class App : Application
     private SessionMonitor? _session;
     private bool _shuttingDown;
 
-    /// <summary>Applies the selected theme (Light/Dark/System).</summary>
+    /// <summary>The black and white theme with strong borders. It is built on the dark theme.</summary>
+    public static readonly ThemeVariant HighContrastVariant = new("HighContrast", ThemeVariant.Dark);
+
+    /// <summary>Applies the selected theme (Light/Dark/System/High contrast).</summary>
     public static void ApplyTheme(AppTheme theme)
     {
         if (Current is null)
@@ -197,10 +204,23 @@ public partial class App : Application
             return;
         }
 
+        // Themes belong to the UI thread; from any other thread the change is passed on to it.
+        if (!Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => ApplyTheme(theme));
+            return;
+        }
+
+        // "Follow the system" also follows the system's high contrast setting.
+        var osWantsHighContrast = theme == AppTheme.System
+            && Current.PlatformSettings?.GetColorValues().ContrastPreference == Avalonia.Platform.ColorContrastPreference.High;
+
         Current.RequestedThemeVariant = theme switch
         {
             AppTheme.Light => ThemeVariant.Light,
             AppTheme.Dark => ThemeVariant.Dark,
+            AppTheme.HighContrast => HighContrastVariant,
+            _ when osWantsHighContrast => HighContrastVariant,
             _ => ThemeVariant.Default,
         };
     }

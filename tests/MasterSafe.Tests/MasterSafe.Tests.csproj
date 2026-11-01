@@ -11,6 +11,7 @@
     <PackageReference Include="FluentAssertions" Version="8.11.0" />
     <PackageReference Include="Moq" Version="4.21.0" />
     <PackageReference Include="coverlet.collector" Version="10.1.0" />
+    <PackageReference Include="Avalonia.Headless" Version="12.1.4" />
   </ItemGroup>
 <ItemGroup>
     <ProjectReference Include="..\..\src\MasterSafe.Core\MasterSafe.Core.csproj" />
