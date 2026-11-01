@@ -60,7 +60,7 @@ locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 m
 - Screen capture of codes while they are displayed.
 - Windows clipboard history or cloud clipboard capturing a copied value before it is cleared.
 - Physical attacks on the TPM.
-- Weak master passwords. The application requires at least 8 characters; a longer passphrase is much safer.
+- Weak master passwords. The application requires at least 12 characters and refuses very weak passwords; a longer passphrase is much safer.
 
 ## Known gaps (planned)
 

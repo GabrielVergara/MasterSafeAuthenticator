@@ -440,7 +440,7 @@ public static class HelpContent
             non-commercial use; see the LICENSE file for the terms. Its third-party components and their
             licences are listed in THIRD-PARTY-NOTICES.md.
 
-            - Article about MasterSafe: https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/
+            - Article about MasterSafe: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
             - Website: https://www.gabriel-vergara.com/
             - Source code, releases and issues: https://github.com/GabrielVergara/MasterSafeAuthenticator
 

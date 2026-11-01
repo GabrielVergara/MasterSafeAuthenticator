@@ -20,7 +20,7 @@ public static class AppInfo
     public const string ProjectUrl = "https://github.com/GabrielVergara/MasterSafeAuthenticator";
 
     /// <summary>The article about MasterSafe Authenticator on the author's site.</summary>
-    public const string ArticleUrl = "https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/";
+    public const string ArticleUrl = "https://www.gabriel-vergara.com/articles/mastersafe-authenticator/";
 
     /// <summary>The releases (downloads and release notes).</summary>
     public const string ReleasesUrl = "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases";

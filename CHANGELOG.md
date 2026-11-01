@@ -2,6 +2,11 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+- The article link in About, Help and the README now opens the live site, not the test copy.
+- Documentation: the roadmap, threat model, OWASP checklist and signing notes now match 1.5.0.
+
 ## 1.5.0 (2026-11-01)
 
 ### Accessibility

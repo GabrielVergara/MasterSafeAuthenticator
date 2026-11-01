@@ -294,7 +294,7 @@ summary: Kuka MasterSafen tekee ja mistä lukea lisää.
 body:
 MasterSafe Authenticatorin on kirjoittanut Gabriel Vergara Ezcurdia. Se on ilmainen henkilökohtaiseen, ei-kaupalliseen käyttöön; ehdot ovat LICENSE-tiedostossa. Sen kolmannen osapuolen osat ja niiden lisenssit on lueteltu tiedostossa THIRD-PARTY-NOTICES.md.
 
-- Artikkeli MasterSafesta: https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/
+- Artikkeli MasterSafesta: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
 - Verkkosivusto: https://www.gabriel-vergara.com/
 - Lähdekoodi, julkaisut ja ongelmat: https://github.com/GabrielVergara/MasterSafeAuthenticator
 

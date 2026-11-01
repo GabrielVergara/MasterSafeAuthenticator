@@ -110,7 +110,7 @@ public sealed class HelpAndAboutContentTests
     {
         var about = new AboutViewModel();
 
-        about.Links[0].Url.Should().Be("https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/");
+        about.Links[0].Url.Should().Be("https://www.gabriel-vergara.com/articles/mastersafe-authenticator/");
         about.ArticleUrl.Should().Be(AppInfo.ArticleUrl);
         about.Links.Should().OnlyContain(l => l.Url.StartsWith("https://") && l.Title.Length > 0 && l.Description.Length > 0);
         about.Links.Select(l => l.Title).Should().Contain(["Article", "Website", "Source code", "Releases", "Security policy", "Licence", "Third-party notices"]);
@@ -129,14 +129,14 @@ public sealed class HelpAndAboutContentTests
         about.OpenLinkCommand.Execute(about.Links.Single(l => l.Title == "Releases"));
 
         opened.Should().Equal(
-            "https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/",
+            "https://www.gabriel-vergara.com/articles/mastersafe-authenticator/",
             "https://www.gabriel-vergara.com/",
             "https://github.com/GabrielVergara/MasterSafeAuthenticator",
             "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases");
     }
 
     [Theory]
-    [InlineData("https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/", true)]
+    [InlineData("https://www.gabriel-vergara.com/articles/mastersafe-authenticator/", true)]
     [InlineData("https://www.gabriel-vergara.com/", true)]
     [InlineData("https://github.com/GabrielVergara/MasterSafeAuthenticator/issues", true)]
     [InlineData("http://www.gabriel-vergara.com/", false)]

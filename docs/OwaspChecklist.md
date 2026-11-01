@@ -53,7 +53,7 @@ Legend: **Met** = implemented and covered by tests or CI. **Partial** = implemen
 | V14 Configuration | 14.1 Build pipeline | Met | `TreatWarningsAsErrors`, deterministic builds, analysers, CI on Windows and Linux |
 | V14 | 14.2 Dependencies | Met | NuGet audit fails the build; `scripts/check-vulnerabilities.sh` in CI and releases; Dependabot (grouped); CodeQL, Gitleaks and dependency review; SBOM per release; third-party notices in the repository |
 | V14 | 14.3 No debug information in release | Met | Release builds; no verbose logging |
-| V14 | Reproducible builds / provenance | Gap | On the roadmap |
+| V14 | Reproducible builds / provenance | Partial | Each release has a GitHub build attestation that `scripts/sign-release.ps1` checks before signing. Builds are not reproducible yet (on the roadmap) |
 | V14 | 14.1 Source repository protection | Met | Only the owner can change `main` or `v*` tags (rulesets), force-pushes and deletions are blocked, secret scanning with push protection is on, and workflows from outside contributors need approval |
 
 ## OWASP Top 10 (2021), as it applies
@@ -103,7 +103,7 @@ CI also runs CodeQL, Gitleaks, dependency review and the vulnerable-package gate
 ## Known gaps, in priority order
 
 1. Authenticode-sign the Windows installer (postponed: cost).
-2. Reproducible builds and signed provenance.
+2. Reproducible builds (signed provenance is done).
 3. Move the assessment to ASVS 5.0.
 4. Independent security review.
 5. Secrets are .NET strings while the vault is unlocked and cannot be wiped; see the hardening ideas in

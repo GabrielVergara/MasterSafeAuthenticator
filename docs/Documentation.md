@@ -179,7 +179,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Recovery, switch on automatic backup, choose a folder, edit a password, wait a minute | A new `recovery-*.sauth` file appears; after more than five, the oldest are removed |
 | Press Ctrl+B, Ctrl+C, Ctrl+U, Ctrl+F, Ctrl+N and Delete on the Passwords page after clicking an entry | Copies user name, copies password, opens the site, focuses search, starts a new entry, asks to delete |
 | Drag an entry onto a folder, and onto Recycle bin | It moves; dropping on the bin asks nothing but can be restored |
-| Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/ |
+| Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://www.gabriel-vergara.com/articles/mastersafe-authenticator/ |
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
 | Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |

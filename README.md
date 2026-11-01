@@ -44,7 +44,7 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
   icon. On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
 **More to read**: the article about MasterSafe Authenticator on the author's site,
-<https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/>.
+<https://www.gabriel-vergara.com/articles/mastersafe-authenticator/>.
 
 Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
 a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md).
@@ -52,7 +52,7 @@ a mobile app. See [docs/Roadmap.md](docs/Roadmap.md) and the known gaps in [docs
 ## Download and install
 
 Author: [Gabriel Vergara Ezcurdia](https://www.gabriel-vergara.com/). Article:
-[MasterSafe Authenticator](https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/).
+[MasterSafe Authenticator](https://www.gabriel-vergara.com/articles/mastersafe-authenticator/).
 
 Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthenticator/releases>.
 
@@ -132,7 +132,8 @@ targets `net10.0`. To build for Linux from any machine pass `-p:MasterSafeTarget
 
 All packages are self-contained, so users do not need to install .NET. The Linux script also runs on Windows
 (Git Bash). Pushing a tag such as `v1.2.0` runs `.github/workflows/release.yml`, which tests on both systems,
-builds, signs (repository secret `RELEASE_SIGNING_KEY`) and creates a draft GitHub release.
+builds, records a build attestation and creates a draft GitHub release. The workflow has no signing key: the
+maintainer signs and publishes offline with `scripts/sign-release.ps1` (see [docs/ReleaseProcess.md](docs/ReleaseProcess.md)).
 
 ### Release signing keys
 
@@ -142,7 +143,7 @@ dotnet run --project src/MasterSafe.Cli -c Release -- sign <file> masterSafe-rel
 dotnet run --project src/MasterSafe.Cli -c Release -- verify <file> masterSafe-release.pub
 ```
 
-Keep the `.key` file private (never commit it). Store its contents in the `RELEASE_SIGNING_KEY` secret.
+Keep the `.key` file private and offline: never commit it, and never put it in a GitHub secret or a cloud-synced folder.
 
 ## Solution layout
 

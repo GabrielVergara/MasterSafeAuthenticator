@@ -294,7 +294,7 @@ summary: Quién hace MasterSafe y dónde leer más.
 body:
 MasterSafe Authenticator está escrito por Gabriel Vergara Ezcurdia. Es gratuito para uso personal y no comercial; vea el archivo LICENSE para los términos. Sus componentes de terceros y sus licencias figuran en THIRD-PARTY-NOTICES.md.
 
-- Artículo sobre MasterSafe: https://sitio.gabriel-vergara.com/articles/mastersafe-authenticator/
+- Artículo sobre MasterSafe: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
 - Sitio web: https://www.gabriel-vergara.com/
 - Código fuente, versiones e incidencias: https://github.com/GabrielVergara/MasterSafeAuthenticator
 
