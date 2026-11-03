@@ -98,7 +98,23 @@ format 3 the next time the vault is unlocked with the master password.
 - **Recycle bin and history:** deleted passwords and the last ten versions of an entry stay inside the encrypted vault
   (30 days for the bin). Delete for good or empty the bin to remove them.
 - **Network use, only when you switch it on or start it:** the breach check (api.pwnedpasswords.com, only a 5-character hash
-  prefix), the update check (github.com, public release information) and a WebDAV server.
+  prefix), the update check (github.com, public release information), a WebDAV server for backups or sync, and the website
+  icon of one password at a time.
+
+## Added in 1.6
+
+- **Security settings in the vault:** see `VaultSecurity`. The settings file only serves the sign-in screen. Once a vault is
+  open its own encrypted values win. A vault from before 1.6 takes its first values from the file, once.
+- **Network paths:** a vault or automatic backup folder on a share is not touched until the user agrees for this run, and the
+  agreement is never stored, because a stored one could be forged in the same file.
+- **Older copies:** a counter inside the vault and a copy outside it. A warning only. It catches a swapped file, not a program
+  that changes both.
+- **Sync:** a random 256-bit key, not derived from any password, encrypts each file with AES-256-GCM. The key and the WebDAV
+  password are stored inside the vault. Sync files never hold either. Anyone with the sync code and access to the files can
+  read the data and add items. See [ThreatModel.md](ThreatModel.md).
+- **Release manifest:** the version and file hashes are signed, so an update's version is proven, not only its contents.
+- **Website icon:** the fixed rules are in [Roadmap.md](Roadmap.md). The connection goes to an address checked at connection
+  time, so a site cannot aim the app at this computer or the local network by changing its DNS answer.
 
 ## Recovery
 

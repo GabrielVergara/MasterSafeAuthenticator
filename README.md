@@ -12,12 +12,18 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 
 **Authenticator and passwords in one encrypted vault**
 - TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits) from an `otpauth://` link or a QR code
-  image (drag it onto the window, or choose the file). Search, sort and rename on the codes page.
+  image (drag it onto the window, or choose the file). Search, sort, your own order, groups and rename on the codes page,
+  and codes can stay hidden until you click them.
 - Password manager: folders with icons you choose, attached files (5 MB each), a recycle bin (30 days), entry history,
-  a strength meter, a password generator, sorting, shortcuts, right-click menus and drag and drop.
-- **Password health**: weak, reused and old passwords, plus an optional, privacy-preserving check against known data
-  breaches.
-- Import from **KeePass and KeePassXC** (XML or CSV) with a preview before anything is added.
+  a strength meter, a password generator, sorting, tags, shortcuts, right-click menus and drag and drop. Besides logins it
+  keeps secure notes, payment cards, identities and extra fields, with letter icons and an optional website icon.
+- **Password health**: weak, reused and old passwords, possible copies, `http://` addresses and expiry dates, plus an
+  optional, privacy-preserving check against known data breaches.
+- Import from **KeePass, KeePassXC, Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator** with a preview
+  before anything is added, and export to **KeePass (`.kdbx`)** so you can always leave.
+- **Sync between your computers** through a folder or WebDAV server of your own (optional): encrypted files only, locked with a
+  random code, and nothing on a server is ever overwritten or deleted.
+- Encrypted backups of everything, and a printable emergency sheet.
 
 **Security**
 - Available in **English, Spanish and Finnish** (follows your computer; see [docs/Translating.md](docs/Translating.md)), with screen-reader names, keyboard access, text zoom and a high-contrast theme ([docs/Accessibility.md](docs/Accessibility.md)).
@@ -29,10 +35,12 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
   optionally on minimize; locking wipes the key and decrypted data. Weak master passwords are refused.
 - Copied secrets are cleared from the clipboard (30 seconds, 1 or 2 minutes, your choice) and kept out of the Windows
   clipboard history and cloud clipboard; the window can be kept out of screenshots.
+- Security settings are kept inside the encrypted vault, one copy runs at a time, a vault on a network share is not opened
+  until you agree, and an older copy of the vault is noticed.
 - **Recovery**: a recovery key and recovery backups (optionally automatic) let you get your data back if you forget the
   master password. Recovery backups use a hybrid **ECDH-P384 + ML-KEM-768** (post-quantum) scheme.
-- **Signed releases** (ML-DSA-65) with checksums and an SBOM; a built-in update check verifies the signature before it
-  offers a download. Nothing updates automatically.
+- **Signed releases** (ML-DSA-65) with checksums, a signed version manifest and an SBOM; a built-in update check verifies
+  them before it offers a download. Nothing updates automatically.
 - Hostile-file hardening: sizes, key-derivation settings and counts of everything the app opens are limited and tested.
 - See the [OWASP self-assessment](docs/OwaspChecklist.md), the [threat model](docs/ThreatModel.md) and
   [SECURITY.md](SECURITY.md).
@@ -175,8 +183,8 @@ MasterSafe.slnx
 See [docs/Security.md](docs/Security.md), [docs/ThreatModel.md](docs/ThreatModel.md),
 [docs/OwaspChecklist.md](docs/OwaspChecklist.md), [docs/FileLocations.md](docs/FileLocations.md),
 [docs/Architecture.md](docs/Architecture.md), [docs/BackupFormat.md](docs/BackupFormat.md),
-[docs/PQC.md](docs/PQC.md), [docs/Roadmap.md](docs/Roadmap.md), [docs/Documentation.md](docs/Documentation.md)
-and [docs/SBOM.md](docs/SBOM.md).
+[docs/PQC.md](docs/PQC.md), [docs/Roadmap.md](docs/Roadmap.md), [docs/Documentation.md](docs/Documentation.md),
+[docs/Comparison.md](docs/Comparison.md), [docs/SecurityReview.md](docs/SecurityReview.md) and [docs/SBOM.md](docs/SBOM.md).
 
 ### Patching and compliance
 

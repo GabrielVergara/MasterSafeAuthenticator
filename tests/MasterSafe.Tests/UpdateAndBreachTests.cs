@@ -154,7 +154,8 @@ public sealed class UpdateAndBreachTests : IDisposable
 
     // ------------------------------------------------------------------ download and verify
 
-    private (UpdateChecker Checker, UpdateInfo Info, FakeHandler Handler, byte[] Installer) Release(bool tamper = false, bool sign = true, string host = Base)
+    private (UpdateChecker Checker, UpdateInfo Info, FakeHandler Handler, byte[] Installer) Release(
+        bool tamper = false, bool sign = true, string host = Base, string manifestVersion = "9.9.9", bool withManifest = true, string current = "1.0.0", string? manifestHash = null, bool signManifest = true)
     {
         // Some systems (for example the Ubuntu build runner) cannot make ML-DSA keys. The tests that do not check the
         // signature itself still run there with placeholder keys.
@@ -169,18 +170,28 @@ public sealed class UpdateAndBreachTests : IDisposable
         var signature = ReleaseSigner.IsSupported ? Convert.ToBase64String(ReleaseSigner.Sign(installer, seed)) : "placeholder";
         var sha = Convert.ToHexString(SHA256.HashData(installer)) + "  " + name;
         var served = tamper ? [.. installer, 1] : installer;
+        var manifest = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new ReleaseManifest(
+            ReleaseManifest.ProductName, manifestVersion, [new ReleaseManifestFile(name, manifestHash ?? Convert.ToHexString(SHA256.HashData(installer)))]));
+        var manifestSignature = ReleaseSigner.IsSupported && signManifest ? Convert.ToBase64String(ReleaseSigner.Sign(manifest, seed)) : "AAAA";
 
         var handler = new FakeHandler(request =>
         {
             var url = request.RequestUri!.ToString();
-            return url.EndsWith(".sig", StringComparison.Ordinal) ? Ok(signature)
+            return url.EndsWith(ReleaseManifest.FileName, StringComparison.Ordinal) ? Ok(manifest)
+                : url.EndsWith(ReleaseManifest.FileName + ".sig", StringComparison.Ordinal) ? Ok(manifestSignature)
+                : url.EndsWith(".sig", StringComparison.Ordinal) ? Ok(signature)
                 : url.EndsWith(".sha256", StringComparison.Ordinal) ? Ok(sha)
                 : Ok(served);
         });
 
         var assets = sign ? new[] { name, name + ".sig", name + ".sha256" } : [name];
+        if (sign && withManifest)
+        {
+            assets = [.. assets, ReleaseManifest.FileName, ReleaseManifest.FileName + ".sig"];
+        }
+
         var json = ReleaseJson("v9.9.9", assets).Replace(Base, host, StringComparison.Ordinal);
-        var checker = new UpdateChecker(new HttpClient(handler), publicKey, "1.0.0");
+        var checker = new UpdateChecker(new HttpClient(handler), publicKey, current);
         return (checker, checker.Parse(Encoding.UTF8.GetBytes(json))!, handler, installer);
     }
 
@@ -217,6 +228,93 @@ public sealed class UpdateAndBreachTests : IDisposable
         result.InstallerPath.Should().BeNull();
         result.Message.Should().Contain("deleted");
         Directory.GetDirectories(_folder).Should().BeEmpty("nothing is left on disk");
+    }
+
+    [Theory]
+    [InlineData("1.0.0")]
+    [InlineData("9.9.8")]
+    [InlineData("9.9.10")]
+    [InlineData("not a version")]
+    public async Task AnOldSignedInstallerOfferedAsNew_IsRefused(string signedVersion)
+    {
+        if (!ReleaseSigner.IsSupported)
+        {
+            return;
+        }
+
+        var (checker, info, _, _) = Release(manifestVersion: signedVersion);
+
+        var result = await checker.DownloadAndVerifyAsync(info, _folder);
+
+        result.Verified.Should().BeFalse("the signed version must equal the one offered");
+        Directory.GetDirectories(_folder).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task AReleaseThatIsNotNewer_IsNotDownloaded()
+    {
+        var (checker, info, handler, _) = Release(current: "9.9.9");
+
+        var result = await checker.DownloadAndVerifyAsync(info, _folder);
+
+        result.Verified.Should().BeFalse();
+        handler.Requests.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task AReleaseWithoutAManifest_IsNotOffered()
+    {
+        var (checker, info, _, _) = Release(withManifest: false);
+
+        (await checker.DownloadAndVerifyAsync(info, _folder)).Verified.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task AManifestSignedByNobody_IsRefused()
+    {
+        if (!ReleaseSigner.IsSupported)
+        {
+            return;
+        }
+
+        var (checker, info, _, _) = Release(signManifest: false);
+
+        (await checker.DownloadAndVerifyAsync(info, _folder)).Verified.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task AManifestListingAnotherFile_IsRefused()
+    {
+        if (!ReleaseSigner.IsSupported)
+        {
+            return;
+        }
+
+        var (checker, info, _, _) = Release(manifestHash: new string('0', 64));
+
+        (await checker.DownloadAndVerifyAsync(info, _folder)).Verified.Should().BeFalse();
+    }
+
+    [Fact]
+    public void TheManifest_CanBeBuiltAndCheckedForAFolder()
+    {
+        if (!ReleaseSigner.IsSupported)
+        {
+            return;
+        }
+
+        var (publicKey, seed) = ReleaseSigner.GenerateKeyPair();
+        var file = Path.Combine(_folder, "setup.exe");
+        File.WriteAllText(file, "installer");
+        var manifest = Path.Combine(_folder, ReleaseManifest.FileName);
+        File.WriteAllBytes(manifest, ReleaseManifest.Build(_folder, "1.6.0", ["setup.exe"]));
+        File.WriteAllText(manifest + ".sig", Convert.ToBase64String(ReleaseSigner.Sign(File.ReadAllBytes(manifest), seed)));
+
+        ReleaseVerifier.VerifyManifest(_folder, publicKey, out var version).Should().BeNull();
+        version.Should().Be("1.6.0");
+
+        File.WriteAllText(file, "replaced");
+        ReleaseVerifier.VerifyManifest(_folder, publicKey, out _).Should().Contain("differs");
     }
 
     [Fact]

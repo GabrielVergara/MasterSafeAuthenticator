@@ -83,6 +83,36 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         TrustedKeyFingerprint = null;
     }
 
+    /// <summary>What goes on the emergency sheet. Set by the shell.</summary>
+    public Func<EmergencySheetData>? SheetData { get; set; }
+
+    /// <summary>Saves the printable emergency sheet. It holds no secrets: those are written on the paper by hand.</summary>
+    [RelayCommand]
+    private async Task CreateEmergencySheetAsync()
+    {
+        if (_services is null || SheetData is null)
+        {
+            return;
+        }
+
+        var path = await _services.Dialogs.SaveFileAsync("Save the emergency sheet", "MasterSafe-emergency-sheet.html", "html");
+        if (path is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await File.WriteAllTextAsync(path, EmergencySheet.BuildHtml(SheetData()));
+            Status = "Saved. Open the file in a browser, print it, fill it in by hand and delete the file.";
+            _services.Dialogs.ShowInFolder(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Status = $"The sheet could not be saved: {ex.Message}";
+        }
+    }
+
     /// <summary>The fingerprint of the recovery key the open vault trusts; null until it has one.</summary>
     public string? TrustedKeyFingerprint { get; set; }
 

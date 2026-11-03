@@ -26,6 +26,12 @@ La página Códigos del autenticador lista todas las cuentas con su código actu
 - Renombrar cambia solo el emisor y la etiqueta. El secreto y los códigos no cambian.
 - Eliminar quita una cuenta de inmediato tras una confirmación. Asegúrese antes de poder entrar a ese servicio de otra forma: sin el secreto no hay manera de recuperar los códigos, salvo desde una copia.
 
+Cada cuenta muestra un cuadro de color con su primera letra, para encontrarla fácilmente. No se descarga nada para esto.
+
+Con «Mi propio orden» elegido, Subir y Bajar mueven una cuenta. Renombrar también pone un grupo, como Trabajo; cuando hay grupos, una lista sobre los códigos muestra un grupo cada vez.
+
+En Ajustes puede ocultar los códigos hasta hacer clic en ellos, para que nadie los lea por encima de su hombro. Un código mostrado se oculta de nuevo a los 20 segundos, y Copiar código funciona sin mostrarlo.
+
 ### Adding and importing
 title: Añadir e importar
 summary: Tipos de enlaces, imágenes QR y exportaciones de KeePass.
@@ -43,6 +49,8 @@ Traer datos de KeePass o KeePassXC:
 
 MasterSafe comprueba cada cuenta y archivo que lee. Los archivos dañados o inesperados se rechazan con un mensaje en vez de importarse a medias.
 
+Otras aplicaciones: exporte desde Bitwarden, 1Password, Proton Pass, Aegis o 2FAS sin contraseña en la exportación, y elija el archivo en Desde otra aplicación. Las tarjetas, notas e identidades conservan sus campos. Un código QR de exportación de Google Authenticator sirve en la casilla del enlace o como imagen. Una exportación no está cifrada, así que bórrela después de importar.
+
 ### Passwords
 title: Contraseñas
 summary: Guarde credenciales, cree contraseñas seguras y cópielas con seguridad.
@@ -55,6 +63,12 @@ La página Contraseñas guarda credenciales en su bóveda cifrada.
 - Abrir sitio abre la dirección de la entrada en su navegador. Solo se abren direcciones http y https, y una dirección http sin cifrar viene con una advertencia.
 - La búsqueda coincide con el título, el usuario, la dirección, la carpeta y las etiquetas. El cuadro de orden ordena por título, por cambios recientes o por carpeta.
 - Marque varias entradas para eliminarlas o moverlas juntas. Cambiar la búsqueda o la carpeta quita las marcas, así que nunca se elimina por error algo que no ve.
+
+Tipo de elemento: además de inicios de sesión puede guardar notas seguras, tarjetas de pago e identidades. Cualquier elemento puede tener campos adicionales; uno oculto se tapa en pantalla y se copia como una contraseña. Las etiquetas, separadas por comas, sirven para filtrar la lista.
+
+Una fecha de caducidad le da un recordatorio en la página de códigos y en la de salud, 30 días antes.
+
+Cada entrada muestra un icono de letra. Si lo permite en Ajustes, el botón Usar el icono del sitio pide su icono a ese sitio, lo muestra y lo conserva solo si lo acepta. El sitio, y quien vigile la red, pueden ver la petición. Un icono no demuestra que un sitio sea auténtico.
 
 ### Folders and icons
 title: Carpetas e iconos
@@ -113,6 +127,8 @@ Cada línea tiene un botón Abrir que le lleva a la entrada.
 Comprobación opcional de filtraciones
 También puede buscar sus contraseñas en filtraciones de datos conocidas con el servicio Pwned Passwords de Have I Been Pwned (haveibeenpwned.com, de Troy Hunt). Está desactivada hasta que la permita en Ajustes. Al ejecutarla, su contraseña nunca se envía: MasterSafe calcula su hash SHA-1 en su equipo y envía solo los 5 primeros caracteres a api.pwnedpasswords.com. El servicio responde con todos los hashes que empiezan igual y la comparación se hace aquí. Una contraseña encontrada en una filtración debe cambiarse sea cual sea su fortaleza.
 
+También lista las entradas que parecen copias entre sí (con un botón para mover una a la papelera), las direcciones que empiezan por http:// (con un botón para cambiarlas a https) y los elementos que han llegado a su fecha de caducidad.
+
 ### Keyboard and mouse
 title: Teclado y ratón
 summary: Atajos y acciones rápidas.
@@ -150,17 +166,38 @@ Si algo resulta difícil de usar con sus herramientas, cuéntenoslo: vea «Acerc
 
 ### Backups
 title: Copias de seguridad
-summary: Copias cifradas de sus cuentas.
+summary: Copias cifradas de todo lo que hay en su bóveda.
 body:
-La pantalla Copias escribe un archivo .sauth cifrado con sus cuentas del autenticador. Solo su contraseña maestra puede abrirlo. Nunca se produce una exportación en texto plano.
+La página Copia escribe un archivo .sauth cifrado con sus cuentas del autenticador, contraseñas y archivos adjuntos. Usted elige la contraseña de cada archivo, de al menos 12 caracteres. No tiene que ser su contraseña maestra. Nunca se produce una exportación en texto plano.
 
 Destinos:
 - Carpeta local: elija una carpeta de este dispositivo.
 - WebDAV en la nube: escriba la dirección de la carpeta (debe empezar por https://) más el usuario y la contraseña de un servidor WebDAV como Nextcloud u ownCloud. Use una contraseña de aplicación si su servidor la ofrece.
 
-Use Exportar para crear una copia, Actualizar para listar las existentes e Importar la seleccionada para restaurar una. Las copias se cifran con Argon2id y AES-256-GCM.
+Use Exportar para crear una copia y Actualizar para listar las existentes. Importar la seleccionada añade a esta bóveda lo que hay en la copia: no se reemplaza nada, y cuando un elemento cambió, sus valores anteriores quedan en su historial. Las copias anteriores a la versión 1.6 contienen solo cuentas, y siguen abriéndose. Las copias se cifran con Argon2id y AES-256-GCM.
 
-Esta copia contiene solo cuentas. Para proteger también sus contraseñas y archivos adjuntos, use las copias de recuperación, descritas en el tema siguiente.
+Exportar a KeePass escribe un archivo .kdbx que se abre en KeePass y KeePassXC, para que siempre pueda pasarse a otra aplicación. Usa la contraseña que escribió. No incluye la papelera ni las versiones anteriores.
+
+Una copia no sustituye a una clave de recuperación: si olvida su contraseña maestra, solo una copia de recuperación devuelve la bóveda. Vea el tema siguiente.
+
+### Sync between computers
+title: Sincronizar entre equipos
+summary: Tenga la misma bóveda en sus equipos, sin cuentas.
+body:
+La sincronización está desactivada hasta que la configure. Funciona con una carpeta o un servidor WebDAV suyo, por ejemplo una carpeta que una unidad en la nube copia entre sus equipos.
+
+En el primer equipo, abra Copia, elija la carpeta o el servidor en Sincronizar entre equipos, y elija Empezar a sincronizar desde este equipo. MasterSafe crea un código de sincronización aleatorio. En el segundo equipo, desbloquee una bóveda, indique el mismo lugar, escriba el código y elija Unirse con este código. Cada equipo conserva su propia contraseña maestra y su propia forma de desbloquear.
+
+A ese lugar solo van archivos cifrados. Están protegidos con el código de sincronización, no con su contraseña maestra, así que quien los robe no tiene nada que adivinar. Sus ajustes, el código y la contraseña del servidor nunca van en ellos. Guarde el código como una contraseña: quien lo tenga y pueda llegar a los archivos puede leer su bóveda y añadirle elementos.
+
+Sincronizar ahora lee lo que escribieron los otros equipos y lo une a esta bóveda:
+- Un elemento que existe en un solo equipo se conserva.
+- Cuando un elemento cambió en dos equipos, se usa el más reciente y el anterior queda en su historial.
+- Un elemento solo se quita si se eliminó para siempre en otro equipo y no cambió después. Entonces se quita en todos.
+
+La sincronización solo añade archivos. Nunca sobrescribe ni borra nada en un servidor, así que una contraseña de servidor robada no puede destruir lo que hay. Eso también significa que los archivos antiguos siguen allí hasta que los quite con las herramientas del propio servidor, y aún se pueden leer con el código. Para cambiar el código, deje de sincronizar en todos los equipos y empiece de nuevo; después quite los archivos antiguos. En una carpeta, MasterSafe conserva solo los 20 archivos más recientes.
+
+Sincronizar sola es opcional: sincroniza tras desbloquear y poco después de cada cambio, como mucho cada 15 minutos. La sincronización no es una copia de seguridad. Un error cometido en un equipo llega a los demás, así que conserve también una copia de recuperación.
 
 ### Recovery and the forgotten master password
 title: Recuperación y contraseña maestra olvidada
@@ -179,6 +216,8 @@ Si olvida la contraseña:
 - Restaure desde una copia de recuperación: elija el archivo de copia, su archivo de clave, su frase y una contraseña maestra nueva.
 - O empiece una bóveda nueva. Su bóveda anterior se mueve al archivo, no se elimina. Si encuentra la contraseña más tarde, abra la bóveda antigua desde la página Bóvedas.
 - Windows Hello o una llave de seguridad aún pueden abrir su bóveda. Si es así, cambie la contraseña maestra en Ajustes.
+
+La hoja de emergencia es una página en letra grande para guardar en papel. Dice dónde están sus archivos y qué hacer, con casillas vacías para lo que escriba a mano. El archivo no contiene secretos. Ábralo en un navegador, imprímalo y borre el archivo.
 
 ### Unlock methods
 title: Métodos de desbloqueo
@@ -204,6 +243,10 @@ Ajustes, «Privacidad y bloqueo» y General:
 - Mantener la ventana fuera de las capturas y de la pantalla compartida (activado por defecto, Windows): la ventana se ve negra en las capturas. Desactívelo si necesita hacer una captura de MasterSafe.
 - Portapapeles: elija 30 segundos, 1 minuto o 2 minutos. Las copias se mantienen fuera del historial del portapapeles de Windows y del portapapeles en la nube.
 - Al bloquear se quitan los datos descifrados de las pantallas respaldadas en memoria y se borra la clave de sesión.
+
+Las contraseñas visibles se ocultan cuando la ventana pierde el foco, salvo que lo desactive. Estos ajustes se guardan dentro de su bóveda cifrada, así que un programa que edite el archivo de ajustes no puede desactivarlos cuando la bóveda está abierta.
+
+Si una bóveda parece más antigua que la última copia usada en este equipo, la página de códigos lo dice. Es normal tras restaurar una copia. Nunca le impide abrir la bóveda.
 
 ### Settings and the tray
 title: Ajustes y la bandeja
@@ -231,6 +274,8 @@ Ajustes tiene una sección Actualizaciones.
 
 También puede verificar cualquier descarga a mano con la herramienta de línea de comandos de MasterSafe. La huella de la clave se publica en el README y en SECURITY.md del proyecto.
 
+Cada versión tiene también una lista firmada de sus archivos y su número de versión. MasterSafe rechaza una actualización cuya versión firmada difiera de la ofrecida, o que no sea más reciente que la suya.
+
 ### Vaults and files
 title: Bóvedas y archivos
 summary: Dónde se guardan sus datos y cómo abrir otra bóveda.
@@ -244,6 +289,8 @@ La página Bóvedas muestra estas ubicaciones y lista sus bóvedas:
 - Abra de nuevo una bóveda archivada, muestre un archivo en su carpeta o elimine una bóveda antigua. Eliminar pide confirmación y no se puede deshacer.
 
 Para pasar a otro equipo, copie allí vault.sauth, instale MasterSafe y elija «Ya tengo un archivo de bóveda». Desinstalar nunca quita su bóveda. Guardar es seguro ante fallos y la versión anterior de la bóveda se conserva como vault.sauth.bak, con copias diarias en la carpeta snapshots. Cambiar la contraseña maestra o quitar un método de desbloqueo elimina esas copias, porque la forma de entrada anterior aún las abre.
+
+Una bóveda en un recurso de red no se abre hasta que usted lo acepte, porque Windows inicia sesión en ese recurso con su cuenta en cuanto toca el archivo. Si el archivo de ajustes apunta a un recurso de red, la pantalla de entrada le pregunta primero.
 
 ### Security model
 title: Modelo de seguridad
@@ -287,6 +334,8 @@ En Windows 11 mire bajo la flecha junto al reloj y arrastre el icono a la barra 
 
 El instalador muestra una advertencia de SmartScreen.
 El instalador aún no está firmado con un certificado Authenticode de pago. Compruebe la descarga con «Descargar y verificar» en una actualización posterior, o con la herramienta de línea de comandos, y compare la huella de la clave con la del README del proyecto.
+
+No pasa nada al iniciar MasterSafe: ya está en marcha y la ventana viene al frente. Si está oculta en la bandeja del sistema, mire allí. Solo puede funcionar una copia a la vez, porque dos copias podrían sobrescribir los cambios de la otra.
 
 ### About, licence and support
 title: Acerca de, licencia y soporte

@@ -112,6 +112,7 @@ public sealed partial class PasswordsViewModel
     private void ConfirmEmptyBin()
     {
         IsConfirmingEmptyBin = false;
+        Forget(_all.Where(e => e.IsDeleted));
         var removed = _all.RemoveAll(e => e.IsDeleted);
         if (removed == 0)
         {
@@ -129,6 +130,7 @@ public sealed partial class PasswordsViewModel
     private void PurgeOldBinEntries()
     {
         var limit = DateTimeOffset.UtcNow - TimeSpan.FromDays(PasswordVersion.BinRetentionDays);
+        Forget(_all.Where(e => e.DeletedUtc is { } deleted && deleted < limit));
         _all.RemoveAll(e => e.DeletedUtc is { } deleted && deleted < limit);
     }
 
@@ -144,7 +146,8 @@ public sealed partial class PasswordsViewModel
             || existing.UserName != updated.UserName
             || existing.Password != updated.Password
             || existing.Url != updated.Url
-            || existing.Notes != updated.Notes;
+            || existing.Notes != updated.Notes
+            || !existing.Fields.SequenceEqual(updated.Fields);
 
         return changed
             ? [existing.ToVersion(), .. existing.History.Take(PasswordVersion.MaxKept - 1)]
@@ -176,6 +179,12 @@ public sealed partial class PasswordsViewModel
         Password = row.Version.Password;
         Url = row.Version.Url;
         Notes = row.Version.Notes;
+        FormFields.Clear();
+        foreach (var field in row.Version.Fields)
+        {
+            FormFields.Add(new FieldRow { Name = field.Name, Value = field.Value, IsSecret = field.IsSecret });
+        }
+
         Status = $"Loaded the version from {row.Version.ModifiedUtc.LocalDateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)}. Choose Save to keep it.";
     }
 

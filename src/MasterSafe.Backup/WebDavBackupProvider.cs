@@ -22,6 +22,25 @@ public sealed class WebDavBackupProvider : IBackupProvider
     /// <summary>Largest folder listing accepted from a server.</summary>
     public const int MaxListingChars = 4 * 1024 * 1024;
 
+    /// <summary>
+    /// Creates a client for a WebDAV server with this login. It follows no redirects, so a server cannot send the login, or
+    /// the backups, somewhere else.
+    /// </summary>
+    public static HttpClient CreateClient(string? user, string? password)
+    {
+        var client = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false, UseCookies = false }) { Timeout = TimeSpan.FromMinutes(5) };
+        if (!string.IsNullOrEmpty(user))
+        {
+            var token = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{user}:{password}"));
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", token);
+        }
+
+        return client;
+    }
+
+    /// <summary>Asks the server whether the address and login work. Nothing is written.</summary>
+    public async Task CheckAsync(CancellationToken cancellationToken = default) => await ListAsync(cancellationToken).ConfigureAwait(false);
+
     private readonly HttpClient _client;
     private readonly Uri _baseUri;
 
@@ -68,6 +87,14 @@ public sealed class WebDavBackupProvider : IBackupProvider
         content.Headers.ContentType = new("application/octet-stream");
 
         using var response = await _client.PutAsync(target, content, cancellationToken).ConfigureAwait(false);
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.Conflict or HttpStatusCode.PreconditionFailed:
+                throw new BackupNameTakenException(fileName);
+            case HttpStatusCode.InsufficientStorage:
+                throw new BackupProviderException("The server is full. MasterSafe never deletes anything on a server, so remove old files there with the server's own tools.");
+        }
+
         EnsureSuccess(response, $"Upload of '{fileName}' failed");
         return target.AbsoluteUri;
     }
@@ -78,7 +105,8 @@ public sealed class WebDavBackupProvider : IBackupProvider
         ArgumentException.ThrowIfNullOrEmpty(fileName);
 
         var target = new Uri(_baseUri, Uri.EscapeDataString(fileName));
-        using var response = await _client.GetAsync(target, cancellationToken).ConfigureAwait(false);
+        // Read as it arrives, not all at once: a server must not be able to fill the memory before the limit below is checked.
+        using var response = await _client.GetAsync(target, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             throw new FileNotFoundException("Backup not found.", fileName);
@@ -186,6 +214,9 @@ public sealed class WebDavBackupProvider : IBackupProvider
         }
     }
 }
+
+/// <summary>The name is already in use. Files are never overwritten, so another name must be chosen.</summary>
+public sealed class BackupNameTakenException(string fileName) : Exception($"The name {fileName} is already in use.");
 
 /// <summary>Raised when a backup provider operation fails.</summary>
 public sealed class BackupProviderException : Exception

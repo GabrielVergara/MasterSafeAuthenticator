@@ -145,6 +145,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
             _textScalePercent = NearestTextScale(saved.TextScalePercent);
             _language = Loc.Choices.Contains(saved.Language) ? saved.Language : "System";
             _checkForUpdatesOnStart = saved.CheckForUpdatesOnStart;
+            _hideCodes = saved.HideCodes;
+            _hideRevealedOnFocusLoss = saved.HideRevealedOnFocusLoss;
+            _websiteIconsEnabled = saved.WebsiteIconsEnabled;
             ClipboardPolicy.Use(saved.ClipboardClearSeconds);
             _selectedClipboardDelay = ClipboardPolicy.Current;
         }
@@ -160,11 +163,80 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     partial void OnMinimizeToTrayChanged(bool value) => SaveSettings();
 
-    partial void OnAutoLockMinutesChanged(int value) => SaveSettings();
+    partial void OnAutoLockMinutesChanged(int value) => SaveSecurity();
 
-    partial void OnLockOnSessionLockChanged(bool value) => SaveSettings();
+    partial void OnLockOnSessionLockChanged(bool value) => SaveSecurity();
 
-    partial void OnLockOnMinimizeChanged(bool value) => SaveSettings();
+    partial void OnLockOnMinimizeChanged(bool value) => SaveSecurity();
+
+    /// <summary>Codes stay hidden until they are clicked.</summary>
+    [ObservableProperty]
+    private bool _hideCodes;
+
+    /// <summary>Revealed passwords hide again when the window loses focus.</summary>
+    [ObservableProperty]
+    private bool _hideRevealedOnFocusLoss = true;
+
+    /// <summary>The "use the site's icon" button may be used.</summary>
+    [ObservableProperty]
+    private bool _websiteIconsEnabled;
+
+    partial void OnHideCodesChanged(bool value) => SaveSecurity();
+
+    partial void OnHideRevealedOnFocusLossChanged(bool value) => SaveSecurity();
+
+    partial void OnWebsiteIconsEnabledChanged(bool value) => SaveSecurity();
+
+    /// <summary>Raised when a setting kept inside the vault changes, so the vault can be saved.</summary>
+    public event EventHandler? SecurityChanged;
+
+    private bool _applyingVault;
+
+    private void SaveSecurity()
+    {
+        SaveSettings();
+        if (!_applyingVault)
+        {
+            SecurityChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>The settings as they are kept in the vault.</summary>
+    public VaultSecurity CurrentSecurity() => new()
+    {
+        AutoLockMinutes = AutoLockMinutes,
+        LockOnSessionLock = LockOnSessionLock,
+        LockOnMinimize = LockOnMinimize,
+        ClipboardClearSeconds = SelectedClipboardDelay.Seconds,
+        BlockScreenCapture = BlockScreenCapture,
+        BreachCheckEnabled = BreachCheckEnabled,
+        HideCodes = HideCodes,
+        HideRevealedOnFocusLoss = HideRevealedOnFocusLoss,
+        WebsiteIconsEnabled = WebsiteIconsEnabled,
+    };
+
+    /// <summary>Uses the values stored in the vault. They win over the settings file, which anyone can edit.</summary>
+    public void ApplySecurity(VaultSecurity security)
+    {
+        ArgumentNullException.ThrowIfNull(security);
+
+        _applyingVault = true;
+        AutoLockMinutes = Math.Clamp(security.AutoLockMinutes, 1, 120);
+        LockOnSessionLock = security.LockOnSessionLock;
+        LockOnMinimize = security.LockOnMinimize;
+        ClipboardPolicy.Use(security.ClipboardClearSeconds);
+        SelectedClipboardDelay = ClipboardPolicy.Current;
+        BlockScreenCapture = security.BlockScreenCapture;
+        BreachCheckEnabled = security.BreachCheckEnabled;
+        HideCodes = security.HideCodes;
+        HideRevealedOnFocusLoss = security.HideRevealedOnFocusLoss;
+        WebsiteIconsEnabled = security.WebsiteIconsEnabled;
+        _applyingVault = false;
+        SecurityApplied?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Raised after the values of a vault were applied, so the screens can follow them.</summary>
+    public event EventHandler? SecurityApplied;
 
     /// <summary>Ctrl+Alt+L locks the vault from any program (Windows).</summary>
     [ObservableProperty]
@@ -182,9 +254,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     partial void OnEasyReadingChanged(bool value) => SaveSettings();
 
-    partial void OnBlockScreenCaptureChanged(bool value) => SaveSettings();
+    partial void OnBlockScreenCaptureChanged(bool value) => SaveSecurity();
 
-    partial void OnBreachCheckEnabledChanged(bool value) => SaveSettings();
+    partial void OnBreachCheckEnabledChanged(bool value) => SaveSecurity();
 
     partial void OnShowRemindersChanged(bool value) => SaveSettings();
 
@@ -214,7 +286,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     partial void OnSelectedClipboardDelayChanged(ClipboardDelayOption value)
     {
         ClipboardPolicy.Use(value.Seconds);
-        SaveSettings();
+        SaveSecurity();
     }
 
     private void SaveSettings()
@@ -238,6 +310,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
             settings.EasyReading = EasyReading;
             settings.BlockScreenCapture = BlockScreenCapture;
             settings.BreachCheckEnabled = BreachCheckEnabled;
+            settings.HideCodes = HideCodes;
+            settings.HideRevealedOnFocusLoss = HideRevealedOnFocusLoss;
+            settings.WebsiteIconsEnabled = WebsiteIconsEnabled;
             settings.ShowReminders = ShowReminders;
             settings.TextScalePercent = TextScalePercent;
             settings.Language = Language;

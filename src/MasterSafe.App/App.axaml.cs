@@ -146,14 +146,22 @@ public partial class App : Application
         _tray = new AvaloniaSystemTray();
         _tray.Show(AppInfo.ProductName, TrayCommands.DefaultMenu);
 
+        void BringForward()
+        {
+            window.Show();
+            window.WindowState = Avalonia.Controls.WindowState.Normal;
+            window.Activate();
+        }
+
+        // A second start of the program asks this copy to come forward, and then ends.
+        Program.Instance?.Listen(() => Avalonia.Threading.Dispatcher.UIThread.Post(BringForward));
+
         _tray.MenuItemClicked += (_, command) =>
         {
             switch (command)
             {
                 case TrayCommands.ShowWindow:
-                    window.Show();
-                    window.WindowState = Avalonia.Controls.WindowState.Normal;
-                    window.Activate();
+                    BringForward();
                     break;
                 case TrayCommands.HideWindow:
                     window.Hide();

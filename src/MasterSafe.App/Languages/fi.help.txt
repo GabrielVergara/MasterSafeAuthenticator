@@ -26,6 +26,12 @@ Todennuskoodit-sivu luettelee jokaisen tilin ja sen nykyisen koodin.
 - Nimeä uudelleen muuttaa vain myöntäjän ja nimikkeen. Salaisuus ja koodit pysyvät samoina.
 - Poista poistaa tilin heti vahvistuksen jälkeen. Varmista ensin, että pääset kyseiseen palveluun muullakin tavalla: ilman salaisuutta koodeja ei voi saada takaisin muuten kuin varmuuskopiosta.
 
+Jokaisella tilillä on värillinen ruutu ja sen ensimmäinen kirjain, joten tili on helppo löytää. Tätä varten ei ladata mitään.
+
+Kun Oma järjestys on valittuna, Ylös ja Alas siirtävät tiliä. Nimeä uudelleen asettaa myös ryhmän, kuten Työ; kun ryhmiä on, koodien yläpuolella oleva luettelo näyttää yhden ryhmän kerrallaan.
+
+Asetuksissa voit piilottaa koodit, kunnes napsautat niitä, jottei kukaan lue niitä olkasi yli. Näytetty koodi piiloutuu 20 sekunnin kuluttua, ja Kopioi koodi toimii näyttämättä sitä.
+
 ### Adding and importing
 title: Lisääminen ja tuonti
 summary: Linkkityypit, QR-kuvat ja KeePass-viennit.
@@ -43,6 +49,8 @@ Siirtyminen KeePassista tai KeePassXC:stä:
 
 MasterSafe tarkistaa jokaisen lukemansa tilin ja tiedoston. Rikkinäiset tai odottamattomat tiedostot hylätään ilmoituksella sen sijaan, että ne tuotaisiin puoliksi.
 
+Muut sovellukset: vie tiedot Bitwardenista, 1Passwordista, Proton Passista, Aegisista tai 2FAS:sta ilman viennin salasanaa ja valitse tiedosto kohdassa Toisesta sovelluksesta. Kortit, muistiinpanot ja henkilötiedot säilyttävät kenttänsä. Google Authenticatorin vienti-QR-koodi toimii linkkikohdassa tai kuvana. Vienti ei ole salattu, joten poista se tuonnin jälkeen.
+
 ### Passwords
 title: Salasanat
 summary: Tallenna tunnuksia, luo vahvoja salasanoja ja kopioi ne turvallisesti.
@@ -55,6 +63,12 @@ Salasanat-sivu säilyttää tunnukset salatussa holvissasi.
 - Avaa sivusto avaa merkinnän osoitteen selaimessasi. Vain http- ja https-osoitteet avataan, ja salaamattomasta http-osoitteesta tulee varoitus.
 - Haku vertaa otsikkoa, käyttäjätunnusta, osoitetta, kansiota ja tunnisteita. Järjestysvalinta lajittelee otsikon, viimeisimmän muutoksen tai kansion mukaan.
 - Valitse useita merkintöjä poistettavaksi tai siirrettäväksi yhdessä. Haun tai kansion vaihtaminen poistaa valinnat, joten et koskaan poista vahingossa jotain, mitä et näe.
+
+Kohteen tyyppi: kirjautumistietojen lisäksi voit säilyttää suojattuja muistiinpanoja, maksukortteja ja henkilötietoja. Kaikissa kohteissa voi olla lisäkenttiä; piilotettu kenttä on näytöllä peitetty ja kopioituu kuin salasana. Pilkuilla erotetuilla tunnisteilla voi suodattaa luetteloa.
+
+Vanhenemispäivästä saat muistutuksen koodisivulle ja kuntosivulle 30 päivää ennen.
+
+Jokaisella merkinnällä on kirjainkuvake. Jos sallit sen Asetuksissa, Käytä sivuston kuvaketta -painike pyytää kuvakkeen tältä sivustolta, näyttää sen ja säilyttää sen vain, jos hyväksyt. Sivusto ja verkkoa seuraavat näkevät pyynnön. Kuvake ei todista sivustoa aidoksi.
 
 ### Folders and icons
 title: Kansiot ja kuvakkeet
@@ -113,6 +127,8 @@ Jokaisella rivillä on Avaa-painike, joka vie merkintään.
 Valinnainen vuototarkistus
 Se voi myös hakea salasanojasi tunnetuista tietovuodoista Have I Been Pwnedin (haveibeenpwned.com, Troy Hunt) Pwned Passwords -palvelun avulla. Se on pois päältä, kunnes sallit sen Asetuksissa. Kun ajat sen, salasanaasi ei koskaan lähetetä: MasterSafe laskee sen SHA-1-tiivisteen tietokoneellasi ja lähettää vain 5 ensimmäistä merkkiä osoitteeseen api.pwnedpasswords.com. Palvelu vastaa kaikilla samalla tavalla alkavilla tiivisteillä, ja vertailu tehdään täällä. Vuodosta löytynyt salasana tulee vaihtaa vahvuudesta riippumatta.
 
+Sivu listaa myös toistensa kopioilta näyttävät merkinnät (painikkeella yhden voi siirtää roskakoriin), http://-alkuiset osoitteet (painikkeella ne vaihtuvat https:ään) ja kohteet, joiden vanhenemispäivä on tullut.
+
 ### Keyboard and mouse
 title: Näppäimistö ja hiiri
 summary: Pikanäppäimet ja pikatoiminnot.
@@ -150,17 +166,38 @@ Jos jokin on vaikea käyttää työkaluillasi, kerro meille: katso "Tietoja, lis
 
 ### Backups
 title: Varmuuskopiot
-summary: Salatut kopiot tileistäsi.
+summary: Salatut kopiot kaikesta holvisi sisällöstä.
 body:
-Varmuuskopio-näyttö kirjoittaa salatun .sauth-tiedoston todennustileistäsi. Vain pääsalasanasi voi avata sen. Selväkielistä vientiä ei koskaan tuoteta.
+Varmuuskopio-sivu kirjoittaa salatun .sauth-tiedoston, jossa ovat todennustilisi, salasanasi ja liitetiedostosi. Valitset jokaiselle tiedostolle salasanan, vähintään 12 merkkiä. Sen ei tarvitse olla pääsalasanasi. Selväkielistä vientiä ei koskaan tuoteta.
 
 Kohteet:
 - Paikallinen kansio: valitse kansio tältä laitteelta.
 - WebDAV-pilvi: syötä kansion osoite (sen on alettava https://) sekä WebDAV-palvelimen, kuten Nextcloudin tai ownCloudin, käyttäjätunnus ja salasana. Käytä sovellussalasanaa, jos palvelimesi tarjoaa sellaisen.
 
-Käytä Vie luodaksesi varmuuskopion, Päivitä luetteloidaksesi olemassa olevat ja Tuo valittu palauttaaksesi yhden. Varmuuskopiot salataan Argon2id:llä ja AES-256-GCM:llä.
+Käytä Vie luodaksesi varmuuskopion ja Päivitä luetteloidaksesi olemassa olevat. Tuo valittu lisää varmuuskopion sisällön tähän holviin: mitään ei korvata, ja kun kohde on muuttunut, sen vanhat arvot jäävät historiaan. Ennen versiota 1.6 tehdyt varmuuskopiot sisältävät vain tilit, ja ne aukeavat yhä. Varmuuskopiot salataan Argon2id:llä ja AES-256-GCM:llä.
 
-Tämä varmuuskopio sisältää vain tilit. Suojataksesi myös salasanasi ja liitetiedostosi käytä palautusvarmuuskopioita, jotka kuvataan seuraavassa aiheessa.
+Vie KeePassiin kirjoittaa .kdbx-tiedoston, joka aukeaa KeePassissa ja KeePassXC:ssä, joten voit aina siirtyä toiseen sovellukseen. Se käyttää kirjoittamaasi salasanaa. Roskakorin kohteet ja aiemmat versiot jäävät pois.
+
+Varmuuskopio ei korvaa palautusavainta: jos unohdat pääsalasanasi, vain palautuskopio tuo holvin takaisin. Katso seuraava aihe.
+
+### Sync between computers
+title: Synkronointi tietokoneiden välillä
+summary: Sama holvi tietokoneillasi ilman tiliä.
+body:
+Synkronointi on pois päältä, kunnes otat sen käyttöön. Se toimii oman kansion tai oman WebDAV-palvelimen kautta, esimerkiksi kansiolla, jonka pilvilevy kopioi tietokoneidesi välillä.
+
+Avaa ensimmäisellä tietokoneella Varmuuskopio, valitse kansio tai palvelin kohdassa Synkronointi tietokoneiden välillä ja valitse Aloita synkronointi tältä tietokoneelta. MasterSafe tekee satunnaisen synkronointikoodin. Avaa toisella tietokoneella holvi, anna sama paikka, kirjoita koodi ja valitse Liity tällä koodilla. Kummallakin tietokoneella on oma pääsalasana ja oma avaustapa.
+
+Sinne menee vain salattuja tiedostoja. Ne lukitsee synkronointikoodi, ei pääsalasanasi, joten varkaalla ei ole mitään arvattavaa. Asetuksesi, koodi ja palvelimen salasana eivät koskaan ole niissä. Säilytä koodia kuin salasanaa: joka saa sen ja pääsee tiedostoihin, voi lukea holvisi ja lisätä siihen kohteita.
+
+Synkronoi nyt lukee, mitä muut tietokoneet kirjoittivat, ja yhdistää sen tähän holviin:
+- Kohde, joka on vain yhdellä tietokoneella, säilyy.
+- Kun kohdetta on muutettu kahdella tietokoneella, uudempi otetaan käyttöön ja vanhempi jää historiaan.
+- Kohde poistuu vain, jos se on poistettu lopullisesti toisella tietokoneella eikä sitä ole sen jälkeen muutettu. Silloin se poistuu kaikkialta.
+
+Synkronointi vain lisää tiedostoja. Se ei koskaan korvaa tai poista mitään palvelimelta, joten varastettu palvelimen salasana ei voi tuhota siellä olevaa. Siksi vanhat tiedostot pysyvät, kunnes poistat ne palvelimen omilla työkaluilla, ja ne voi yhä lukea koodilla. Koodin vaihtamiseksi lopeta synkronointi kaikilla tietokoneilla ja aloita alusta; poista sitten vanhat tiedostot. Kansiossa MasterSafe säilyttää itse 20 uusinta tiedostoa.
+
+Automaattinen synkronointi on valinnainen: se synkronoi avauksen jälkeen ja pian jokaisen muutoksen jälkeen, enintään 15 minuutin välein. Synkronointi ei ole varmuuskopio. Yhdellä tietokoneella tehty virhe kulkee muille, joten pidä myös palautuskopio.
 
 ### Recovery and the forgotten master password
 title: Palautus ja unohtunut pääsalasana
@@ -179,6 +216,8 @@ Jos unohdat salasanan:
 - Palauta palautusvarmuuskopiosta: valitse varmuuskopiotiedosto, avaintiedostosi, sen salalause ja uusi pääsalasana.
 - Tai aloita uusi holvi. Vanha holvisi siirretään arkistoon, ei poisteta. Jos löydät salasanan myöhemmin, avaa vanha holvi Holvit-sivulta.
 - Windows Hello tai suojausavain saattaa yhä avata holvisi. Jos näin on, vaihda pääsalasana Asetuksissa.
+
+Hätäarkki on isolla tekstillä tulostettava sivu säilytettäväksi paperilla. Se kertoo, missä tiedostosi ovat ja mitä tehdään, ja siinä on tyhjät ruudut käsin kirjoitettaville asioille. Tiedostossa ei ole salaisuuksia. Avaa se selaimessa, tulosta ja poista tiedosto.
 
 ### Unlock methods
 title: Avaustavat
@@ -204,6 +243,10 @@ Asetukset, "Yksityisyys ja lukitus" ja Yleiset:
 - Pidä ikkuna poissa kuvakaappauksista ja näytön jaosta (oletuksena päällä, Windows): ikkuna näkyy mustana kaappauksissa. Poista käytöstä, jos tarvitset kuvakaappauksen MasterSafesta.
 - Leikepöytä: valitse 30 sekuntia, 1 minuutti tai 2 minuuttia. Kopiot pidetään poissa Windowsin leikepöytähistoriasta ja pilvileikepöydältä.
 - Lukitus poistaa puretut tiedot muistiin perustuvilta näytöiltä ja pyyhkii istuntoavaimen.
+
+Näkyvät salasanat piiloutuvat, kun ikkuna menettää kohdistuksen, ellet poista tätä käytöstä. Nämä asetukset ovat salatussa holvissasi, joten asetustiedostoa muuttava ohjelma ei voi poistaa niitä käytöstä, kun holvi on auki.
+
+Jos holvi näyttää vanhemmalta kuin viimeksi tällä tietokoneella käytetty kopio, koodisivu kertoo sen. Se on normaalia varmuuskopion palautuksen jälkeen. Se ei koskaan estä holvin avaamista.
 
 ### Settings and the tray
 title: Asetukset ja ilmoitusalue
@@ -231,6 +274,8 @@ Asetuksissa on Päivitykset-osio.
 
 Voit myös varmentaa minkä tahansa latauksen käsin MasterSafen komentorivityökalulla. Avaimen sormenjälki on julkaistu projektin README-tiedostossa ja SECURITY.md:ssä.
 
+Julkaisussa on myös allekirjoitettu luettelo sen tiedostoista ja versiosta. MasterSafe kieltäytyy päivityksestä, jonka allekirjoitettu versio eroaa tarjotusta tai ei ole sinun versiotasi uudempi.
+
 ### Vaults and files
 title: Holvit ja tiedostot
 summary: Missä tietosi sijaitsevat ja miten toinen holvi avataan.
@@ -244,6 +289,8 @@ Holvit-sivu näyttää nämä sijainnit ja luettelee holvisi:
 - Avaa arkistoitu holvi uudelleen, näytä tiedosto kansiossaan tai poista vanha holvi. Poisto pyytää vahvistusta, eikä sitä voi perua.
 
 Siirtyäksesi toiselle tietokoneelle kopioi vault.sauth sinne, asenna MasterSafe ja valitse "Minulla on jo holvitiedosto". Asennuksen poistaminen ei koskaan poista holviasi. Tallennus kestää kaatumisen, ja holvin edellinen versio säilytetään nimellä vault.sauth.bak ja päivittäiset kopiot snapshots-kansiossa. Pääsalasanan vaihto tai avaustavan poisto poistaa nämä kopiot, koska vanha avaustapa avaa ne edelleen.
+
+Verkkojaolla olevaa holvia ei avata ennen kuin hyväksyt sen, koska Windows kirjautuu jaolle tililläsi heti, kun se koskee tiedostoon. Jos asetustiedosto osoittaa verkkojaolle, kirjautumisnäyttö kysyy ensin sinulta.
 
 ### Security model
 title: Turvamalli
@@ -287,6 +334,8 @@ Windows 11:ssä katso kellon vieressä olevan nuolen alta ja vedä kuvake tehtä
 
 Asennusohjelma näyttää SmartScreen-varoituksen.
 Asennusohjelmaa ei ole vielä allekirjoitettu maksullisella Authenticode-varmenteella. Tarkista lataus myöhemmässä päivityksessä kohdalla "Lataa ja varmenna" tai komentorivityökalulla ja vertaa avaimen sormenjälkeä projektin README-tiedoston sormenjälkeen.
+
+MasterSafen käynnistys ei näytä tekevän mitään: se on jo käynnissä, ja ikkuna tulee esiin. Jos se on piilossa ilmaisinalueella, katso sieltä. Vain yksi kopio voi olla käynnissä kerrallaan, koska kaksi kopiota voisi korvata toistensa muutokset.
 
 ### About, licence and support
 title: Tietoja, lisenssi ja tuki

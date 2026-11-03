@@ -66,3 +66,5 @@ Every file must report `signature valid, checksum ok`. Full steps: [README](READ
 
 The key's SHA-256 fingerprint is `28ad8deb1624d6f04fe9100e25edb2666ad904e02824af14ef2fe6c8d2a74b8a`.
 If a release is ever signed with a different key, treat it as suspect until this page and the README say otherwise.
+
+An independent reviewer can start from [docs/SecurityReview.md](docs/SecurityReview.md).

@@ -11,7 +11,8 @@ using System.Xml.Linq;
 namespace MasterSafe.Core.Import;
 
 /// <summary>
-/// Reads the unencrypted exports of KeePass 2.x (KeePass XML) and KeePassXC (CSV or XML). The files are untrusted, so
+/// Reads the unencrypted exports of KeePass 2.x (KeePass XML), KeePassXC (CSV or XML) and the CSV exports of other password
+/// managers. JSON and zip exports of other apps go to <see cref="AppExportImporter"/>. The files are untrusted, so
 /// DTDs and external entities are off and the size, entry count and nesting depth are limited.
 /// </summary>
 public static class KeePassImporter
@@ -25,7 +26,7 @@ public static class KeePassImporter
     private const int MaxGroupDepth = 64;
     private const int MaxFieldLength = 1_000_000;
 
-    /// <summary>Reads an export from disk, choosing XML or CSV from the content.</summary>
+    /// <summary>Reads an export from disk, choosing the format from the content.</summary>
     public static KeePassImportResult ReadFile(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -58,8 +59,16 @@ public static class KeePassImporter
                 + "or in KeePassXC choose Database, Export to CSV, and import that file.");
         }
 
-        var text = DecodeText(bytes);
-        return text.TrimStart().StartsWith('<') ? ParseXml(text) : ParseCsv(text);
+        if (bytes.Length >= 4 && bytes[0] == (byte)'P' && bytes[1] == (byte)'K' && bytes[2] == 3 && bytes[3] == 4)
+        {
+            return AppExportImporter.ParseJson(AppExportImporter.ReadZip(bytes));
+        }
+
+        var text = DecodeText(bytes).TrimStart();
+        return text.Length > 0 && text[0] == '<' ? ParseXml(text)
+            : text.Length > 0 && text[0] == '{' ? AppExportImporter.ParseJson(text)
+            : text.StartsWith("otpauth", StringComparison.OrdinalIgnoreCase) ? AppExportImporter.ParseOtpLinks(text)
+            : ParseCsv(text);
     }
 
     /// <summary>Parses a KeePass XML (2.x) export.</summary>
@@ -128,17 +137,19 @@ public static class KeePassImporter
 
         var header = rows[0].Select(h => h.Trim().ToLowerInvariant()).ToList();
         int Col(params string[] names) => header.FindIndex(h => names.Contains(h));
-        var title = Col("title", "account");
-        var user = Col("username", "user name", "login name", "login");
-        var password = Col("password");
-        var url = Col("url", "web site", "website");
+        // The names used by KeePass, KeePassXC, 1Password, Bitwarden and Proton Pass.
+        var title = Col("title", "account", "name");
+        var user = Col("username", "user name", "login name", "login", "login_username", "email");
+        var password = Col("password", "login_password");
+        var url = Col("url", "web site", "website", "login_uri");
         var notes = Col("notes", "comments", "note");
-        var group = Col("group", "group tree", "grouping");
-        var totp = Col("totp", "otp");
+        var group = Col("group", "group tree", "grouping", "folder");
+        var totp = Col("totp", "otp", "otpauth", "login_totp");
+        var type = Col("type");
 
         if (title < 0 || password < 0)
         {
-            throw new KeePassImportException("The file has no Title and Password columns, so it does not look like a KeePass or KeePassXC export.");
+            throw new KeePassImportException("The file has no Title and Password columns, so it does not look like an export MasterSafe knows.");
         }
 
         var result = new KeePassImportResult();
@@ -159,6 +170,12 @@ public static class KeePassImporter
             if (path.Count > 0 && path[0].Equals("Root", StringComparison.OrdinalIgnoreCase))
             {
                 path.RemoveAt(0);
+            }
+
+            if (Get(type).Equals("note", StringComparison.OrdinalIgnoreCase) && Get(password).Length == 0)
+            {
+                AddItem(result, new PasswordEntry { Title = Get(title), Password = string.Empty, Notes = Get(notes), Folder = FolderPath.Normalize(string.Join(FolderPath.Separator, path)), Kind = EntryKind.Note }, string.Empty);
+                continue;
             }
 
             AddEntry(result, Get(title), Get(user), Get(password), Get(url), Get(notes), Get(totp), path, DateTimeOffset.UtcNow, []);
@@ -404,6 +421,36 @@ public static class KeePassImporter
             else
             {
                 result.Warnings.Add($"The one-time password of '{title}' was not understood and was skipped.");
+            }
+        }
+
+        if (!added)
+        {
+            result.SkippedInvalid++;
+        }
+    }
+
+    /// <summary>Adds an item read by another importer, with its one-time password when it has one.</summary>
+    internal static void AddItem(KeePassImportResult result, PasswordEntry entry, string otp)
+    {
+        var added = false;
+        if (!string.IsNullOrWhiteSpace(entry.Title) && entry.IsValid(out _))
+        {
+            result.Passwords.Add(entry);
+            added = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(otp))
+        {
+            var account = ToAccount(otp, entry.Title, entry.UserName, []);
+            if (account is not null)
+            {
+                result.Accounts.Add(account);
+                added = true;
+            }
+            else
+            {
+                result.Warnings.Add($"The one-time password of '{entry.Title}' was not understood and was skipped.");
             }
         }
 

@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace MasterSafe.PostQuantum;
 
@@ -16,6 +17,61 @@ public sealed record ReleaseFileResult(string FileName, bool? ChecksumOk, bool? 
 {
     /// <summary>The file is acceptable: signed correctly, and its checksum matches when one was supplied.</summary>
     public bool Passed => SignatureOk == true && ChecksumOk != false;
+}
+
+/// <summary>One file listed in a release manifest.</summary>
+public sealed record ReleaseManifestFile(string Name, string Sha256);
+
+/// <summary>
+/// The signed list of a release: its version and the name and SHA-256 of each file. A signature on an installer alone says
+/// nothing about which version it is, so an old signed installer could be offered as a new one. This list binds them.
+/// </summary>
+public sealed record ReleaseManifest(string Product, string Version, IReadOnlyList<ReleaseManifestFile> Files)
+{
+    /// <summary>The file name of the manifest in a release.</summary>
+    public const string FileName = "MasterSafe-release-manifest.json";
+
+    /// <summary>The product name the manifest must carry.</summary>
+    public const string ProductName = "MasterSafe Authenticator";
+
+    /// <summary>Largest manifest that is read.</summary>
+    public const int MaxBytes = 64 * 1024;
+
+    /// <summary>Writes the manifest for the named files in <paramref name="folder"/>.</summary>
+    public static byte[] Build(string folder, string version, IEnumerable<string> fileNames)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(folder);
+        ArgumentException.ThrowIfNullOrEmpty(version);
+        ArgumentNullException.ThrowIfNull(fileNames);
+
+        var files = fileNames
+            .Order(StringComparer.Ordinal)
+            .Select(name => new ReleaseManifestFile(name, Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(folder, name)))).ToLowerInvariant()))
+            .ToList();
+        return JsonSerializer.SerializeToUtf8Bytes(new ReleaseManifest(ProductName, version, files), new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    /// <summary>Reads a manifest. Null when it is not one.</summary>
+    public static ReleaseManifest? TryParse(ReadOnlySpan<byte> json)
+    {
+        if (json.Length > MaxBytes)
+        {
+            return null;
+        }
+
+        try
+        {
+            var manifest = JsonSerializer.Deserialize<ReleaseManifest>(json);
+            return manifest is { Product: ProductName, Version: { Length: > 0 }, Files: not null } ? manifest : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The recorded SHA-256 of a file, or null when the manifest does not list it.</summary>
+    public string? HashOf(string fileName) => Files.FirstOrDefault(f => f.Name == fileName)?.Sha256;
 }
 
 /// <summary>
@@ -52,6 +108,59 @@ public static class ReleaseVerifier
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// Checks the signed manifest in <paramref name="folder"/> against the key and every file it lists. Returns the problem, or
+    /// null when all is well. The version of the manifest is returned through <paramref name="version"/>.
+    /// </summary>
+    public static string? VerifyManifest(string folder, byte[] publicKey, out string? version)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(folder);
+        ArgumentNullException.ThrowIfNull(publicKey);
+
+        version = null;
+        var path = Path.Combine(folder, ReleaseManifest.FileName);
+        if (!File.Exists(path) || !File.Exists(path + ".sig"))
+        {
+            return "the release has no signed manifest";
+        }
+
+        var bytes = File.ReadAllBytes(path);
+        try
+        {
+            if (!ReleaseSigner.Verify(bytes, Convert.FromBase64String(File.ReadAllText(path + ".sig").Trim()), publicKey))
+            {
+                return "the manifest signature is not valid";
+            }
+        }
+        catch (FormatException)
+        {
+            return "the manifest signature is damaged";
+        }
+
+        var manifest = ReleaseManifest.TryParse(bytes);
+        if (manifest is null)
+        {
+            return "the manifest is damaged";
+        }
+
+        version = manifest.Version;
+        foreach (var file in manifest.Files)
+        {
+            var target = Path.Combine(folder, Path.GetFileName(file.Name));
+            if (!File.Exists(target))
+            {
+                return $"{file.Name} is listed in the manifest but missing";
+            }
+
+            if (!string.Equals(file.Sha256, Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(target))), StringComparison.OrdinalIgnoreCase))
+            {
+                return $"{file.Name} differs from the manifest";
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Verifies a single file using the <c>.sig</c> and <c>.sha256</c> files next to it.</summary>

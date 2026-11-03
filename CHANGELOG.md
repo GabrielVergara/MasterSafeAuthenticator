@@ -2,6 +2,56 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.6.0 (2026-11-03)
+
+A release about being harder to attack and easier to use, with sync between your own computers. Vaults from older versions open
+as before. See [docs/SecurityReview.md](docs/SecurityReview.md) for what is still weak.
+
+### Security
+- **One running copy.** A second start brings the first window forward and ends, so two copies can never overwrite each other's saves. The lock goes away with the program, even after a crash.
+- **Security settings are inside the vault.** Automatic lock time, lock on computer lock, lock on minimize, clipboard wait, screen capture block, breach check, hidden codes and website icons are stored in the encrypted vault, and its values win after unlocking. Editing `settings.json` can no longer turn them off once the vault is open. An older vault takes its first values from the settings file, once.
+- **Network shares are refused until you agree.** A vault path on a share in the settings file is not touched, and the sign-in screen asks you, because Windows sends a form of your network password as soon as it looks at the file. The agreement lasts for one run and cannot be stored. The list of known vaults and the automatic backup folder follow the same rule.
+- **An older copy of the vault is noticed.** A save counter is kept in the vault, and a copy of it outside. If the vault is older, the codes page says so in plain words. This never blocks you, because restoring a backup is normal. It catches a swapped file, not malware that also changes the copy.
+- **The version is bound into the release signature.** A signed manifest lists the version and the SHA-256 of each file, and the app refuses an update whose signed version differs from the one offered or is not newer. Each file keeps its own signature, so older versions still verify updates.
+- **Linux:** on an account without `~/.local/share` yet, the data folder was made inside whatever folder the program was started from, so each place had its own vault. It is now always `~/.local/share/MasterSafe`. A vault made that way is not lost: open it once from the Vaults page.
+- **Revealed passwords hide when the window loses focus** (on by default).
+- **Hide codes until clicked** (optional), so nobody can read them over your shoulder.
+- Found by reviewing the new code the way an attacker would:
+  - A WebDAV server can no longer redirect the login elsewhere, and a large download no longer fills memory before the size limit applies.
+  - A backup is checked for absurd key-derivation settings before any work is done.
+  - A sync that finishes after the vault locked no longer puts decrypted data back on the screens.
+  - A stored icon goes through the same image check as a download before it reaches the screen.
+  - A damaged or hostile counter file is harmless.
+  - The sync code leaves the screen when you move to another page.
+
+### Sync
+- **Sync between your computers** through a folder or a WebDAV server of your own, off until you set it up. Only encrypted files go there, locked with a random sync code that does not depend on your master password, so a stolen file gives nothing to guess at. Each computer keeps its own master password.
+- A merge keeps every item that exists on only one computer. When an item changed on both, the newer one is used and the older one stays in its history. An item is only removed if it was deleted for good and not changed after that.
+- Sync only adds files. It never overwrites or deletes anything on a server, so it works with a server that refuses both, and a stolen server password cannot destroy what is there. Old files must be removed with the server's own tools.
+- Optional automatic sync after unlocking and a little after each change, at most every 15 minutes.
+
+### Backups and moving your data
+- **A backup now holds everything.** The Backup page used to save authenticator accounts only, and Import selected did not add what it read. It now writes accounts, passwords and attached files, and importing merges them into the vault, replacing nothing. You choose the password for each file. Older backups still open.
+- **Export to KeePass (`.kdbx`)**, so you can always leave. Checked with KeePassXC.
+- **Import from Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator**, and lists of otpauth links, with the same preview. An encrypted export is refused with a message saying what to do.
+- **Printed emergency sheet** on the Recovery page: a large-print page with no secrets in the file.
+
+### Added
+- **Letter icons** for passwords and authenticator accounts. Nothing is downloaded and no logo is copied.
+- **Website icon** for a password (optional, off by default), one at a time on request, with a preview. It asks only for `https://<site>/favicon.ico`, directly, and refuses private addresses. Only a 32 by 32 picture made by the app is kept.
+- **Secure notes, payment cards and identities**, and **extra fields** on any item, hidden if you want.
+- **Tags** can filter the password list.
+- **Your own order and groups** for authenticator accounts.
+- **More health checks**, each with a simple fix: entries that look like copies, `http://` addresses, and expiry dates.
+- **Expiry dates** on items, with a reminder 30 days before.
+
+### Faster with many entries
+- Searching no longer waits on every letter. Long lists only build what is on screen, a search no longer rebuilds the folder list, and the search waits for a short pause in typing. The codes page also opens much faster.
+
+### Testing
+- A vault written by 1.5.1 is part of the tests. 1.5.1 itself was also run against a 1.6 vault: it opens and saves it, and 1.6 restores the kinds, fields and dates from what it left. Sync settings, security settings, the counter, groups and icons do not survive an older version saving the vault.
+- Fuzz tests now cover the exports of other apps, Google links, zip files, the image check, sync files, manifests and the notes block.
+
 ## 1.5.1 (2026-11-01)
 
 ### Security

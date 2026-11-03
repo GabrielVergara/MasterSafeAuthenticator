@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 
 namespace MasterSafe.App.ViewModels;
@@ -33,17 +34,109 @@ public sealed partial class DashboardViewModel
     /// <summary>The orders the accounts can be shown in.</summary>
     public static IReadOnlyList<AccountSortOption> SortOptions { get; } =
     [
-        new("added", "Order added"),
+        new("added", "My own order"),
         new("name", "Name, A to Z"),
         new("name-desc", "Name, Z to A"),
     ];
 
     /// <summary>The accounts that match the search, in the chosen order. This is what the page lists.</summary>
-    public ObservableCollection<OtpItemViewModel> Shown { get; } = [];
+    public BulkObservableCollection<OtpItemViewModel> Shown { get; } = [];
 
     /// <summary>How the accounts are ordered.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanReorder))]
     private AccountSortOption _selectedSort = SortOptions[0];
+
+    private readonly Dictionary<Guid, DateTimeOffset> _tombstones = [];
+
+    /// <summary>Accounts deleted for good, for sync.</summary>
+    public IReadOnlyList<MasterSafe.Crypto.Tombstone> TombstoneSnapshot()
+        => _tombstones.Select(t => new MasterSafe.Crypto.Tombstone { Id = t.Key, DeletedUtc = t.Value }).ToList();
+
+    /// <summary>Codes stay covered until they are clicked.</summary>
+    [ObservableProperty]
+    private bool _hideCodes;
+
+    partial void OnHideCodesChanged(bool value)
+    {
+        foreach (var item in Accounts)
+        {
+            item.CanHide = value;
+            item.IsHidden = value;
+        }
+    }
+
+    private OtpItemViewModel NewItem(OtpAccount account) => new(account) { CanHide = HideCodes, IsHidden = HideCodes };
+
+    /// <summary>Shows a covered code for a short time, or covers it again.</summary>
+    [RelayCommand]
+    private void ToggleReveal(OtpItemViewModel? item) => item?.ToggleReveal();
+
+    /// <summary>The groups in use, for the filter. The first one means all.</summary>
+    public ObservableCollection<string> GroupChoices { get; } = [];
+
+    /// <summary>The group shown. The first choice shows all accounts.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanReorder))]
+    private string? _selectedGroup;
+
+    /// <summary>True when groups are in use, so the filter is worth showing.</summary>
+    public bool HasGroups => GroupChoices.Count > 1;
+
+    private bool _rebuildingGroups;
+
+    private void RebuildGroups()
+    {
+        var wanted = SelectedGroup;
+        var groups = Accounts.Select(a => a.Group).Where(g => g.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        _rebuildingGroups = true;
+        GroupChoices.Clear();
+        GroupChoices.Add(Loc.T("All groups"));
+        foreach (var group in groups)
+        {
+            GroupChoices.Add(group);
+        }
+
+        SelectedGroup = wanted is not null && GroupChoices.Contains(wanted) ? wanted : GroupChoices[0];
+        _rebuildingGroups = false;
+        OnPropertyChanged(nameof(HasGroups));
+        RebuildShown();
+    }
+
+    partial void OnSelectedGroupChanged(string? value)
+    {
+        if (!_rebuildingGroups)
+        {
+            RebuildShown();
+        }
+    }
+
+    private bool ShowsAllGroups => SelectedGroup is null || GroupChoices.Count == 0 || SelectedGroup == GroupChoices[0];
+
+    /// <summary>True when the arrows that move an account are offered: only your own order, with nothing filtered out.</summary>
+    public bool CanReorder => SelectedSort.Key == "added" && SearchText.Trim().Length == 0 && ShowsAllGroups;
+
+    /// <summary>Moves an account up in your own order.</summary>
+    [RelayCommand]
+    private void MoveUp(OtpItemViewModel? item) => Move(item, -1);
+
+    /// <summary>Moves an account down in your own order.</summary>
+    [RelayCommand]
+    private void MoveDown(OtpItemViewModel? item) => Move(item, 1);
+
+    private void Move(OtpItemViewModel? item, int step)
+    {
+        var from = item is null ? -1 : Accounts.IndexOf(item);
+        var to = from + step;
+        if (!CanReorder || from < 0 || to < 0 || to >= Accounts.Count)
+        {
+            return;
+        }
+
+        Accounts.Move(from, to);
+        StatusMessage = $"Moved {item!.Issuer}.";
+        AccountsChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <summary>Raised when the user picks another order, so it can be remembered.</summary>
     public event EventHandler? SortChanged;
@@ -56,7 +149,11 @@ public sealed partial class DashboardViewModel
     /// <summary>True when there are enough accounts for search and sorting to be useful.</summary>
     public bool ShowSearch => Accounts.Count > 3;
 
-    partial void OnSearchTextChanged(string value) => RebuildShown();
+    partial void OnSearchTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanReorder));
+        RebuildShown();
+    }
 
     partial void OnSelectedSortChanged(AccountSortOption value)
     {
@@ -78,9 +175,11 @@ public sealed partial class DashboardViewModel
     private void RebuildShown()
     {
         var q = SearchText.Trim();
-        IEnumerable<OtpItemViewModel> list = Accounts.Where(a => q.Length == 0
-            || a.Issuer.Contains(q, StringComparison.OrdinalIgnoreCase)
-            || a.Label.Contains(q, StringComparison.OrdinalIgnoreCase));
+        IEnumerable<OtpItemViewModel> list = Accounts
+            .Where(a => ShowsAllGroups || string.Equals(a.Group, SelectedGroup, StringComparison.OrdinalIgnoreCase))
+            .Where(a => q.Length == 0
+                || a.Issuer.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || a.Label.Contains(q, StringComparison.OrdinalIgnoreCase));
 
         list = SelectedSort.Key switch
         {
@@ -95,12 +194,7 @@ public sealed partial class DashboardViewModel
             return;
         }
 
-        Shown.Clear();
-        foreach (var item in wanted)
-        {
-            Shown.Add(item);
-        }
-
+        Shown.ReplaceAll(wanted);
         OnPropertyChanged(nameof(HasNoMatches));
         OnPropertyChanged(nameof(ShowSearch));
     }
@@ -120,6 +214,10 @@ public sealed partial class DashboardViewModel
     [ObservableProperty]
     private string _editLabel = string.Empty;
 
+    /// <summary>The group being typed.</summary>
+    [ObservableProperty]
+    private string _editGroup = string.Empty;
+
     /// <summary>True while an account is being renamed.</summary>
     public bool IsEditing => Editing is not null;
 
@@ -136,6 +234,7 @@ public sealed partial class DashboardViewModel
         Editing = item;
         EditIssuer = item.Account.Issuer;
         EditLabel = item.Account.Label;
+        EditGroup = item.Account.Group;
     }
 
     [RelayCommand]
@@ -166,23 +265,10 @@ public sealed partial class DashboardViewModel
             return;
         }
 
-        var old = item.Account;
-        var renamed = new OtpAccount
-        {
-            Id = old.Id,
-            Issuer = issuer,
-            Label = label,
-            Secret = old.Secret,
-            Type = old.Type,
-            Algorithm = old.Algorithm,
-            Digits = old.Digits,
-            Period = old.Period,
-            Counter = old.Counter,
-            Tags = old.Tags,
-        };
-
-        Accounts[index] = new OtpItemViewModel(renamed);
+        var renamed = item.Account.Renamed(issuer, label, EditGroup.Trim(), _timeProvider());
+        Accounts[index] = NewItem(renamed);
         Editing = null;
+        RebuildGroups();
         Refresh();
         StatusMessage = $"Renamed to {(issuer.Length > 0 ? issuer : label)}.";
         AccountsChanged?.Invoke(this, EventArgs.Empty);

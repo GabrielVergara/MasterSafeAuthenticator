@@ -23,14 +23,24 @@ public sealed class PasswordHealthReport
     /// <summary>Passwords found in known data breaches (only filled when the optional check was run).</summary>
     public IReadOnlyList<HealthIssue> Breached { get; init; } = [];
 
+    /// <summary>Entries that look like copies of each other (same address and user name, or same title and user name).</summary>
+    public IReadOnlyList<HealthIssue> Duplicates { get; init; } = [];
+
+    /// <summary>Sign-ins on an http:// address, which is not encrypted.</summary>
+    public IReadOnlyList<HealthIssue> Insecure { get; init; } = [];
+
+    /// <summary>Entries past the date the user set, or close to it.</summary>
+    public IReadOnlyList<HealthIssue> Expiring { get; init; } = [];
+
     /// <summary>How many entries were looked at.</summary>
     public int Checked { get; init; }
 
     /// <summary>True when nothing needs attention.</summary>
-    public bool IsClean => Weak.Count == 0 && Reused.Count == 0 && Old.Count == 0 && Breached.Count == 0;
+    public bool IsClean => EntriesNeedingAttention == 0;
 
     /// <summary>How many different entries need attention.</summary>
-    public int EntriesNeedingAttention => Weak.Concat(Reused).Concat(Old).Concat(Breached).Select(i => i.Entry.Id).Distinct().Count();
+    public int EntriesNeedingAttention => Weak.Concat(Reused).Concat(Old).Concat(Breached).Concat(Duplicates).Concat(Insecure).Concat(Expiring)
+        .Select(i => i.Entry.Id).Distinct().Count();
 }
 
 /// <summary>Looks through the passwords for ones that are weak, reused, old or known from breaches. Everything runs offline.</summary>
@@ -39,6 +49,9 @@ public static class PasswordHealth
     /// <summary>Passwords older than this many days are listed as old.</summary>
     public const int OldAfterDays = 365;
 
+    /// <summary>An entry is listed this many days before its expiry date.</summary>
+    public const int ExpiryWarningDays = 30;
+
     /// <summary>Builds the report for the entries that are in use.</summary>
     /// <param name="entries">All entries; those in the recycle bin are ignored.</param>
     /// <param name="now">The current time.</param>
@@ -46,7 +59,8 @@ public static class PasswordHealth
     public static PasswordHealthReport Analyze(IEnumerable<PasswordEntry> entries, DateTimeOffset now, IReadOnlyDictionary<Guid, int>? breachCounts = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        var active = entries.Where(e => !e.IsDeleted && !string.IsNullOrEmpty(e.Password)).ToList();
+        var inUse = entries.Where(e => !e.IsDeleted).ToList();
+        var active = inUse.Where(e => !string.IsNullOrEmpty(e.Password)).ToList();
 
         var weak = active
             .Select(e => (Entry: e, Strength: PasswordStrength.Evaluate(e.Password, e.Title, e.UserName)))
@@ -73,6 +87,69 @@ public static class PasswordHealth
                 .Select(e => new HealthIssue(e, $"Found in known data breaches ({breachCounts[e.Id].ToString("N0", System.Globalization.CultureInfo.InvariantCulture)} times). Change it."))
                 .ToList();
 
-        return new PasswordHealthReport { Weak = weak, Reused = reused, Old = old, Breached = breached, Checked = active.Count };
+        var insecure = active
+            .Where(IsInsecure)
+            .Select(e => new HealthIssue(e, "This address is not encrypted (http). If the site supports it, use https."))
+            .ToList();
+
+        var expiring = inUse
+            .Where(e => ExpiresSoon(e, now))
+            .OrderBy(e => e.ExpiresUtc)
+            .Select(e => new HealthIssue(e, DescribeExpiry(e.ExpiresUtc!.Value, now)))
+            .ToList();
+
+        return new PasswordHealthReport
+        {
+            Weak = weak,
+            Reused = reused,
+            Old = old,
+            Breached = breached,
+            Duplicates = FindDuplicates(inUse),
+            Insecure = insecure,
+            Expiring = expiring,
+            Checked = active.Count,
+        };
+    }
+
+    /// <summary>How many entries are past their date or close to it, for the reminder on the codes page.</summary>
+    public static int CountExpiring(IEnumerable<PasswordEntry> entries, DateTimeOffset now)
+        => entries.Count(e => !e.IsDeleted && ExpiresSoon(e, now));
+
+    /// <summary>The same address with https, or null when it does not start with http://.</summary>
+    public static string? HttpsVersion(string url)
+    {
+        var trimmed = url.Trim();
+        return trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + trimmed["http://".Length..] : null;
+    }
+
+    private static bool IsInsecure(PasswordEntry entry) => HttpsVersion(entry.Url) is not null;
+
+    private static bool ExpiresSoon(PasswordEntry entry, DateTimeOffset now)
+        => entry.ExpiresUtc is { } expires && expires - now <= TimeSpan.FromDays(ExpiryWarningDays);
+
+    private static string DescribeExpiry(DateTimeOffset expires, DateTimeOffset now)
+    {
+        var days = (int)Math.Ceiling((expires - now).TotalDays);
+        return days switch
+        {
+            < 0 => $"Expired {-days} days ago. Change it, then set a new date.",
+            0 => "Expires today. Change it, then set a new date.",
+            1 => "Expires tomorrow.",
+            _ => $"Expires in {days} days.",
+        };
+    }
+
+    private static List<HealthIssue> FindDuplicates(List<PasswordEntry> entries)
+    {
+        static string Clean(string text) => text.Trim().ToLowerInvariant();
+        static string Address(string url) => Clean(url).TrimEnd('/').Replace("https://", string.Empty, StringComparison.Ordinal).Replace("http://", string.Empty, StringComparison.Ordinal);
+
+        // Same address and user name, or, with no address, same title and user name.
+        return entries
+            .Where(e => e.Kind == EntryKind.Login)
+            .GroupBy(e => e.Url.Trim().Length > 0 ? $"u|{Address(e.Url)}|{Clean(e.UserName)}" : $"t|{Clean(e.Title)}|{Clean(e.UserName)}", StringComparer.Ordinal)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Select(e => new HealthIssue(e, g.Count() == 2 ? "Looks like a copy of another entry." : $"Looks like a copy of {g.Count() - 1} other entries.")))
+            .ToList();
     }
 }

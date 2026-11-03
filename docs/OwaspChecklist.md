@@ -56,6 +56,18 @@ Legend: **Met** = implemented and covered by tests or CI. **Partial** = implemen
 | V14 | Reproducible builds / provenance | Partial | Each release has a GitHub build attestation that `scripts/sign-release.ps1` checks before signing. Builds are not reproducible yet (on the roadmap) |
 | V14 | 14.1 Source repository protection | Met | Only the owner can change `main` or `v*` tags (rulesets), force-pushes and deletions are blocked, secret scanning with push protection is on, and workflows from outside contributors need approval |
 
+### Added in 1.6
+
+| Chapter | Requirement (short) | Status | Evidence and notes |
+| --- | --- | --- | --- |
+| V1 | Security decisions do not rest on unprotected configuration | Met | Security settings live in the vault (`VaultSecurity`); a test edits `settings.json` and they hold |
+| V5 | Input from files and servers is validated | Met | Exports of other apps, sync files, icons, manifests and zip files have size limits and fuzz tests |
+| V6 | Keys come from a secure random source | Met | The sync key is 256 random bits, and its code has a check value |
+| V9 | Connections are authenticated and encrypted | Met | WebDAV needs https and follows no redirects; the icon request uses https with default certificate checks |
+| V10 | Updates are signed, and their version is bound | Met | Signed manifest; old installers offered as new are refused, tested |
+| V12 | Server-side request forgery is prevented (website icon) | Met | Address checked at connection time, tested against private, mapped and embedded addresses, redirects and huge files |
+| V14 | Downgrade of the vault is noticed | Partial | A warning from a counter. A program that changes the copy as well is not noticed |
+
 ## OWASP Top 10 (2021), as it applies
 
 | Item | Position |
@@ -106,5 +118,6 @@ CI also runs CodeQL, Gitleaks, dependency review and the vulnerable-package gate
 2. Reproducible builds (signed provenance is done).
 3. Move the assessment to ASVS 5.0.
 4. Independent security review.
-5. Secrets are .NET strings while the vault is unlocked and cannot be wiped; see the hardening ideas in
+5. A review pack is ready in [SecurityReview.md](SecurityReview.md); the review itself has not happened.
+6. Secrets are .NET strings while the vault is unlocked and cannot be wiped; see the hardening ideas in
    [Roadmap.md](Roadmap.md).

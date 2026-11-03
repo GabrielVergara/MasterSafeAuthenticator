@@ -147,12 +147,19 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
         var installer = PickInstaller(info, OperatingSystem.IsWindows(), RuntimeInformation.OSArchitecture);
         var signature = installer is null ? null : info.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sig");
         var checksum = installer is null ? null : info.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sha256");
-        if (installer is null || signature is null || checksum is null)
+        var manifest = info.Assets.FirstOrDefault(a => a.Name == ReleaseManifest.FileName);
+        var manifestSignature = info.Assets.FirstOrDefault(a => a.Name == ReleaseManifest.FileName + ".sig");
+        if (installer is null || signature is null || checksum is null || manifest is null || manifestSignature is null)
         {
             return new UpdateDownload(false, null, "This release has no signed download for this system. Open the release page instead.");
         }
 
-        foreach (var asset in new[] { installer, signature, checksum })
+        if (!TryParseVersion(currentVersion, out var running) || info.Version <= running)
+        {
+            return new UpdateDownload(false, null, "This release is not newer than the version you have, so it was not downloaded.");
+        }
+
+        foreach (var asset in new[] { installer, signature, checksum, manifest, manifestSignature })
         {
             if (!asset.Url.StartsWith(DownloadPrefix, StringComparison.Ordinal))
             {
@@ -163,12 +170,15 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
         var target = Path.Combine(folder, $"MasterSafe-update-{info.Version}");
         Directory.CreateDirectory(target);
         var installerPath = Path.Combine(target, installer.Name);
+        var manifestPath = Path.Combine(target, ReleaseManifest.FileName);
 
         try
         {
             await DownloadAsync(installer.Url, installerPath, MaxInstallerBytes, cancellationToken).ConfigureAwait(false);
             await DownloadAsync(signature.Url, installerPath + ".sig", MaxSmallFileBytes, cancellationToken).ConfigureAwait(false);
             await DownloadAsync(checksum.Url, installerPath + ".sha256", MaxSmallFileBytes, cancellationToken).ConfigureAwait(false);
+            await DownloadAsync(manifest.Url, manifestPath, ReleaseManifest.MaxBytes, cancellationToken).ConfigureAwait(false);
+            await DownloadAsync(manifestSignature.Url, manifestPath + ".sig", MaxSmallFileBytes, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidDataException or TaskCanceledException)
         {
@@ -189,7 +199,41 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
             return new UpdateDownload(false, null, "The download did not match the project's signature or checksum, so it was deleted. Do not install it.");
         }
 
+        // The signature above says the file is genuine. Only this says which version it is, so an old signed installer
+        // cannot be offered as a new one.
+        var manifestProblem = CheckManifest(manifestPath, installer.Name, installerPath, info.Version, running);
+        if (manifestProblem is not null)
+        {
+            Cleanup(target);
+            return new UpdateDownload(false, null, manifestProblem);
+        }
+
         return new UpdateDownload(true, installerPath, "The signature and checksum are valid.");
+    }
+
+    private string? CheckManifest(string manifestPath, string installerName, string installerPath, Version offered, Version running)
+    {
+        const string refused = "The signed list of this release does not match what was offered, so the download was deleted. Do not install it.";
+
+        var bytes = File.ReadAllBytes(manifestPath);
+        bool signed;
+        try
+        {
+            signed = ReleaseSigner.Verify(bytes, Convert.FromBase64String(File.ReadAllText(manifestPath + ".sig").Trim()), publicKey);
+        }
+        catch (FormatException)
+        {
+            return refused;
+        }
+
+        var manifest = signed ? ReleaseManifest.TryParse(bytes) : null;
+        if (manifest is null || !TryParseVersion(manifest.Version, out var listed) || listed != offered || listed <= running)
+        {
+            return refused;
+        }
+
+        var hash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(installerPath)));
+        return string.Equals(manifest.HashOf(installerName), hash, StringComparison.OrdinalIgnoreCase) ? null : refused;
     }
 
     private async Task<byte[]> ReadLimitedAsync(string url, long limit, CancellationToken cancellationToken)

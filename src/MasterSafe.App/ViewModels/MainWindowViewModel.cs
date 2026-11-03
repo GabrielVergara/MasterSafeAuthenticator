@@ -42,6 +42,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     partial void OnCurrentPageChanged(object value)
     {
+        // A sync code on the screen is a key. It does not stay there when the user moves on.
+        Sync.HideCodeCommand.Execute(null);
+
         if (value is DashboardViewModel)
         {
             Recovery.Refresh();
@@ -161,6 +164,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public BackupViewModel Backup { get; } = new();
 
+    /// <summary>Sync between computers, on the Backup page.</summary>
+    public SyncViewModel Sync => Backup.Sync;
+
     public ImportViewModel Import { get; } = new();
 
     public AccountEditorViewModel AccountEditor { get; } = new();
@@ -192,6 +198,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Dashboard = new DashboardViewModel();
         Settings = new SettingsViewModel(services?.SettingsStore);
         _throttle = new UnlockThrottle(_clock, services?.SettingsStore);
+        _counters = services is null ? null : new SaveCounterStore(services.Paths.SaveCounterPath);
+        Settings.SecurityChanged += (_, _) => OnSecuritySettingChanged();
+        Settings.SecurityApplied += (_, _) =>
+        {
+            Passwords.RefreshIconSetting();
+            Dashboard.HideCodes = Settings.HideCodes;
+            AutoHideReveal.HideOnFocusLoss = Settings.HideRevealedOnFocusLoss;
+        };
+        Dashboard.HideCodes = Settings.HideCodes;
+        AutoHideReveal.HideOnFocusLoss = Settings.HideRevealedOnFocusLoss;
+        Passwords.IconsAllowed = () => Settings.WebsiteIconsEnabled;
         Settings.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SettingsViewModel.TextScalePercent))
@@ -222,11 +239,14 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 Passwords.EditEntryById(id);
                 CurrentPage = Passwords;
             },
+            MoveToBin = id => Passwords.MoveToBinById(id),
+            UseHttps = id => Passwords.UseHttpsById(id),
         };
         Vaults = new VaultsViewModel(services, _providers);
         Recovery = new RecoveryViewModel(services, BuildContents) { SaveRequested = PersistAsync };
         Recovery.IsVaultUnlocked = () => IsUnlocked;
         Recovery.Clock = _clock;
+        Recovery.SheetData = services is null ? null : () => SheetData(services);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
         _currentPage = Login;
 
@@ -246,6 +266,35 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
 
         Backup.AccountsProvider = () => Dashboard.Accounts.Select(a => a.Account).ToList();
+        Backup.ContentsProvider = BuildContents;
+        Backup.MergeRequested = MergeBackupAsync;
+        Backup.Dialogs = services?.Dialogs;
+        Sync.Dialogs = services?.Dialogs;
+        Sync.RunRequested = RunSyncAsync;
+        Sync.SettingsChanged = _ => PersistAsync();
+        if (services?.Catalog.RefusedNetworkPath is { } refused)
+        {
+            Login.RefusedPath = refused;
+            Login.DismissRefusedPath = () =>
+            {
+                services.Catalog.DismissNetworkPath();
+                Login.RefusedPath = null;
+            };
+            Login.OpenRefusedPath = async () =>
+            {
+                Login.RefusedPath = null;
+                services.Catalog.AllowNetworkPath(refused);
+                try
+                {
+                    services.Catalog.SetActive(refused);
+                    await OnActiveVaultChangedAsync();
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Login.Error = $"Could not open vault: {ex.Message}";
+                }
+            };
+        }
 
         Dashboard.AccountsChanged += async (_, _) => await PersistAsync();
         Passwords.EntriesChanged += async (_, _) => await PersistAsync();
@@ -339,7 +388,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         NotifyActivity();
 
         var files = paths.ToList();
-        if (files.Count == 1 && Path.GetExtension(files[0]).ToLowerInvariant() is ".xml" or ".csv" or ".kdbx")
+        if (files.Count == 1 && Path.GetExtension(files[0]).ToLowerInvariant() is ".xml" or ".csv" or ".kdbx" or ".json" or ".1pux" or ".2fas" or ".zip")
         {
             Import.KeePass.Load(files[0]);
             CurrentPage = Import;
@@ -450,13 +499,25 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Rebuilds the reminders at the top of the codes page.</summary>
     public void RefreshNotices()
     {
+        // This one is a warning, not a reminder, so the setting does not hide it.
+        var olderCopy = IsUnlocked ? OlderCopyNotice() : null;
         if (!IsUnlocked || !Settings.ShowReminders)
         {
-            Dashboard.SetNotices([]);
+            Dashboard.SetNotices(olderCopy is null ? [] : [olderCopy]);
             return;
         }
 
         var notices = new List<NoticeRow>();
+        var expiring = PasswordHealth.CountExpiring(Passwords.Snapshot(), _clock());
+        if (expiring > 0)
+        {
+            notices.Add(new NoticeRow(
+                "expiring",
+                expiring == 1 ? "1 item has reached its expiry date, or will soon." : $"{expiring} items have reached their expiry date, or will soon.",
+                "Show them",
+                ShowHealthCommand));
+        }
+
         if (_newerRelease is not null)
         {
             notices.Add(new NoticeRow(
@@ -505,6 +566,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                     Settings.CheckForUpdatesOnStart = true;
                     RefreshNotices();
                 })));
+        }
+
+        if (olderCopy is not null)
+        {
+            notices.Insert(0, olderCopy);
         }
 
         Dashboard.SetNotices(notices);
@@ -611,7 +677,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>Saves accounts and passwords to the encrypted vault (no-op without a vault or session).</summary>
-    public async Task PersistAsync()
+    public Task PersistAsync() => PersistAsync(fromSync: false);
+
+    private async Task PersistAsync(bool fromSync)
     {
         if (_vault is null || _sessionKey is null)
         {
@@ -623,8 +691,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             if (_sessionKey is not null)
             {
+                _saveCounter++;
                 await _vault.SaveWithKeyAsync(_sessionKey, BuildContents());
+                RecordSave();
+                Interlocked.Increment(ref _changes);
                 Recovery.NotifyVaultChanged();
+                if (!fromSync)
+                {
+                    TriggerAutomaticSync();
+                }
             }
         }
         catch (Exception ex)
@@ -903,6 +978,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Dashboard.Load([]);
         Passwords.Load([]);
         Passwords.ClearFormCommand.Execute(null);
+        _syncDebounce?.Cancel();
+        Sync.ClearSecrets();
+        _olderCopyNoticed = false;
         AccountEditor.Secret = string.Empty;
         Import.ManualUri = string.Empty;
         Import.KeePass.Discard();
@@ -950,6 +1028,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Folders = Passwords.FolderSnapshot(),
         FolderIcons = Passwords.IconSnapshot(),
         RecoveryKeyFingerprint = Recovery.TrustedKeyFingerprint,
+        Security = Settings.CurrentSecurity(),
+        SaveCounter = _saveCounter,
+        Tombstones = Passwords.TombstoneSnapshot().Concat(Dashboard.TombstoneSnapshot())
+            .OrderByDescending(t => t.DeletedUtc).Take(Tombstone.MaxKept).ToList(),
+        Sync = Sync.Settings,
         AttachmentData = Passwords.AttachmentSnapshot(),
     };
 
@@ -959,8 +1042,19 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             var contents = await _vault!.OpenWithKeyAsync(key);
             _sessionKey = key;
+            var needsFirstSave = ApplyVaultSecurity(contents);
+            await CheckSaveCounterAsync(contents);
             CompleteUnlock(contents);
             await RefreshUnlockMethodsAsync();
+            if (needsFirstSave)
+            {
+                await PersistAsync();
+            }
+
+            if (Sync.Settings?.Automatic == true)
+            {
+                _ = RunAutomaticSyncAsync();
+            }
         }
         catch
         {
@@ -971,8 +1065,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     private void CompleteUnlock(VaultContents contents)
     {
-        Dashboard.Load(contents.Accounts);
-        Passwords.Load(contents.Passwords, contents.Folders, contents.AttachmentData, contents.FolderIcons);
+        ReloadEntries(contents);
+        Sync.Settings = contents.Sync;
         Recovery.TrustedKeyFingerprint = contents.RecoveryKeyFingerprint;
         Recovery.Refresh();
         Login.MasterPassword = string.Empty;

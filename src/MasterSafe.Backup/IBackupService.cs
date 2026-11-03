@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using MasterSafe.Core;
+using MasterSafe.Crypto;
 
 namespace MasterSafe.Backup;
 
@@ -34,6 +35,20 @@ public interface IBackupService
     Task<string> ExportAsync(
         IEnumerable<OtpAccount> accounts,
         string masterPassword,
+        IBackupProvider provider,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Exports everything in the vault to an encrypted <c>.sauth</c> file protected by <paramref name="password"/>.</summary>
+    Task<string> ExportContentsAsync(
+        VaultContents contents,
+        string password,
+        IBackupProvider provider,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Reads an encrypted backup, in either format: everything, or accounts only from before 1.6.</summary>
+    Task<VaultContents> ImportContentsAsync(
+        string fileName,
+        string password,
         IBackupProvider provider,
         CancellationToken cancellationToken = default);
 

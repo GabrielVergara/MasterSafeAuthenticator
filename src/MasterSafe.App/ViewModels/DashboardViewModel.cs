@@ -26,7 +26,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string? _statusMessage;
 
-    public ObservableCollection<OtpItemViewModel> Accounts { get; } = [];
+    public BulkObservableCollection<OtpItemViewModel> Accounts { get; } = [];
 
     /// <summary>Raised when the view should copy a code to the clipboard (and clear it later).</summary>
     public event EventHandler<string>? CopyRequested;
@@ -79,14 +79,17 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>Loads accounts into the dashboard and renders an initial code.</summary>
-    public void Load(IEnumerable<OtpAccount> accounts)
+    public void Load(IEnumerable<OtpAccount> accounts, IEnumerable<MasterSafe.Crypto.Tombstone>? tombstones = null)
     {
         ArgumentNullException.ThrowIfNull(accounts);
-        Accounts.Clear();
-        foreach (var account in accounts)
+        _tombstones.Clear();
+        foreach (var tombstone in tombstones ?? [])
         {
-            Accounts.Add(new OtpItemViewModel(account));
+            _tombstones[tombstone.Id] = tombstone.DeletedUtc;
         }
+
+        Accounts.ReplaceAll(accounts.Select(NewItem));
+        RebuildGroups();
 
         Refresh();
     }
@@ -98,7 +101,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     public void Add(OtpAccount account)
     {
         ArgumentNullException.ThrowIfNull(account);
-        Accounts.Add(new OtpItemViewModel(account));
+        Accounts.Add(NewItem(account));
+        RebuildGroups();
         Refresh();
         StatusMessage = $"Added {account.Issuer}.";
         AccountsChanged?.Invoke(this, EventArgs.Empty);
@@ -108,15 +112,11 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
     public void AddRange(IEnumerable<OtpAccount> accounts)
     {
         ArgumentNullException.ThrowIfNull(accounts);
-        var count = 0;
-        foreach (var account in accounts)
+        var added = accounts.Select(NewItem).ToList();
+        Accounts.AddRange(added);
+        if (added.Count > 0)
         {
-            Accounts.Add(new OtpItemViewModel(account));
-            count++;
-        }
-
-        if (count > 0)
-        {
+            RebuildGroups();
             Refresh();
             AccountsChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -130,6 +130,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IDisposable
             return;
         }
 
+        _tombstones[item.Id] = _timeProvider();
+        RebuildGroups();
         StatusMessage = $"Deleted {item.Issuer}.";
         AccountsChanged?.Invoke(this, EventArgs.Empty);
     }

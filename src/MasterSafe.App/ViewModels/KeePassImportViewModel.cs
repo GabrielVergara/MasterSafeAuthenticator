@@ -54,7 +54,7 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
             return;
         }
 
-        var path = await Dialogs.OpenFileAsync("Choose a KeePass export", "KeePass exports", "*.xml", "*.csv", "*.kdbx");
+        var path = await Dialogs.OpenFileAsync("Choose an export file", "Export files", "*.xml", "*.csv", "*.json", "*.1pux", "*.2fas", "*.zip", "*.txt", "*.kdbx");
         if (path is not null)
         {
             Load(path);

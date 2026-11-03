@@ -65,6 +65,41 @@ public sealed partial class HealthViewModel : ViewModelBase
     /// <summary>Passwords found in known breaches.</summary>
     public ObservableCollection<HealthRow> Breached { get; } = [];
 
+    /// <summary>Entries that look like copies of each other.</summary>
+    public ObservableCollection<HealthRow> Duplicates { get; } = [];
+
+    /// <summary>Sign-ins on an address that is not encrypted.</summary>
+    public ObservableCollection<HealthRow> Insecure { get; } = [];
+
+    /// <summary>Entries past their date or close to it.</summary>
+    public ObservableCollection<HealthRow> Expiring { get; } = [];
+
+    /// <summary>Moves an entry to the recycle bin. Set by the shell.</summary>
+    public Action<Guid>? MoveToBin { get; set; }
+
+    /// <summary>Changes an entry's address to https. Set by the shell.</summary>
+    public Action<Guid>? UseHttps { get; set; }
+
+    [RelayCommand]
+    private void BinCopy(HealthRow? row)
+    {
+        if (row is not null)
+        {
+            MoveToBin?.Invoke(row.Entry.Id);
+            Refresh();
+        }
+    }
+
+    [RelayCommand]
+    private void SwitchToHttps(HealthRow? row)
+    {
+        if (row is not null)
+        {
+            UseHttps?.Invoke(row.Entry.Id);
+            Refresh();
+        }
+    }
+
     /// <summary>How the app's own settings fare (lock time, recovery key, backups and so on).</summary>
     public ObservableCollection<CheckupItem> Checkup { get; } = [];
 
@@ -124,6 +159,9 @@ public sealed partial class HealthViewModel : ViewModelBase
         Fill(Reused, report.Reused);
         Fill(Old, report.Old);
         Fill(Breached, report.Breached);
+        Fill(Duplicates, report.Duplicates);
+        Fill(Insecure, report.Insecure);
+        Fill(Expiring, report.Expiring);
 
         Summary = report.Checked == 0
             ? "There are no passwords to check yet."
@@ -215,6 +253,9 @@ public sealed partial class HealthViewModel : ViewModelBase
         Reused.Clear();
         Old.Clear();
         Breached.Clear();
+        Duplicates.Clear();
+        Insecure.Clear();
+        Expiring.Clear();
         Summary = string.Empty;
         Status = null;
         BreachCheckDone = false;

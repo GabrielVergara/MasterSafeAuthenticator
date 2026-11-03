@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.5.1  
+**Version:** 1.6.0  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -113,6 +113,13 @@ when the vault opens) and `History` (up to ten earlier versions, newest first). 
 Older versions of the app ignore these fields, so a vault that was used with 1.4 still opens, but the bin and history
 are not shown there.
 
+### Added in 1.6
+
+`VaultContents` also holds `Security`, `SaveCounter`, `Tombstones` and `Sync`. Entries also hold `Kind`, `Fields`, `ExpiresUtc`,
+`IconPng` and `StateChangedUtc`; accounts hold `Group` and `ModifiedUtc`. All are optional. [BackupFormat.md](BackupFormat.md)
+says what happens when an older version saves the vault. `VaultMerger` joins two copies, and `DataOnly()` gives what may
+leave the vault in a backup or sync file.
+
 ## 6. Start-up and screens
 
 On start a rounded splash window shows the logo, product name, author and version for about two seconds, then the
@@ -213,6 +220,32 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Vaults, Start a new vault, then Open the archived vault | The old vault opens again with its old password |
 | Vaults, Delete on an archived vault | Asks first; the file is gone afterwards and the other vaults are untouched |
 | Close and reopen the app | Theme, tray and auto-lock choices are remembered |
+| Start MasterSafe twice, also with the window hidden in the tray | One copy runs; the window comes to the front; the task manager shows one process |
+| Close it to the tray, end it in the task manager, start it again | It starts normally: no lock is left behind |
+| Set auto-lock to 3 minutes, Exit, edit `AutoLockMinutes` in `settings.json` to 120, start and unlock | Settings shows 3 again |
+| Put `\\\\some-server\\share\\v.sauth` as `ActiveVaultPath` in `settings.json`, start | The sign-in screen explains and asks; Wireshark or the event log shows no connection before you agree |
+| Vaults, Open a vault file on a share | Asks before opening |
+| Copy `vault.sauth` aside, change something, Exit, put the copy back, unlock | It opens, and the codes page warns about an older copy; I understand removes the warning |
+| Settings, Hide authenticator codes; open the codes page | Codes show as dots; Show code reveals one for 20 seconds; Copy code works without showing it |
+| Reveal a password with the eye, then click another program | The password hides |
+| Codes page: Up and Down with My own order; Rename, set a group | The order stays after a restart; a group list appears and filters |
+| Passwords, Type of item, Payment card, fill in, Save, Lock, unlock, Edit | The fields are back; a hidden field shows dots and Copy clears the clipboard later |
+| Set an expiry date 10 days ahead | The codes page shows a reminder and Show them opens the health page |
+| Health page with an `http://` entry and two copies | Use https changes the address and keeps the old one in history; Move to the recycle bin moves one copy |
+| Settings, allow website icons; Passwords, Use the site's icon on a real site | A preview appears; the entry shows it only after Use it and Save |
+| Same, on an address such as `https://192.168.1.1` | Refused with a message; no connection is made |
+| Backup, Export backup, then Import selected | Items you deleted since come back; nothing else changes |
+| Backup, Export to KeePass, open the file in KeePass or KeePassXC | Folders, passwords, fields, files and codes are there |
+| Import a real export from each of Bitwarden, 1Password, Proton Pass, Aegis, 2FAS | The preview counts are right; cards and notes keep their fields |
+| Scan or paste a Google Authenticator export link | All accounts in it are added |
+| Recovery, Create emergency sheet, open it, print | Large print, no secrets, empty boxes; fits the page |
+| Sync on two computers with a folder: start on one, type the code on the other | Items from both end up on both |
+| Change the same entry on both, sync both | The newer value shows; the other is in Earlier versions |
+| Delete an item for good on one, sync both | It is gone from both |
+| Sync through the real WebDAV server | Works; a new file appears only when something changed; nothing is overwritten or deleted there |
+| Fill the server to its limit | The message says it is full; nothing is lost here |
+| Sync by itself, with a screen reader on the Backup page | Controls are named; status is announced |
+| All new screens at 200% text size and in high contrast | Nothing is cut off; icons have a visible border |
 
 Tested on Windows 11 build 26100 (WebAuthn API version 9) with a Thales SafeNet eToken FIDO key.
 A key must support the CTAP2 `hmac-secret` extension and have a PIN (Windows offers to set one).

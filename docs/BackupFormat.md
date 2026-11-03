@@ -1,10 +1,33 @@
 # Backup Formats (`.sauth`)
 
-A `.sauth` backup is an encrypted file. **No plaintext export is produced.** Two kinds exist.
+A `.sauth` file is encrypted. **No plaintext export is produced.** The kinds below exist. A `.kdbx` export is the standard
+KeePass format (KDBX 4.0, Argon2id, AES-256), written by `KdbxWriter`.
 
-## 1. Password backup (version 1)
+## 0. Full backup (version 4, from 1.6)
 
-Encrypted with a key derived from the master password. Created from the Backup screen.
+The Backup page writes this. It has the same envelope as version 1 below with `"Version": 4`, but the ciphertext holds the
+contents described under [Contents](#contents), without settings, and the salt is bound in as associated data. The key comes from a
+password the user chooses for the file.
+
+## Sync file (from 1.6)
+
+Written by sync, named `vault-<date>-<time>.sauth` so it fits a server that accepts only those names. It is binary:
+
+| Bytes | Content |
+| --- | --- |
+| 8 | `MSSYNC1\n` |
+| 12 | AES-GCM nonce |
+| 16 | AES-GCM tag |
+| rest | Ciphertext of the compressed contents |
+
+The key is the 256-bit sync code, which is random and is not derived from a password. The associated data is
+`MasterSafe.Sync|v1|<file name>`, so a file cannot be passed off under another name. Sync files hold data only: never the
+settings, the sync code, the WebDAV password, the save counter or the recovery key fingerprint. A file is never changed once
+written. Each computer reads the files it has not seen, merges them (see `VaultMerger`) and adds a new one when needed.
+
+## 1. Password backup (version 1, before 1.6)
+
+Encrypted with a key derived from the master password. Written by versions before 1.6, and still read. It holds accounts only.
 
 ```mermaid
 flowchart LR
@@ -87,6 +110,12 @@ Before encryption the contents are compressed (GZip). They are one of two layout
 | --- | --- | --- |
 | Plain JSON | The vault has no attachments (always the case before 1.3.0) | `{"Accounts":[...],"Passwords":[...],"Folders":[...],"FolderIcons":{...}}` |
 | Container `MSV4` | At least one entry has an attached file | `"MSV4"`, length of the JSON (int32 little-endian), the same JSON, number of files (int32), then for each file: its 16-byte id, its length (int32) and its raw bytes |
+
+From 1.6 the JSON can also hold `Security`, `SaveCounter`, `Tombstones` and `Sync`, and entries can hold `Kind`, `Fields`,
+`ExpiresUtc`, `IconPng` and `StateChangedUtc`, and accounts `Group` and `ModifiedUtc`. All are optional, and an older version
+drops them when it saves. Because a card number must not be lost that way, an entry with a kind, fields or a date also carries
+them as one line at the end of its notes, after the line `[MasterSafe 1.6: keep this block, ...]`. This version takes the line out
+when it reads the vault, and restores what an older version dropped.
 
 Attached files are not put inside the JSON, because that would make them a third larger. An entry only holds the
 description of its files (id, name, size). The same layout is used inside recovery backups.

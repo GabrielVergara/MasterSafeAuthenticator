@@ -27,6 +27,31 @@ public sealed partial class VaultsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _confirmingNew;
 
+    /// <summary>A vault file on a network share, waiting for the user to agree.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfirmingNetwork), nameof(NetworkQuestion))]
+    private string? _pendingNetworkPath;
+
+    /// <summary>True while a network vault waits for the user to agree.</summary>
+    public bool IsConfirmingNetwork => PendingNetworkPath is not null;
+
+    /// <summary>The question shown before a vault on a network share is opened.</summary>
+    public string NetworkQuestion => $"{PendingNetworkPath} is on a network share. Windows signs in to the share with your account when it opens the file, so only continue if you trust that computer.";
+
+    [RelayCommand]
+    private async Task ConfirmNetworkAsync()
+    {
+        if (PendingNetworkPath is { } path && _services is not null)
+        {
+            PendingNetworkPath = null;
+            _services.Catalog.AllowNetworkPath(path);
+            await SwitchToAsync(path);
+        }
+    }
+
+    [RelayCommand]
+    private void CancelNetwork() => PendingNetworkPath = null;
+
     /// <summary>Creates the page. With no services it shows that it is unavailable.</summary>
     public VaultsViewModel(AppServices? services = null, IEnumerable<ISecretProvider>? providers = null)
     {
@@ -197,6 +222,10 @@ public sealed partial class VaultsViewModel : ViewModelBase
             _services.Catalog.SetActive(path);
             Status = $"Opened {Path.GetFileName(path)}. Unlock it with its master password or security key.";
             await NotifyChangedAsync();
+        }
+        catch (NetworkVaultException ex)
+        {
+            PendingNetworkPath = ex.Path;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

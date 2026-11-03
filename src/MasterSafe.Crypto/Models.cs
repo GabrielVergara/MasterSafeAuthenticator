@@ -141,10 +141,92 @@ public sealed class VaultFile
 }
 
 /// <summary>
-/// Decrypted vault contents (payload format v2): OTP accounts plus KeePass-style password entries.
-/// Format v1 stored only a JSON array of OTP accounts; it is still readable.
+/// The security settings of a vault. They live inside the encrypted vault because the settings file is not protected:
+/// a program that can edit that file must not be able to turn these off. After unlocking, these values win.
 /// </summary>
-public sealed class VaultContents
+public sealed record VaultSecurity
+{
+    /// <summary>Minutes without activity before the vault locks (1 to 120).</summary>
+    public int AutoLockMinutes { get; init; } = 5;
+
+    /// <summary>Lock when the computer locks or goes to sleep.</summary>
+    public bool LockOnSessionLock { get; init; } = true;
+
+    /// <summary>Lock when the window is minimized.</summary>
+    public bool LockOnMinimize { get; init; }
+
+    /// <summary>Seconds a copied secret stays on the clipboard.</summary>
+    public int ClipboardClearSeconds { get; init; } = 120;
+
+    /// <summary>Keep the window out of screenshots and screen sharing.</summary>
+    public bool BlockScreenCapture { get; init; } = true;
+
+    /// <summary>The breach check may be used.</summary>
+    public bool BreachCheckEnabled { get; init; }
+
+    /// <summary>Codes stay hidden until they are clicked.</summary>
+    public bool HideCodes { get; init; }
+
+    /// <summary>Revealed passwords hide again when the window loses focus.</summary>
+    public bool HideRevealedOnFocusLoss { get; init; } = true;
+
+    /// <summary>The "use the site's icon" button may be used.</summary>
+    public bool WebsiteIconsEnabled { get; init; }
+}
+
+/// <summary>An item deleted for good, remembered so that sync does not bring it back from another computer.</summary>
+public sealed record Tombstone
+{
+    /// <summary>How many are kept.</summary>
+    public const int MaxKept = 5000;
+
+    /// <summary>The id of the entry or account.</summary>
+    public Guid Id { get; init; }
+
+    /// <summary>When it was deleted.</summary>
+    public DateTimeOffset DeletedUtc { get; init; }
+}
+
+/// <summary>How this vault syncs with other computers. Kept inside the vault because it holds a key and a server password.</summary>
+public sealed record SyncSettings
+{
+    /// <summary>True for a WebDAV server, false for a folder.</summary>
+    public bool UseWebDav { get; init; }
+
+    /// <summary>The folder sync files go to.</summary>
+    public string Folder { get; init; } = string.Empty;
+
+    /// <summary>The WebDAV folder address.</summary>
+    public string WebDavUrl { get; init; } = string.Empty;
+
+    /// <summary>The WebDAV user name.</summary>
+    public string WebDavUser { get; init; } = string.Empty;
+
+    /// <summary>The WebDAV password.</summary>
+    public string WebDavPassword { get; init; } = string.Empty;
+
+    /// <summary>The random key that encrypts sync files (Base64). It is not derived from any password.</summary>
+    public string Key { get; init; } = string.Empty;
+
+    /// <summary>Sync after unlocking and a short time after a change.</summary>
+    public bool Automatic { get; init; }
+
+    /// <summary>The sync files already merged here.</summary>
+    public IReadOnlyList<string> SeenFiles { get; init; } = [];
+
+    /// <summary>Fingerprint of the state after the last sync, so nothing is written when nothing changed.</summary>
+    public string? LastStateHash { get; init; }
+
+    /// <summary>When the last sync finished.</summary>
+    public DateTimeOffset? LastSyncUtc { get; init; }
+}
+
+/// <summary>
+/// Decrypted vault contents (payload format v2): OTP accounts plus KeePass-style password entries.
+/// Format v1 stored only a JSON array of OTP accounts; it is still readable. Every property added later is optional, and
+/// a version that does not know it simply leaves it out, so it must be safe to lose.
+/// </summary>
+public sealed record VaultContents
 {
     /// <summary>OTP accounts.</summary>
     public IReadOnlyList<MasterSafe.Core.OtpAccount> Accounts { get; init; } = [];
@@ -164,10 +246,28 @@ public sealed class VaultContents
     /// </summary>
     public string? RecoveryKeyFingerprint { get; init; }
 
+    /// <summary>The security settings of this vault. Null until they are first saved, for a vault from before 1.6.</summary>
+    public VaultSecurity? Security { get; init; }
+
+    /// <summary>
+    /// Goes up with every save. A copy of the number is kept outside the vault file, so an older copy of the vault can be
+    /// noticed. 0 means the vault has none yet.
+    /// </summary>
+    public long SaveCounter { get; init; }
+
+    /// <summary>Items deleted for good.</summary>
+    public IReadOnlyList<Tombstone> Tombstones { get; init; } = [];
+
+    /// <summary>How this vault syncs. Null when it does not.</summary>
+    public SyncSettings? Sync { get; init; }
+
     /// <summary>
     /// The bytes of the files attached to password entries, by attachment id. They are not part of the JSON; they are
     /// stored in their own section (see <see cref="VaultContentsCodec"/>).
     /// </summary>
     [System.Text.Json.Serialization.JsonIgnore]
     public IReadOnlyDictionary<Guid, byte[]> AttachmentData { get; init; } = new Dictionary<Guid, byte[]>();
+
+    /// <summary>The entries and accounts alone, without anything that belongs to this computer or this vault file.</summary>
+    public VaultContents DataOnly() => this with { Sync = null, Security = null, SaveCounter = 0, RecoveryKeyFingerprint = null };
 }

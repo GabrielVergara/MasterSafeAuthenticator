@@ -19,8 +19,25 @@ public static class AutoHideReveal
 {
     public static TimeSpan Delay { get; set; } = TimeSpan.FromSeconds(20);
 
+    /// <summary>Hide revealed passwords when the window loses focus.</summary>
+    public static bool HideOnFocusLoss { get; set; } = true;
+
     private static readonly ConditionalWeakTable<TextBox, DispatcherTimer> Timers = [];
     private static bool _installed;
+
+    /// <summary>Hides everything that is revealed. Called when the window loses focus.</summary>
+    public static void HideAll()
+    {
+        if (!HideOnFocusLoss)
+        {
+            return;
+        }
+
+        foreach (var (box, _) in Timers.ToList())
+        {
+            box.RevealPassword = false;
+        }
+    }
 
     public static void Install()
     {

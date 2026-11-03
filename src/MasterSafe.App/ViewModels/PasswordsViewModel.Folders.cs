@@ -350,6 +350,17 @@ public sealed partial class PasswordsViewModel
             var formPath = FormFolder?.Path ?? string.Empty;
             var movePath = MoveTarget?.Path;
 
+            // Counted once here: asking every folder to look through every entry takes seconds with thousands of them.
+            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var folder in Active.GroupBy(e => e.Folder, StringComparer.OrdinalIgnoreCase))
+            {
+                var inFolder = folder.Count();
+                foreach (var level in FolderPath.WithAncestors(folder.Key))
+                {
+                    counts[level] = counts.GetValueOrDefault(level) + inFolder;
+                }
+            }
+
             FolderNodes.Clear();
             var activeCount = Active.Count();
             FolderNodes.Add(new FolderNode(null, "All passwords", 0, activeCount, "key"));
@@ -359,7 +370,7 @@ public sealed partial class PasswordsViewModel
             {
                 var depth = FolderPath.Depth(path) - 1;
                 var icon = IconKeyFor(path);
-                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, Active.Count(e => FolderPath.IsInside(e.Folder, path)), icon));
+                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, counts.GetValueOrDefault(path), icon));
                 FolderChoices.Add(new FolderChoice(path, new string(' ', depth * 2) + FolderPath.Name(path), icon));
             }
 

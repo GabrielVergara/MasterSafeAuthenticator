@@ -156,6 +156,35 @@ public sealed class AccessibilityTests
     }
 
     [Fact]
+    public void ALongList_OnlyGetsControlsForWhatIsOnScreen()
+    {
+        HeadlessUi.Run(() =>
+        {
+            var window = OpenWindow(out var vm);
+            vm.Passwords.Load(Enumerable.Range(0, 2000).Select(i => new PasswordEntry { Title = "Entry " + i, Password = "p" }).ToList());
+            vm.Dashboard.Load(Enumerable.Range(0, 2000).Select(i => new OtpAccount { Issuer = "Account " + i, Secret = "JBSWY3DPEHPK3PXP" }).ToList());
+
+            Show(window, vm, vm.Passwords);
+            window.GetVisualDescendants().OfType<EntryIcon>().Count().Should().BeLessThan(100, "a card for every entry takes minutes to build");
+            vm.Passwords.Rows.Should().HaveCount(2000);
+
+            Show(window, vm, vm.Dashboard);
+            window.GetVisualDescendants().OfType<EntryIcon>().Count().Should().BeLessThan(100);
+            vm.Dashboard.Shown.Should().HaveCount(2000);
+        });
+    }
+
+    [Fact]
+    public void TheSearchBoxes_WaitForAPauseInTyping()
+    {
+        foreach (var view in new[] { "PasswordsView.axaml", "DashboardView.axaml" })
+        {
+            var xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "MasterSafe.App", "Views", view));
+            xaml.Should().Contain("{Binding SearchText, Mode=TwoWay, Delay=150}").And.Contain("<VirtualizingStackPanel />");
+        }
+    }
+
+    [Fact]
     public void TheWindowScalesWithTheTextSizeSetting()
     {
         HeadlessUi.Run(() =>

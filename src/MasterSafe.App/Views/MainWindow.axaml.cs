@@ -40,6 +40,9 @@ public partial class MainWindow : Window
             }
         };
 
+        // Someone else may be looking at the screen while the user works in another window.
+        Deactivated += (_, _) => MasterSafe.App.Services.AutoHideReveal.HideAll();
+
         // QR code images can be dropped anywhere on the window while the vault is unlocked.
         DragDrop.SetAllowDrop(this, true);
         AddHandler(DragDrop.DragOverEvent, OnDragOver);

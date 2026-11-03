@@ -20,6 +20,13 @@ public enum VaultKind
     External,
 }
 
+/// <summary>The path is on a network share and the user has not agreed to that yet.</summary>
+public sealed class NetworkVaultException(string path) : Exception("That vault file is on a network share.")
+{
+    /// <summary>The path that was refused.</summary>
+    public string Path { get; } = path;
+}
+
 /// <summary>A vault file the app knows about.</summary>
 public sealed record VaultEntry(string Path, string Name, VaultKind Kind, DateTimeOffset Modified, long Size, bool IsActive);
 
@@ -41,9 +48,35 @@ public sealed class VaultCatalog
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
+        // The settings file is not protected. The path in it is checked before anything touches it, because on Windows even
+        // asking whether a file exists on a share sends a form of the user's network password there.
         var saved = settings.Load().ActiveVaultPath;
+        if (VaultPathSafety.IsNetworkPath(saved))
+        {
+            RefusedNetworkPath = saved;
+            saved = null;
+        }
+
         _repository.SetPath(!string.IsNullOrWhiteSpace(saved) && File.Exists(saved) ? saved : _paths.DefaultVaultPath);
     }
+
+    private readonly HashSet<string> _allowedNetworkPaths = new(PathComparer);
+
+    /// <summary>A network path from the settings file that was not opened. The user decides on the sign-in screen.</summary>
+    public string? RefusedNetworkPath { get; private set; }
+
+    /// <summary>The user agreed to open this path from a network share, for this run only. A saved "yes" could be forged.</summary>
+    public void AllowNetworkPath(string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        _allowedNetworkPaths.Add(path);
+        RefusedNetworkPath = null;
+    }
+
+    /// <summary>The user chose not to open the network path.</summary>
+    public void DismissNetworkPath() => RefusedNetworkPath = null;
+
+    private bool MayTouch(string path) => !VaultPathSafety.IsNetworkPath(path) || _allowedNetworkPaths.Contains(path);
 
     /// <summary>The vault file in use.</summary>
     public string ActivePath => _repository.Path;
@@ -55,6 +88,11 @@ public sealed class VaultCatalog
 
         void Add(string path, VaultKind kind)
         {
+            if (!MayTouch(path))
+            {
+                return;
+            }
+
             var info = new FileInfo(path);
             if (info.Exists && !entries.ContainsKey(info.FullName))
             {
@@ -144,9 +182,15 @@ public sealed class VaultCatalog
 
     /// <summary>Makes another vault file the active one. The file must exist.</summary>
     /// <exception cref="FileNotFoundException">The file does not exist.</exception>
+    /// <exception cref="NetworkVaultException">The file is on a network share and the user has not agreed to that.</exception>
     public void SetActive(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (!MayTouch(path))
+        {
+            throw new NetworkVaultException(path);
+        }
 
         var full = Path.GetFullPath(path);
         if (!File.Exists(full))

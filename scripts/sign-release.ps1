@@ -10,9 +10,10 @@
     2. checks that GitHub's build attestation says they were built by this repository's release workflow
        (a file that was swapped after the build fails this check),
     3. checks every file against its .sha256,
-    4. signs each installer, package and command-line tool with the offline ML-DSA-65 key,
-    5. verifies all signatures against signing/masterSafe-release.pub,
-    6. uploads the .sig files and, with -Publish, publishes the release.
+    4. signs each installer, package and command-line tool with the offline ML-DSA-65 key, and signs a manifest
+       that lists the version and the name and SHA-256 of each file, so a signature also says which version it belongs to,
+    5. verifies all signatures and the manifest against signing/masterSafe-release.pub,
+    6. uploads the .sig files and the manifest and, with -Publish, publishes the release.
 
   Nothing is signed unless every check passes. See docs/ReleaseProcess.md.
 
@@ -81,17 +82,22 @@ try {
     Write-Host "4. Signing with the offline key ..."
     foreach ($f in $files) { Invoke-Cli sign $f.FullName $Key | Out-Null; Write-Host "   signed $($f.Name)" }
 
+    Write-Host "   signing the release manifest (version and file list) ..."
+    $version = $Tag.TrimStart('v')
+    Invoke-Cli manifest $work $version
+    $manifest = Join-Path $work "MasterSafe-release-manifest.json"
+    Invoke-Cli sign $manifest $Key | Out-Null
+
     Write-Host "5. Verifying every signature against signing\masterSafe-release.pub ..."
     Copy-Item $pub $work -Force
     Invoke-Cli verify-release $work $pub
 
-    Write-Host "6. Uploading the signatures ..."
-    $sigs = Get-ChildItem $work -File -Filter *.sig | ForEach-Object { $_.FullName }
+    Write-Host "6. Uploading the signatures and the manifest ..."
+    $sigs = @(Get-ChildItem $work -File -Filter *.sig | ForEach-Object { $_.FullName }) + $manifest
     & $gh release upload $Tag @sigs -R $repo --clobber
     if ($LASTEXITCODE -ne 0) { throw "Uploading the signatures failed." }
 
     if ($Publish) {
-        $version = $Tag.TrimStart('v')
         if (-not $NotesFile) {
             $changelog = Get-Content (Join-Path $root "CHANGELOG.md") -Raw
             $match = [regex]::Match($changelog, "(?ms)^## $([regex]::Escape($version)) .*?\r?\n(.*?)(?=^## |\z)")

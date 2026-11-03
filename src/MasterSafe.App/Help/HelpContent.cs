@@ -64,6 +64,15 @@ public static class HelpContent
             - Delete removes an account at once after a confirmation. Make sure you can still sign in to that
               service another way first: without the secret there is no way to get the codes back, except
               from a backup.
+
+            Each account shows a coloured tile with its first letter, so it is easy to find. Nothing is
+            downloaded for this.
+
+            With "My own order" chosen, Up and Down move an account. Rename also sets a group, such as Work;
+            once groups exist, a list above the codes shows one group at a time.
+
+            In Settings you can hide codes until you click them, so nobody can read them over your shoulder.
+            A shown code hides again after 20 seconds, and Copy code works without showing it.
             """),
         new(
             "Adding and importing",
@@ -89,6 +98,11 @@ public static class HelpContent
 
             MasterSafe checks every account and file it reads. Broken or unexpected files are refused with a
             message instead of being half imported.
+
+            Other apps: export from Bitwarden, 1Password, Proton Pass, Aegis or 2FAS without a password on the
+            export, then choose the file under From another app. Cards, notes and identities keep their fields.
+            A Google Authenticator export QR code works in the link box or as an image. An export is not
+            encrypted, so delete it after importing.
             """),
         new(
             "Passwords",
@@ -109,6 +123,16 @@ public static class HelpContent
               by recently changed, or by folder.
             - Tick several entries to delete or move them together. Changing the search or the folder
               clears the ticks, so something you cannot see is never deleted by accident.
+
+            Type of item: besides logins you can keep secure notes, payment cards and identities. Any item can
+            have extra fields; a hidden one is covered on screen and copied like a password. Tags, separated by
+            commas, can be used to filter the list.
+
+            An expiry date gives you a reminder on the codes page and the health page, 30 days before.
+
+            A letter icon is shown for each entry. If you allow it in Settings, the button Use the site's icon
+            asks that one site for its icon, shows it, and keeps it only if you accept. The site, and anyone
+            watching the network, can see the request. An icon does not prove that a site is genuine.
             """),
         new(
             "Folders and icons",
@@ -188,6 +212,10 @@ public static class HelpContent
             and sends only the first 5 characters to api.pwnedpasswords.com. The service answers with all
             hashes that start the same way, and the comparison happens here. A password found in a breach
             should be changed whatever its strength.
+
+            It also lists entries that look like copies of each other (with a button to move one to the
+            recycle bin), addresses that start with http:// (with a button to change them to https), and
+            items that have reached their expiry date.
             """),
         new(
             "Keyboard and mouse",
@@ -233,10 +261,11 @@ public static class HelpContent
             """),
         new(
             "Backups",
-            "Encrypted copies of your accounts.",
+            "Encrypted copies of everything in your vault.",
             """
-            The Backup screen writes an encrypted .sauth file with your authenticator accounts. Only your
-            master password can open it. No plaintext export is ever produced.
+            The Backup page writes an encrypted .sauth file with your authenticator accounts, passwords and
+            attached files. You choose the password for each file, at least 12 characters. It does not have
+            to be your master password. No plaintext export is ever produced.
 
             Destinations:
             - Local Folder: choose a folder on this device.
@@ -244,11 +273,51 @@ public static class HelpContent
               password for a WebDAV server such as Nextcloud or ownCloud. Use an app password if your server
               offers one.
 
-            Use Export to create a backup, Refresh to list existing backups, and Import selected to restore
-            one. Backups are encrypted with Argon2id and AES-256-GCM.
+            Use Export to create a backup and Refresh to list existing backups. Import selected adds what
+            is in a backup to this vault: nothing is replaced, and when an item changed, its older values
+            stay in its history. Backups from before version 1.6 hold accounts only, and still open. Backups
+            are encrypted with Argon2id and AES-256-GCM.
 
-            This backup holds accounts only. To protect your passwords and attached files as well, use
-            recovery backups, described in the next topic.
+            Export to KeePass writes a .kdbx file that opens in KeePass and KeePassXC, so you can always move
+            to another app. It uses the password you typed. Items in the recycle bin and earlier versions are
+            left out.
+
+            A backup does not replace a recovery key: if you forget your master password, only a recovery
+            backup brings the vault back. See the next topic.
+            """),
+        new(
+            "Sync between computers",
+            "Keep the same vault on your computers, with no account.",
+            """
+            Sync is off until you set it up. It works through a folder or a WebDAV server of your own, for
+            example a folder that a cloud drive copies between your computers.
+
+            On the first computer, open Backup, choose the folder or server under Sync between computers,
+            and choose Start syncing from this computer. MasterSafe makes a random sync code. On the second
+            computer, unlock a vault, enter the same place, type the sync code, and choose Join with this code.
+            Each computer keeps its own master password and its own way of unlocking.
+
+            Only encrypted files go to that place. They are locked with the sync code, not with your master
+            password, so someone who steals them has nothing to guess at. Your settings, the sync code and the
+            server password are never in them. Keep the sync code like a password: anyone who has it and can
+            reach the files can read your vault, and can add items to it.
+
+            Sync now reads what the other computers wrote and joins it into this vault:
+            - An item that exists on only one computer is kept.
+            - When an item changed on two computers, the newer one is used and the older one stays in its
+              history.
+            - An item is only removed if it was deleted for good on another computer and not changed after
+              that. Then it is removed everywhere.
+
+            Sync only adds files. It never overwrites or deletes anything on a server, so a stolen server
+            password cannot destroy what is there. That also means old files stay until you remove them
+            with the server's own tools, and they can still be read with the sync code. To change the code,
+            stop syncing on every computer and start again; then remove the old files. In a folder, MasterSafe
+            keeps the newest 20 sync files by itself.
+
+            Sync by itself is optional: it syncs after you unlock and a little after each change, at most
+            every 15 minutes. Sync is not a backup. A mistake made on one computer reaches the others, so
+            keep a recovery backup too.
             """),
         new(
             "Recovery and the forgotten master password",
@@ -279,6 +348,10 @@ public static class HelpContent
               password later, open the old vault from the Vaults page.
             - Windows Hello or a security key may still open your vault. If so, change the master password in
               Settings.
+
+            The emergency sheet is a large-print page to keep on paper. It says where your files are and
+            what to do, with empty boxes for what you write by hand. The file holds no secrets. Open it in a
+            browser, print it, and delete the file.
             """),
         new(
             "Unlock methods",
@@ -317,6 +390,13 @@ public static class HelpContent
             - Clipboard: choose 30 seconds, 1 minute or 2 minutes. Copies are kept out of the Windows
               clipboard history and the cloud clipboard.
             - Locking removes the decrypted data from memory-backed screens and wipes the session key.
+
+            Revealed passwords hide when the window loses focus, unless you turn that off. These settings are
+            kept inside your encrypted vault, so a program that edits the settings file cannot turn them off
+            once the vault is open.
+
+            If a vault looks older than the copy last used on this computer, the codes page says so. That is
+            normal after restoring a backup. It never stops you from opening the vault.
             """),
         new(
             "Settings and the tray",
@@ -356,6 +436,9 @@ public static class HelpContent
 
             You can also verify any download by hand with the MasterSafe command-line tool. The key's
             fingerprint is published in the README and in SECURITY.md of the project.
+
+            A release also has a signed list of its files and its version. MasterSafe refuses an update
+            whose signed version differs from the one offered, or is not newer than yours.
             """),
         new(
             "Vaults and files",
@@ -375,6 +458,10 @@ public static class HelpContent
             a vault file". Uninstalling never removes your vault. Saving is crash-safe, and the previous
             version of the vault is kept as vault.sauth.bak, with daily copies in the snapshots folder. Changing the
             master password or removing an unlock method deletes those copies, because the old way in still opens them.
+
+            A vault on a network share is not opened until you agree, because Windows signs in to the share
+            with your account as soon as it touches the file. If the settings file points to a share, the
+            sign-in screen asks you first.
             """),
         new(
             "Security model",
@@ -431,6 +518,10 @@ public static class HelpContent
             The installer is not signed with a paid Authenticode certificate yet. Check the download with
             "Download and verify" in a later update, or with the command-line tool, and compare the key
             fingerprint with the one in the project's README.
+
+            Nothing happens when I start MasterSafe: it is already running, and the window comes forward.
+            If it is hidden in the system tray, look there. Only one copy can run at a time, because two copies
+            could overwrite each other's changes.
             """),
         new(
             "About, licence and support",

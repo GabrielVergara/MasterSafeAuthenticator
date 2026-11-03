@@ -13,7 +13,8 @@ using MasterSafe.PostQuantum;
 //   MasterSafe.Cli fingerprint <name>.pub               prints the SHA-256 fingerprint of a public key
 //   MasterSafe.Cli keygen <name>                        writes <name>.pub and <name>.key (keep the .key file secret)
 //   MasterSafe.Cli sign <file> <name>.key               writes <file>.sig
-if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "help" or "--help" or "-h")
+//   MasterSafe.Cli manifest <folder> <version>          writes the release manifest listing the installers and packages in a folder
+if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "manifest" or "help" or "--help" or "-h")
 {
     return RunSigningCommand(args);
 }
@@ -35,6 +36,7 @@ static int RunSigningCommand(string[] args)
             "verify" when args.Length == 3 => Verify(args[1], args[2]),
             "verify-release" when args.Length == 3 => VerifyRelease(args[1], args[2]),
             "fingerprint" when args.Length == 2 => Fingerprint(args[1]),
+            "manifest" when args.Length == 3 => Manifest(args[1], args[2]),
             "help" or "--help" or "-h" => Usage(0),
             _ => Usage(64),
         };
@@ -67,6 +69,7 @@ static int Usage(int exitCode)
     output.WriteLine("  fingerprint <pubkey>               print the public key fingerprint");
     output.WriteLine("  keygen <name>                      create a signing key pair (maintainers)");
     output.WriteLine("  sign <file> <key>                  sign a file (maintainers)");
+    output.WriteLine("  manifest <folder> <version>        write the release manifest for the files in a folder (maintainers)");
     return exitCode;
 }
 
@@ -105,6 +108,25 @@ static int Fingerprint(string pubFile)
     return 0;
 }
 
+// The files a release ships: everything except signatures, checksums, keys, the SBOM and the manifest itself.
+static int Manifest(string folder, string version)
+{
+    var names = Directory.EnumerateFiles(folder)
+        .Select(f => Path.GetFileName(f))
+        .Where(n => !n.EndsWith(".sig", StringComparison.OrdinalIgnoreCase) && !n.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase)
+                    && !n.EndsWith(".pub", StringComparison.OrdinalIgnoreCase) && !n.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        .ToList();
+    if (names.Count == 0)
+    {
+        Console.Error.WriteLine("No release files were found in that folder.");
+        return 1;
+    }
+
+    File.WriteAllBytes(Path.Combine(folder, ReleaseManifest.FileName), ReleaseManifest.Build(folder, version, names));
+    Console.WriteLine($"Wrote {ReleaseManifest.FileName} for version {version} with {names.Count} files.");
+    return 0;
+}
+
 static int VerifyRelease(string folder, string pubFile)
 {
     var publicKey = ReadKey(pubFile);
@@ -131,6 +153,13 @@ static int VerifyRelease(string folder, string pubFile)
     }
 
     var failed = results.Count(r => !r.Passed);
+    if (File.Exists(Path.Combine(folder, ReleaseManifest.FileName)))
+    {
+        var problem = ReleaseVerifier.VerifyManifest(folder, publicKey, out var version);
+        Console.WriteLine(problem is null ? $"OK    manifest: signed, version {version}, all listed files match" : $"FAIL  manifest: {problem}");
+        failed += problem is null ? 0 : 1;
+    }
+
     Console.WriteLine();
     Console.WriteLine(failed == 0
         ? $"All {results.Count} files are genuine."

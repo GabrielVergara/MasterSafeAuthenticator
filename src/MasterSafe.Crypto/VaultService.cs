@@ -227,6 +227,13 @@ public sealed class VaultService : IVaultService
     }
 
     /// <inheritdoc />
+    public async Task<string?> GetVaultIdAsync(CancellationToken cancellationToken = default)
+    {
+        var vault = await _repository.LoadAsync(cancellationToken).ConfigureAwait(false);
+        return vault is { Version: >= CurrentVersion } ? vault.VaultId : null;
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<KeySlotInfo>> ListSlotsAsync(CancellationToken cancellationToken = default)
     {
         var vault = await _repository.LoadAsync(cancellationToken).ConfigureAwait(false);
@@ -531,7 +538,7 @@ public sealed class VaultService : IVaultService
 
         if (vault.Version >= 2)
         {
-            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+            return VaultContentsCodec.Decode(json);
         }
 
         // Format v1: a bare JSON array of OTP accounts.

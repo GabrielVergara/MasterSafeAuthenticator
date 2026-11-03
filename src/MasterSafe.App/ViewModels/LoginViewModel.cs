@@ -49,6 +49,35 @@ public sealed partial class LoginViewModel : ViewModelBase
     [RelayCommand]
     private void ShowForgot() => Forgot.IsOpen = true;
 
+    /// <summary>A vault path from the settings file that is on a network share and was not opened.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRefusedPath), nameof(RefusedPathText))]
+    private string? _refusedPath;
+
+    /// <summary>True while the sign-in screen asks about a network path.</summary>
+    public bool HasRefusedPath => RefusedPath is not null;
+
+    /// <summary>Explains the refused path.</summary>
+    public string RefusedPathText => $"The settings point to a vault on a network share: {RefusedPath}. It was not opened, because Windows signs in to the share with your account as soon as it touches the file. If you did not set this up, the settings file may have been changed.";
+
+    /// <summary>Opens the refused path after all. Set by the shell.</summary>
+    public Func<Task>? OpenRefusedPath { get; set; }
+
+    /// <summary>Stays with the vault in the app's own folder. Set by the shell.</summary>
+    public Action? DismissRefusedPath { get; set; }
+
+    [RelayCommand]
+    private async Task OpenNetworkVaultAsync()
+    {
+        if (OpenRefusedPath is not null)
+        {
+            await OpenRefusedPath();
+        }
+    }
+
+    [RelayCommand]
+    private void IgnoreNetworkVault() => DismissRefusedPath?.Invoke();
+
     /// <summary>Closes the program. Set by the application.</summary>
     public Action? ExitRequested { get; set; }
 

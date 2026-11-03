@@ -90,6 +90,9 @@ public interface IVaultService
     /// </summary>
     Task RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, CancellationToken cancellationToken = default);
 
+    /// <summary>The random identifier of the vault, or null for a legacy vault or when there is none.</summary>
+    Task<string?> GetVaultIdAsync(CancellationToken cancellationToken = default);
+
     /// <summary>Lists the unlock methods of the vault (empty for legacy vaults).</summary>
     Task<IReadOnlyList<KeySlotInfo>> ListSlotsAsync(CancellationToken cancellationToken = default);
 

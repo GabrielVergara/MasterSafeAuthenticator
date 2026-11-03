@@ -6,7 +6,7 @@
   <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
     <StackPanel Spacing="2">
       <TextBlock Text="Import" Classes="h1" />
-      <TextBlock Classes="hint" Text="Add authenticator accounts from a link or a QR code image, or move your passwords over from KeePass." />
+      <TextBlock Classes="hint" Text="Add authenticator accounts from a link or a QR code image, or move your passwords over from another app." />
     </StackPanel>
     <StackPanel>
       <TextBlock Text="Setup link (otpauth://)" Classes="label" />
@@ -24,9 +24,9 @@
     <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" />
     <Border Classes="card" Padding="20" DataContext="{Binding KeePass}" x:DataType="vm:KeePassImportViewModel">
       <StackPanel Spacing="10">
-        <TextBlock Text="From KeePass or KeePassXC" Classes="h2" />
+        <TextBlock Text="From another app" Classes="h2" />
         <TextBlock TextWrapping="Wrap" Classes="hint"
-                   Text="Export your database from KeePass (File, Export, KeePass XML) or KeePassXC (Database, Export to CSV or XML), then choose the file here. You see a summary first and nothing is added until you confirm." />
+                   Text="Export from KeePass, KeePassXC, Bitwarden, 1Password, Proton Pass, Aegis or 2FAS without a password on the export, then choose the file here. A Google Authenticator export QR code goes in the link box or the image box above. You see a summary first and nothing is added until you confirm." />
         <TextBlock TextWrapping="Wrap" Classes="hint"
                    Text="The export file is not encrypted. Delete it as soon as you have imported it." />
         <Button Content="Choose an export file..." HorizontalAlignment="Left" Command="{Binding ChooseFileCommand}" />

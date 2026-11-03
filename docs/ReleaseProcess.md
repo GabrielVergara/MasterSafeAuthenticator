@@ -20,11 +20,19 @@ verification.
 
    The script downloads the draft's files, then refuses to continue unless **every file has a valid attestation from this
    repository's release workflow** (a file replaced after the build fails), **and every checksum matches**. Only then does
-   it sign each installer, package and command-line tool with the offline ML-DSA-65 key, verifies all signatures against
-   `signing/masterSafe-release.pub`, uploads the `.sig` files and publishes the release with the changelog as notes.
+   it sign each installer, package and command-line tool with the offline ML-DSA-65 key, writes and signs
+   `MasterSafe-release-manifest.json` (the version, and the name and SHA-256 of each file), verifies everything against
+   `signing/masterSafe-release.pub`, uploads the `.sig` files and the manifest, and publishes the release with the changelog as notes.
    Without `-Publish` it signs and leaves the draft for review.
 5. **Check.** Download the published files into a new folder and run `MasterSafe.Cli verify-release <folder> signing/masterSafe-release.pub`.
    Install the installer on a test computer.
+
+## Why there is a signed manifest
+
+A signature on an installer proves the file is genuine, but not which version it is. Someone who took over the GitHub release
+could offer an old, signed installer as "the new version". From 1.6 the app downloads the manifest too and refuses an update
+unless the signed version equals the version offered, is newer than the running version, and lists this installer with the same
+SHA-256. The `.sig` file of each installer is still produced, so versions before 1.6 keep verifying updates as they did.
 
 ## The signing key
 

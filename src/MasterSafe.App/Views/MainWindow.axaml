@@ -44,6 +44,7 @@
                   ToolTip.Tip="Lock the vault and close MasterSafe completely" />
         </StackPanel>
 
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="2">
           <Button Classes="nav" Content="Authenticator c_odes" Command="{Binding ShowDashboardCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Dashboard}" />
@@ -66,6 +67,7 @@
           <Button Classes="nav" Content="Help (F1)" Command="{Binding ShowHelpCommand}"
                   Classes.active="{Binding ActiveSection, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Help}" />
         </StackPanel>
+        </ScrollViewer>
       </DockPanel>
     </Border>
 

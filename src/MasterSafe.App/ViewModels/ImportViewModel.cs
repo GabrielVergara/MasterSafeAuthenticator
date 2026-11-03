@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Services;
 using MasterSafe.Core;
+using MasterSafe.Core.Import;
 using MasterSafe.QR;
 
 namespace MasterSafe.App.ViewModels;
@@ -75,6 +76,11 @@ public sealed partial class ImportViewModel : ViewModelBase
             return Accept(account, "from the link");
         }
 
+        if (AcceptMigration(ManualUri.Trim()))
+        {
+            return true;
+        }
+
         Status = "Not a valid otpauth:// link.";
         return false;
     }
@@ -93,6 +99,11 @@ public sealed partial class ImportViewModel : ViewModelBase
             if (_importer.TryImportFromFile(path, out var account) && account is not null)
             {
                 return Accept(account, "from the image");
+            }
+
+            if (_importer.DecodeText(path) is { } text && AcceptMigration(text))
+            {
+                return true;
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or QrImportException or NotSupportedException)
@@ -154,6 +165,19 @@ public sealed partial class ImportViewModel : ViewModelBase
             Status = ex.Message;
             return false;
         }
+    }
+
+    // A Google Authenticator export holds several accounts in one link.
+    private bool AcceptMigration(string text)
+    {
+        if (!GoogleMigration.TryParse(text, out var accounts))
+        {
+            return false;
+        }
+
+        var added = accounts.Count(a => Accept(a, "from the export"));
+        Status = $"Imported {added} of {accounts.Count} accounts from the Google Authenticator export.";
+        return added > 0;
     }
 
     private bool Accept(OtpAccount account, string source)

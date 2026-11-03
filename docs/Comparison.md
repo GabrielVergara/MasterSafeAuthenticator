@@ -1,12 +1,12 @@
 # How MasterSafe compares
 
 This page helps you decide whether MasterSafe Authenticator suits you. It shows where other apps are ahead as well as where
-MasterSafe is. Checked on 2026-11-01 from each project's own pages where possible. Products change, so check the sources
+MasterSafe is. Checked on 2026-11-02 from each project's own pages where possible. Products change, so check the sources
 below before you rely on a detail. If something here is wrong, please [open an issue](https://github.com/GabrielVergara/MasterSafeAuthenticator/issues).
 
 **In short:** MasterSafe keeps passwords and authenticator codes together in one encrypted file on your own computer, with
-no account and no cloud. If you need autofill in the browser, a phone app or automatic sync, or you want software that has
-had an independent security audit, one of the other apps suits you better today.
+no account and no cloud, and can sync through a folder or server of your own. If you need autofill in the browser, a phone
+app, or software that has had an independent security audit, one of the other apps suits you better today.
 
 In the tables, **?** means we could not confirm it from the sources we used. It does not mean the app lacks the feature.
 
@@ -28,8 +28,8 @@ In the tables, **?** means we could not confirm it from the sources we used. It 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Independent security audit | **None yet** | Yes: 2023 audit, French ANSSI security visa in 2025 | Yes: several every year | Yes: lists a 2020 review, and ongoing penetration tests | Yes: Cure53, 2023 | Yes: Cure53, sponsored by CERN | None found |
 | Post-quantum protection | Recovery backups (ECDH-P384 with ML-KEM-768) and release signatures (ML-DSA-65). The vault itself uses AES-256 | ? | Was still evaluating, on an older page | Web app connections (2026), passkeys being added | None found for Pass | ? | ? |
-| Hardware key | Unlocks the vault with a FIDO2 key (Windows only) | YubiKey or OnlyKey strengthens the database key | Protects the account login | ? | ? | ? | ? |
-| Fingerprint or face | Windows Hello | ? | ? | ? | ? | ? | Yes |
+| Hardware key | Unlocks the vault with a FIDO2 key (Windows only) | YubiKey or OnlyKey strengthens the database key | Protects the account login | Protects the account login | Protects the account login | ? | None found |
+| Fingerprint or face | Windows Hello | Yes, Windows and macOS | Yes | Yes | Yes, Windows on paid plans | Yes, phone lock screen | Yes |
 | Emergency access for someone you trust | No, recovery key instead | ? | Yes, on Premium | ? | Yes, on Plus | Not applicable | Not applicable |
 
 ## Everyday features
@@ -38,18 +38,20 @@ In the tables, **?** means we could not confirm it from the sources we used. It 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Browser autofill | No | Yes, by extension | Yes | Yes | Yes | Not applicable | Not applicable |
 | Passkeys | No | Yes | Yes | Yes | Yes | Not applicable | Not applicable |
-| Sync between devices | No, backups to a folder or WebDAV | Through a cloud folder of your choice | Built in | Built in | Built in | Built in, optional | No, backups to a place you choose |
+| Sync between devices | Through a folder or WebDAV server of your choice | Through a cloud folder of your choice | Built in | Built in | Built in | Built in, optional | No, backups to a place you choose |
 | Weak and reused password checks | Yes | ? | Yes, on Premium | Yes (Watchtower) | Yes | Not applicable | Not applicable |
 | Breach check | Yes, off until you turn it on | ? | Yes, on Premium | Yes (Watchtower) | Yes, on Plus | Not applicable | Not applicable |
-| File attachments | Yes, up to 5 MiB each | ? | Yes, on Premium | ? | Yes, on Plus | Not applicable | Not applicable |
+| File attachments | Yes, up to 5 MiB each | Yes | Yes, on Premium | Yes | Yes, on Plus | Not applicable | Not applicable |
 | Auto-type | No | Yes | ? | ? | ? | Not applicable | Not applicable |
-| SSH agent | No | Yes | ? | Yes | ? | Not applicable | Not applicable |
-| Tap to reveal codes | Planned for 1.6 | ? | ? | ? | ? | ? | Yes |
+| SSH agent | No | Yes | Yes | Yes | Yes, on paid plans except Essentials | Not applicable | Not applicable |
+| Hide codes until clicked | Yes, off until you turn it on | ? | ? | ? | ? | Yes | Yes |
+| Your own order and groups for codes | Yes | ? | ? | ? | ? | ? | Yes |
+| Moves to KeePass format | Yes, `.kdbx` | Yes, it is the native format | ? | ? | ? | Not applicable | Not applicable |
 
 ## Where each kind of app fits
 
-- **MasterSafe:** you want passwords and codes in one place, offline, on Windows or Linux, with no account, and with hardware
-  or Windows Hello unlock.
+- **MasterSafe:** you want passwords and codes in one place, offline, on Windows or Linux, with no account, with hardware
+  or Windows Hello unlock, and sync only through a place you own.
 - **KeePassXC:** you want a mature offline password manager that has been audited, with browser support and an SSH agent.
 - **Bitwarden, 1Password, Proton Pass:** you want everything on every device, and are happy to have an account.
 - **Ente Auth, Aegis:** you only need authenticator codes, above all on a phone.
@@ -63,10 +65,10 @@ password manager can fully protect you from malware running on your computer whi
 
 ## Sources
 
-- KeePassXC: [documentation](https://keepassxc.org/docs/), [ANSSI visa](https://www.privacyguides.org/news/2025/11/25/keepassxc-awarded-anssi-security-visa/), [2023 audit](https://keepassxc.org/blog/2023-04-15-audit-report/), [passkeys](https://www.ghacks.net/?p=205232)
-- Bitwarden: [audits](https://bitwarden.com/help/is-bitwarden-audited/), [plans](https://bitwarden.com/pricing/), [encryption](https://bitwarden.com/help/what-encryption-is-used/), [emergency access](https://bitwarden.com/help/emergency-access/)
-- 1Password: [assessments](https://support.1password.com/security-assessments/), [post-quantum web app](https://1password.com/blog/post-quantum-cryptography), [post-quantum passkeys](https://1password.com/blog/post-quantum-passkeys), [Watchtower](https://support.1password.com/watchtower/)
-- Proton Pass: [plans](https://proton.me/pass/pricing), [audit](https://proton.me/blog/pass-open-source-security-audit)
+- KeePassXC: [documentation](https://keepassxc.org/docs/), [user guide](https://keepassxc.org/docs/KeePassXC_UserGuide), [ANSSI visa](https://www.privacyguides.org/news/2025/11/25/keepassxc-awarded-anssi-security-visa/), [2023 audit](https://keepassxc.org/blog/2023-04-15-audit-report/), [passkeys](https://www.ghacks.net/?p=205232)
+- Bitwarden: [audits](https://bitwarden.com/help/is-bitwarden-audited/), [plans](https://bitwarden.com/pricing/), [encryption](https://bitwarden.com/help/what-encryption-is-used/), [emergency access](https://bitwarden.com/help/emergency-access/), [biometrics](https://bitwarden.com/help/biometrics/), [app settings and SSH agent](https://bitwarden.com/help/app-settings/), [security keys](https://bitwarden.com/help/setup-two-step-login-fido/)
+- 1Password: [assessments](https://support.1password.com/security-assessments/), [post-quantum web app](https://1password.com/blog/post-quantum-cryptography), [post-quantum passkeys](https://1password.com/blog/post-quantum-passkeys), [Watchtower](https://support.1password.com/watchtower/), [security keys](https://support.1password.com/security-key/), [files](https://support.1password.com/files/), [SSH agent](https://1password.com/developers/ssh)
+- Proton Pass: [plans](https://proton.me/pass/pricing), [audit](https://proton.me/blog/pass-open-source-security-audit), [Windows setup and biometrics](https://proton.me/support/how-to-set-up-proton-pass-for-windows), [SSH agent](https://proton.me/support/ssh-agent), [account security](https://proton.me/business/pass/security)
 - Ente Auth: [FAQ](https://ente.com/help/auth/faq/), [audit](https://ente.com/blog/cern-audit)
 - Aegis: [README](https://github.com/beemdevelopment/Aegis)
 

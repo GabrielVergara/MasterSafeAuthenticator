@@ -33,7 +33,7 @@ public static class VaultContentsCodec
         ArgumentNullException.ThrowIfNull(contents);
 
         var files = ReferencedFiles(contents);
-        var json = JsonSerializer.SerializeToUtf8Bytes(contents);
+        var json = JsonSerializer.SerializeToUtf8Bytes(contents with { Passwords = contents.Passwords.Select(EntryExtras.Attach).ToList() });
         if (files.Count == 0)
         {
             return json;
@@ -117,7 +117,8 @@ public static class VaultContentsCodec
     {
         try
         {
-            return JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+            var contents = JsonSerializer.Deserialize<VaultContents>(json) ?? new VaultContents();
+            return contents with { Passwords = contents.Passwords.Select(EntryExtras.Detach).ToList() };
         }
         catch (JsonException ex)
         {
@@ -151,15 +152,7 @@ public static class VaultContentsCodec
             return entry.WithAttachments(good);
         }).ToList();
 
-        return new VaultContents
-        {
-            Accounts = contents.Accounts,
-            Passwords = passwords,
-            Folders = contents.Folders,
-            FolderIcons = contents.FolderIcons,
-            RecoveryKeyFingerprint = contents.RecoveryKeyFingerprint,
-            AttachmentData = kept,
-        };
+        return contents with { Passwords = passwords, AttachmentData = kept };
     }
 
     private static List<KeyValuePair<Guid, byte[]>> ReferencedFiles(VaultContents contents)

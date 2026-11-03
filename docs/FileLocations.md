@@ -18,6 +18,15 @@ files. The Vaults page in the app shows these locations too.
 | `settings.json` | Theme, tray, locking, clipboard and privacy choices, the sign-in pause counter, the list of other vault files you opened, the folder for automatic recovery backups, and the recovery **public** key | No secrets |
 | `archive\vault-<date>-<time>.sauth` | Old vaults moved aside, for example after a forgotten master password (plus their `.bak` files) | Encrypted |
 
+| `instance.lock` | Held open while the program runs, so only one copy can run. It is empty | No |
+
+A second folder holds one file, kept apart from the vault on purpose: `%AppData%\MasterSafe` on Windows and
+`~/.config/MasterSafe` on Linux.
+
+| File | What it is | Secret? |
+| --- | --- | --- |
+| `save-counters.json` | How many times each vault was saved, so an older copy of a vault can be noticed. Vault ids are hashed | No |
+
 Never stored on disk: your master password, the vault's encryption key, the codes shown on screen, or the
 passphrase of your recovery key.
 
@@ -27,7 +36,10 @@ passphrase of your recovery key.
 | --- | --- | --- |
 | Recovery key file `*.msrk` | Recovery page, Create recovery key | Holds the recovery public key and the private key encrypted with your passphrase. Keep it, and its passphrase, away from this computer |
 | Recovery backup `recovery-<date>-<time>.sauth` | Recovery page, Create recovery backup | Your accounts and passwords, encrypted so only the recovery key can open them. Safe to keep in the cloud |
-| Password backup `vault-<date>-<time>.sauth` | Backup page | Encrypted with your master password. Saved to a folder you pick, or uploaded over https to a WebDAV server |
+| Sync file `vault-<date>-<time>.sauth` | Backup page, Sync | Encrypted with the sync code. Goes to the folder or WebDAV server you chose. In a folder the newest 20 are kept; on a server nothing is ever deleted by the app |
+| KeePass export `*.kdbx` | Backup page | Protected by the password you typed. Opens in KeePass and KeePassXC |
+| Emergency sheet `*.html` | Recovery page | Holds no secrets. Delete it after printing |
+| Password backup `vault-<date>-<time>.sauth` | Backup page | Encrypted with the password you chose. Saved to a folder you pick, or uploaded over https to a WebDAV server |
 | Other vault files | You | Use **Open a vault file** to use a vault from a USB stick or another folder. MasterSafe keeps it where it is and never moves or deletes it |
 
 ## Where the program is installed

@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
+             xmlns:v="clr-namespace:MasterSafe.App.Views"
              x:Class="MasterSafe.App.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
   <DockPanel>
@@ -29,10 +30,14 @@
 
     <!-- Search and order (only when there are enough accounts to need it) -->
     <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10" IsVisible="{Binding ShowSearch}">
-      <TextBox PlaceholderText="Search by issuer or name" Text="{Binding SearchText, Mode=TwoWay}" />
+      <TextBox PlaceholderText="Search by issuer or name" Text="{Binding SearchText, Mode=TwoWay, Delay=150}" />
       <ComboBox Grid.Column="1" Margin="8,0,0,0" MinWidth="170" ItemsSource="{Binding SortOptions}"
                 SelectedItem="{Binding SelectedSort, Mode=TwoWay}" ToolTip.Tip="Order of the list" />
     </Grid>
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10" IsVisible="{Binding HasGroups}">
+      <TextBlock Text="Group" Classes="label" />
+      <ComboBox MinWidth="170" ItemsSource="{Binding GroupChoices}" SelectedItem="{Binding SelectedGroup, Mode=TwoWay}" />
+    </StackPanel>
 
     <!-- Rename an account -->
     <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,10" IsVisible="{Binding IsEditing}">
@@ -46,6 +51,10 @@
         <StackPanel>
           <TextBlock Text="Label (for example your user name)" Classes="label" />
           <TextBox Text="{Binding EditLabel, Mode=TwoWay}" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Text="Group (optional, for example Work)" Classes="label" />
+          <TextBox Text="{Binding EditGroup, Mode=TwoWay}" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Button Classes="accent" Content="Save" Command="{Binding SaveEditCommand}" />
@@ -81,31 +90,55 @@
 
     <ScrollViewer>
       <ItemsControl ItemsSource="{Binding Shown}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <VirtualizingStackPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:OtpItemViewModel">
             <Border Classes="card" Margin="0,0,0,10">
-              <Grid ColumnDefinitions="*,Auto,Auto">
-                <StackPanel Grid.Column="0" Spacing="2">
-                  <TextBlock Tag="data" Text="{Binding Issuer}" Classes="h2" />
+              <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+                <v:EntryIcon Text="{Binding Issuer}" Margin="0,2,12,0" />
+                <StackPanel Grid.Column="1" Spacing="2">
+                  <TextBlock Tag="data" Text="{Binding Issuer}" Classes="h2" AutomationProperties.HeadingLevel="2" />
                   <TextBlock Tag="data" Text="{Binding Label}" Classes="hint" />
-                  <TextBlock Text="{Binding DisplayCode}" Classes="code" Margin="0,6,0,0" />
+                  <TextBlock Tag="data" Text="{Binding Group}" Classes="hint" IsVisible="{Binding HasGroup}" />
+                  <TextBlock Tag="data" Text="{Binding DisplayCode}" Classes="code" Margin="0,6,0,0" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6" Margin="16,0" Width="72">
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6" Margin="16,0" Width="72">
                   <TextBlock Text="{Binding SecondsRemaining, StringFormat='{}{0} s'}"
                              HorizontalAlignment="Center" Classes="hint" />
                   <ProgressBar ToolTip.Tip="Time until the next code" Minimum="0" Maximum="1" MinWidth="0" Width="72" Height="4" Value="{Binding Progress}" />
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <WrapPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,8,0,0">
+                  <WrapPanel.Styles>
+                    <Style Selector="WrapPanel > Button">
+                      <Setter Property="Margin" Value="0,2,6,2" />
+                    </Style>
+                  </WrapPanel.Styles>
+                  <Button Content="{Binding RevealText}" IsVisible="{Binding CanHide}"
+                          AutomationProperties.Name="{Binding Issuer, StringFormat='Show or hide the code of {0}'}"
+                          Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).ToggleRevealCommand}"
+                          CommandParameter="{Binding}" />
                   <Button Classes="accent" Content="Copy code"
                           Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).CopyCodeCommand}"
                           CommandParameter="{Binding}" />
                   <Button Content="Rename"
                           Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).BeginEditCommand}"
                           CommandParameter="{Binding}" />
+                  <Button Content="Up" AutomationProperties.Name="{Binding Issuer, StringFormat='Move {0} up'}"
+                          IsVisible="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).CanReorder}"
+                          Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).MoveUpCommand}"
+                          CommandParameter="{Binding}" />
+                  <Button Content="Down" AutomationProperties.Name="{Binding Issuer, StringFormat='Move {0} down'}"
+                          IsVisible="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).CanReorder}"
+                          Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).MoveDownCommand}"
+                          CommandParameter="{Binding}" />
                   <Button Classes="danger" Content="Delete"
                           Command="{Binding $parent[ItemsControl].((vm:DashboardViewModel)DataContext).RequestDeleteCommand}"
                           CommandParameter="{Binding}" />
-                </StackPanel>
+                </WrapPanel>
               </Grid>
             </Border>
           </DataTemplate>

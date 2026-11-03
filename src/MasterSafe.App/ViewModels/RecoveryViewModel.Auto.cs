@@ -43,6 +43,7 @@ public sealed partial class RecoveryViewModel
     public int? DaysSinceLastBackup { get; private set; }
 
     private bool _loadingAuto;
+    private string? _chosenFolder;
 
     private void LoadAutoSettings(Services.AppSettings? settings)
     {
@@ -99,6 +100,8 @@ public sealed partial class RecoveryViewModel
             return;
         }
 
+        // Picked by hand just now, so a share is the user's own choice. One that only comes from the settings file is not.
+        _chosenFolder = folder;
         AutoBackupFolder = folder;
         _loadingAuto = true;
         AutoBackupEnabled = true;
@@ -165,6 +168,12 @@ public sealed partial class RecoveryViewModel
             return;
         }
 
+        if (VaultPathSafety.IsNetworkPath(AutoBackupFolder) && _chosenFolder != AutoBackupFolder)
+        {
+            AutoBackupStatus = "The automatic backup folder is on a network share, so nothing was written. If you want it there, choose the folder again.";
+            return;
+        }
+
         var settings = _services.SettingsStore.Load();
         if (string.IsNullOrEmpty(settings.RecoveryPublicKey))
         {
@@ -206,7 +215,7 @@ public sealed partial class RecoveryViewModel
         }
     }
 
-    private static IDisposable StartUiTimer(TimeSpan interval, Func<Task> action)
+    internal static IDisposable StartUiTimer(TimeSpan interval, Func<Task> action)
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {

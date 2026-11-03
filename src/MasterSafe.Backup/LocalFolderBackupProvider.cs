@@ -29,8 +29,68 @@ public sealed class LocalFolderBackupProvider : IBackupProvider
         ArgumentNullException.ThrowIfNull(encryptedContent);
 
         var path = SafePath(fileName);
-        await File.WriteAllBytesAsync(path, encryptedContent, cancellationToken).ConfigureAwait(false);
+
+        // Written beside the target and moved in whole, so another computer syncing this folder never reads half a file.
+        // A file that is already there is never replaced.
+        var temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            await File.WriteAllBytesAsync(temporary, encryptedContent, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                File.Move(temporary, path);
+            }
+            catch (IOException) when (File.Exists(path))
+            {
+                throw new BackupNameTakenException(fileName);
+            }
+        }
+        finally
+        {
+            File.Delete(temporary);
+        }
+
         return path;
+    }
+
+    /// <summary>
+    /// Deletes the oldest of the named files so that <paramref name="keep"/> remain, but only files whose first bytes pass
+    /// <paramref name="isOurs"/>, so an ordinary backup in the same folder is never touched. Returns how many went.
+    /// </summary>
+    public int DeleteOldest(IEnumerable<string> names, Func<byte[], bool> isOurs, int headerLength, int keep)
+    {
+        ArgumentNullException.ThrowIfNull(names);
+        ArgumentNullException.ThrowIfNull(isOurs);
+
+        var ours = names.OrderDescending(StringComparer.Ordinal).Where(name =>
+        {
+            try
+            {
+                using var file = File.OpenRead(SafePath(name));
+                var header = new byte[headerLength];
+                return file.ReadAtLeast(header, headerLength, throwOnEndOfStream: false) == headerLength && isOurs(header);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }).ToList();
+
+        var deleted = 0;
+        foreach (var name in ours.Skip(keep))
+        {
+            try
+            {
+                File.Delete(SafePath(name));
+                deleted++;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Tried again next time.
+            }
+        }
+
+        return deleted;
     }
 
     /// <inheritdoc />

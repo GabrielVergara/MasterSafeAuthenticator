@@ -64,12 +64,20 @@ any host with `-p:MasterSafeTargetOs=linux`. Windows-only code sits behind `#if 
 | `AppPaths` | Where files live (`%LocalAppData%\MasterSafe` or `~/.local/share/MasterSafe`), see [FileLocations.md](FileLocations.md) |
 | `SettingsStore`, `AppSettings` | Settings saved as JSON, written atomically; no secrets |
 | `VaultCatalog` | Lists vault files, archives the old vault, switches the active vault, deletes only inside the app folder |
+| `SingleInstance` | One running copy: a lock file held open, and a pipe a second start uses to bring the first forward |
+| `VaultPathSafety` | Recognises network paths without touching the network |
+| `SaveCounterStore` | The copy of each vault's save counter, outside the vault file |
+| `WebsiteIconFetcher`, `IconImageCheck` | The optional website icon, with its fixed rules |
+| `EmergencySheet` | The printable page |
+| `VaultMerger`, `EntryExtras` (Crypto) | Joins two copies of a vault; keeps new fields safe from older versions |
+| `SyncService`, `SyncPackage`, `SyncCode`, `KdbxWriter` (Backup) | Sync through a folder or WebDAV; KeePass export |
+| `AppExportImporter`, `GoogleMigration` (Core) | Exports of other apps |
 | `SwitchableVaultRepository` (Crypto) | A vault repository whose file can change at run time |
 | `IFileDialogs`, `WindowFileDialogs` | File and folder pickers behind an interface |
 | `AppServices` | The bundle passed to the view models; absent in design and test mode |
 | `RecoveryKeyService`, `RecipientBackupService` (Backup) | Recovery key files and recovery backups |
 
-View models added for these: `VaultsViewModel`, `RecoveryViewModel`, `ForgotPasswordViewModel`.
+View models added for these: `VaultsViewModel`, `RecoveryViewModel`, `ForgotPasswordViewModel`, `SyncViewModel`.
 
 ## Principles
 

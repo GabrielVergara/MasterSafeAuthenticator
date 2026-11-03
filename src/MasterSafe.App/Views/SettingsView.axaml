@@ -82,10 +82,22 @@
                     IsChecked="{Binding BlockScreenCapture, Mode=TwoWay}" />
           <TextBlock Classes="hint" TextWrapping="Wrap"
                      Text="Screenshots and screen sharing show this window as black while this is on. Turn it off if you need to capture the window." />
+          <CheckBox Content="Hide authenticator codes until I click them"
+                    IsChecked="{Binding HideCodes, Mode=TwoWay}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Stops someone behind you from reading a code. A shown code hides again after 20 seconds. Copy code works without showing it." />
+          <CheckBox Content="Hide revealed passwords when this window loses focus"
+                    IsChecked="{Binding HideRevealedOnFocusLoss, Mode=TwoWay}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="These settings and the ones above are kept inside your encrypted vault. A program that changes the settings file cannot turn them off once the vault is open." />
           <CheckBox Content="Allow checking passwords against known data breaches (Password health page)"
                     IsChecked="{Binding BreachCheckEnabled, Mode=TwoWay}" />
           <TextBlock Classes="hint" TextWrapping="Wrap"
                      Text="Off by default. When you run the check, only the first 5 characters of each password's SHA-1 hash are sent to api.pwnedpasswords.com (Have I Been Pwned). Your passwords never leave this computer." />
+          <CheckBox Content="Allow fetching a website's icon, one password at a time"
+                    IsChecked="{Binding WebsiteIconsEnabled, Mode=TwoWay}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Off by default. Nothing happens by itself: you press Use the site's icon on one password, see the icon, and accept it. The site, and anyone watching the network, can see that this computer asked for that site's icon. An icon does not prove a site is genuine." />
         </StackPanel>
       </Border>
 

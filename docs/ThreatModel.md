@@ -12,7 +12,8 @@
 flowchart TD
     User -->|master password / Windows Hello| App
     App -->|ciphertext only| Disk[(Disk and backups)]
-    App -->|https, encrypted backups only| Cloud[(WebDAV server)]
+    App -->|https, encrypted backups and sync files only| Cloud[(WebDAV server or sync folder)]
+    App -.->|only on request, one icon| Site[(A site the user names)]
 ```
 
 ## Attackers and outcomes
@@ -34,7 +35,16 @@ flowchart TD
 | Reads the Windows clipboard history or cloud clipboard | No | Secret copies carry the markers that exclude them; they are cleared after the chosen time |
 | Serves a fake update | No | Updates are never installed by the app; a download is checked against the built-in ML-DSA-65 key and deleted if it fails |
 | Reads old passwords from the recycle bin or history | Only with the unlocked vault | They are inside the encrypted vault; they are removed for good when you empty the bin or delete the entry |
-| Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https |
+| Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https. A website icon request shows that this computer asked that site |
+| Edits `settings.json` | Cannot turn off protections while a vault is open | The security settings are in the vault. Before a vault's first unlock on 1.6 they still come from this file, once. Other settings, such as the theme, are not protected |
+| Points the settings at a network share | No login is sent | The path is not touched until the user agrees, for this run only |
+| Puts back an older copy of the vault | It opens, and the user is warned | Restoring a backup is normal, so this never blocks. A program that also changes the counter copy is not noticed |
+| Starts a second copy | It cannot save | A second start only brings the first window forward |
+| Offers an old signed installer as new | No | The signed manifest binds the version |
+| Steals the sync files or the WebDAV password | No, not to read them | They are encrypted with a random 256-bit code. With the server password alone nothing can be deleted on a server that refuses deletion, which the author's own server does. A general server may allow it |
+| Runs a hostile sync server | Cannot read or change anything | Every file is authenticated, and the file name is bound in. It can withhold files, so a computer can miss changes without knowing |
+| Has the sync code and access to the files | Yes | Treat the code like a password. Old files stay readable until they are removed. To replace the code, stop syncing on every computer, start again and remove the old files |
+| Runs a hostile web site with a password entry in the vault | Cannot reach this computer or the network | Only `/favicon.ico` over https, public addresses only, one same-site redirect, 256 KiB, 5 seconds, PNG or ICO, and only a picture redrawn by the app is kept. An icon proves nothing about a site |
 
 ## Recovery and old vaults
 
@@ -44,7 +54,9 @@ flowchart TD
 | Someone finds a recovery backup | It is encrypted to the recovery public key (hybrid, post-quantum). Without the private key it is unreadable |
 | Someone gets both the key file and its passphrase | They can read every recovery backup you made. Treat them like the master password |
 | An archived old vault | Still encrypted under its old password. It stays on disk until you delete it, so an old password that leaked still protects only that old data |
-| `settings.json` | Holds no secrets: theme, paths and the recovery **public** key |
+| `settings.json` | Holds no secrets: theme, paths and the recovery **public** key. It is not protected, so nothing in it is trusted once a vault is open |
+| A recovery backup | It holds the sync code and WebDAV password, so a recovery restores sync too. Protected by the recovery key. Password-protected backups and `.kdbx` exports leave them out |
+| A vault saved by a version before 1.6 | Kinds, fields and dates survive in the notes. Sync settings, security settings, the counter, groups and icons are lost, so sync must be joined again |
 | A recovery backup that is out of date | Restoring gives the data as of the backup. The Recovery page shows when the last one was made |
 
 ## Mitigations for the unlocked state

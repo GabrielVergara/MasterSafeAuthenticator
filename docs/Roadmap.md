@@ -14,28 +14,10 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - 1.4.0: sign-in pause after wrong passwords, lock on Windows lock or sleep, screen-capture protection, recycle bin and entry history, password strength and health report, optional breach check, signed update check, automatic recovery backups with reminders, search, sort and rename on the codes page, shortcuts, right-click menus, drag and drop, a rewritten Help and About.
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
+- 1.6.0: one running copy, security settings in the vault, network shares refused until confirmed, older vault copies noticed, version bound into the release signature; letter and website icons, hidden codes, your own order and groups, more health checks and expiry dates; notes, cards, identities, extra fields and a tag filter; full encrypted backups, KeePass export, imports from Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator; sync through your own folder or WebDAV server; a printed emergency sheet; a review pack in [SecurityReview.md](SecurityReview.md).
 - 1.5.1: attacker-style review: trusted recovery key kept in the vault, stronger password protection kept when the password changes, every lock and Exit clears a copied secret, process memory protection on Windows and Linux. Linux tests can also run in Docker.
 
-## Next (1.6): easier to use, harder to attack
-
-The aim is to be as safe as we can and easy for anyone to use. The work order is in
-[Release-1.6-Prompt.md](Release-1.6-Prompt.md), and how MasterSafe compares with other apps is in
-[Comparison.md](Comparison.md). The gaps found in the 1.5.1 review come first.
-
-| Item | Why |
-| --- | --- |
-| One running copy at a time | Two running copies can each save, and the second overwrites the first |
-| Security settings inside the vault | Today `settings.json` can be edited by malware to switch off auto-lock or clipboard clearing, or to point the app at a vault on a network share, which makes Windows send the user's network login hash there. The recovery key is already protected this way |
-| Notice an older copy of the vault | Someone able to replace the vault file can put back an older copy, for example to bring back a password you changed. The app cannot tell today. A save counter kept outside the vault file would show it |
-| Version bound into the release signature | A signature covers the file only, so an old signed installer could be offered as a new one if GitHub were compromised |
-| Letter icons for passwords and authenticator accounts | Finding the right entry at a glance, with no logos and no network. See the plan below |
-| Tap to reveal codes (optional) | Hides codes until clicked, against shoulder surfing |
-| Hide revealed passwords when the window loses focus | Revealed passwords already hide after 20 seconds |
-| More health checks and expiry dates | Duplicates, `http://` addresses and expiring passwords, all offline |
-| Website icon for a password (optional) | Fetches the site's own icon, only when you ask. Off by default, with only the strictest settings. See the plan below |
-| Attacker review and a review pack | Every release gets this review. The pack lets an independent reviewer start quickly |
-
-## After that (1.7): deep protection
+## Next (1.7): deep protection
 
 | Item | Why |
 | --- | --- |
@@ -64,8 +46,7 @@ The last three change how a vault is opened, so they come last and need migratio
 
 | Item | Notes |
 | --- | --- |
-| **KeePass export (`.kdbx`)** | So nobody is locked in. Same code as the importer, in reverse |
-| Import from Google Authenticator (migration QR), Aegis, 2FAS, Bitwarden JSON | Each with a preview screen |
+| Encrypted exports of other apps | Aegis, 2FAS and Bitwarden password-protected files, once a plain export is not enough |
 | macOS build | The code is cross-platform; needs a signed and notarised package |
 | Mobile app (Android and iOS) | Shares the Core, Crypto and Backup libraries. Recovery backups already work across devices |
 | Independent security review | The largest gap against the audited apps in [Comparison.md](Comparison.md). Needs funding or a volunteer reviewer, and free audit programmes may expect an open-source license |
@@ -74,8 +55,8 @@ The last three change how a vault is opened, so they come last and need migratio
 
 ## Icons plan
 
-Today only folders have icons (24 general symbols, no brand logos). Passwords and authenticator accounts have none. Each
-entry will show the website icon you accepted, or else a letter icon.
+Done in 1.6. Each entry shows the website icon you accepted, or else a letter icon. Folders have 24 general symbols. No
+brand logos are used.
 
 ### Step 1: letter icons, built in
 
@@ -124,19 +105,6 @@ settings below are fixed; none of them can be loosened.
 Compared on 2026-11-01 with the published feature lists of KeePassXC, Aegis, Bitwarden and 1Password. The full table is in [Comparison.md](Comparison.md). This project stays
 offline first, so each idea is judged by what it adds to the attack surface as well as what it gives.
 
-**Worth doing, low risk**
-
-| Feature | Seen in | Notes |
-| --- | --- | --- |
-| Export to `.kdbx` and an encrypted export | KeePassXC, Aegis | Nobody is locked in. Already planned |
-| Import from 1Password, Bitwarden, Proton Pass and authenticator apps | KeePassXC, Aegis | Each with a preview screen |
-| Custom fields and more item types (secure notes, cards, identities) | KeePassXC, Bitwarden, 1Password | Tags already exist in the data, but need a screen |
-| Tap to reveal codes | Aegis | Hides codes until clicked, against shoulder surfing |
-| Custom order and groups for authenticator accounts | Aegis | |
-| More health checks: duplicate items, `http://` addresses, expiry dates | 1Password | Works offline. Weak and reused passwords are already covered |
-| Password expiry reminders | 1Password | |
-| Printed emergency sheet | | Local alternative to a cloud emergency contact |
-
 **Useful, but each one adds real risk: decide one at a time**
 
 | Feature | Seen in | Risk to weigh |
@@ -145,7 +113,6 @@ offline first, so each idea is judged by what it adds to the attack surface as w
 | Auto-type | KeePassXC | Can type a password into the wrong window; needs a confirmation |
 | SSH agent | KeePassXC, 1Password | Other programs can ask for a key to be used |
 | Mobile apps | Bitwarden, 1Password, Aegis | Large effort. Already in Later |
-| Encrypted sync through your own folder or WebDAV | KeePassXC users, Bitwarden | Needs conflict handling so that a merge never loses entries |
 | Emergency access | Bitwarden | Bitwarden does it through its servers. A recovery key split between people gives much of this offline |
 | Travel mode | 1Password | Hiding folders on a trip. Hard to do honestly in a single local vault file |
 
@@ -183,10 +150,9 @@ licensed helpers (for example BouncyCastle, MIT, for the ChaCha20 and Salsa20 st
   fuzzing job.
 - Not planned: YubiKey challenge-response used as a KeePass key, plugins.
 
-### Step 3: export to `.kdbx` 4
+### Step 3: export to `.kdbx` 4 (done in 1.6)
 
-- So you can always leave. Argon2id and AES-256 or ChaCha20, written with the same code as the reader and checked by
-  opening the result with KeePassXC in the release checklist.
+- So you can always leave. Argon2id and AES-256. Checked by opening the result with KeePassXC.
 
 ## Security and compliance process
 

@@ -31,4 +31,7 @@ public sealed class PasswordVersion
 
     /// <summary>Notes at that time.</summary>
     public string Notes { get; init; } = string.Empty;
+
+    /// <summary>Extra fields at that time.</summary>
+    public IReadOnlyList<CustomField> Fields { get; init; } = [];
 }

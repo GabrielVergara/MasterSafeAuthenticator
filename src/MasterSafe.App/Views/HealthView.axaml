@@ -9,7 +9,7 @@
       <StackPanel Spacing="2">
         <TextBlock Text="Password health and security check-up" Classes="h1" />
         <TextBlock Classes="hint" TextWrapping="Wrap"
-                   Text="Finds passwords that are easy to guess, used more than once, or not changed for a year. This runs on this computer only." />
+                   Text="Finds passwords that are easy to guess, used more than once or not changed for a year, entries that look like copies, addresses that are not encrypted, and expiry dates. This runs on this computer only." />
       </StackPanel>
 
       <Border Classes="card">
@@ -93,6 +93,74 @@
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
                           Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Expiring.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Expiry dates" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Expiring}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open" VerticalAlignment="Center" CommandParameter="{Binding}"
+                          Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Insecure.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Addresses that are not encrypted" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Insecure}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Classes="accent" Content="Use https" CommandParameter="{Binding}"
+                            Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).SwitchToHttpsCommand}" />
+                    <Button Content="Open" CommandParameter="{Binding}"
+                            Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding Duplicates.Count}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Possible copies" Classes="h2" />
+          <ItemsControl ItemsSource="{Binding Duplicates}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HealthRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <StackPanel>
+                    <TextBlock Tag="data" Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Classes="hint" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Content="Open" CommandParameter="{Binding}"
+                            Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).OpenCommand}" />
+                    <Button Content="Move to the recycle bin" CommandParameter="{Binding}"
+                            Command="{Binding $parent[ItemsControl].((vm:HealthViewModel)DataContext).BinCopyCommand}" />
+                  </StackPanel>
                 </Grid>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

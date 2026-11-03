@@ -1,0 +1,33 @@
+{
+  "Version": 3,
+  "VaultId": "9nLvtB5aYPVUY2Fap3MOLw==",
+  "Slots": [
+    {
+      "Id": "ylPOVHWYvrUQ4PsUeV0jDA==",
+      "Type": "password",
+      "Label": "Master password",
+      "CreatedUtc": "2026-11-01T21:41:40.1087332\u002B00:00",
+      "Salt": "GsQauULQlWS7XbVaRS5uu5Pb8fRM2NRqf4UIKlofVkk=",
+      "Kdf": {
+        "MemorySizeKib": 8192,
+        "Iterations": 1,
+        "DegreeOfParallelism": 1,
+        "KeyLength": 32
+      },
+      "Nonce": "toaWrGEFVllcgjnk",
+      "Tag": "3LLt2RrKrUUPEGDjF/GFUA==",
+      "WrappedKey": "tDWECGXg/Yp4x2M7fIUaVZHGxLBXs9YwXaytP\u002ByMVwc="
+    }
+  ],
+  "Salt": "",
+  "KdfParameters": {
+    "MemorySizeKib": 131072,
+    "Iterations": 3,
+    "DegreeOfParallelism": 4,
+    "KeyLength": 32
+  },
+  "Nonce": "0x4tn2yQdQKAQjmb",
+  "Tag": "6gm8URPDBw6oIlh0ejTbog==",
+  "Ciphertext": "QV7Jj5pZL/wLJcoHByOxwesBOKjy9NCXhJLp9vFfCOkZWfb88JU1d4kn5E\u002BjxyJ0bvhwQsVwfvSIv5EgzSYPvN832b2rs6QaPBNhvoO00Ec6fjDvLYILvwkGD2inGWPVv7ZaD1SjG63m1\u002BeYaNh75dYHc1QcviFhUKjSGVc3OhvUz1n70V/2shvuEigEFxR\u002Bt1UhTMPGdAmMfo\u002Bxc5u\u002BoJA7xEWwZhuo7cTfRUDVnBKL7Bh6cA6vAz8vc53r\u002BDVgWvWlcU2PIx7HTz8EYo1u0QK9Ak4VY\u002B1BA/xhSBNxwNcYoqHbV1rXbHWOSt21jKZvM\u002BwcxcFgYEbm6RlaHNHaoBohwf52WYSy9\u002Bb2PUqI8GSaL3IX61ESq4wB28nJ4Qj26lMWepQhXOUvcUwXEDqS2Ey8W8vtj4mdAYLYJvjVe0HdyXxBW/3gi0Gf5fxwCIMN4QVjOjLjXWA16Ytz\u002BE5MvdahH9FGkL08x/EQx6ZJoRYVVBNJA5oIdnTwGlan38FApWabTb/VFMU5DMCOnT96GvnrC1PNUhz/aAsx47/3DmrbqugXxggcDOobp31ZUu5ft6U4iQwYIp2Y/PKFyHq\u002BVlxXMoJg73GZD98qFYUl0LrDpZbfq7ZNhd5UT7mxxXL7rArKVBznEO3QwwIxPyn9HDFT/iHbDizDHPdEP7J2qEQXNx/iOg7k\u002B4G\u002Bqh1jtPt4a1VoT//tvDy/ZE6j854o/NALwwT6tJ2Hqh/BD/Bv4jLjJ\u002BSLfFXdviD0CIhQ3\u002BCgDA6X\u002Br2XjtWVSnGYudsl50tD8kEz6cSM\u002BxkK9oFaZm2k7exUZiR3LGkK0bUQNYFWSQdHPNT92g==",
+  "Compressed": true
+}

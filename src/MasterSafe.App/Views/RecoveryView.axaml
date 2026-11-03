@@ -100,6 +100,15 @@
         </StackPanel>
       </Border>
 
+      <Border Classes="card" IsVisible="{Binding IsAvailable}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Printed emergency sheet" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="A large-print page that says where your files are and what to do in an emergency, with empty boxes for what only you should know. No secrets are put in the file: you write those on the paper by hand. Delete the file after printing." />
+          <Button Content="Create emergency sheet..." HorizontalAlignment="Left" Command="{Binding CreateEmergencySheetCommand}" />
+        </StackPanel>
+      </Border>
+
       <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>

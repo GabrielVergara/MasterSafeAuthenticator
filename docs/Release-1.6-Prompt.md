@@ -1,5 +1,7 @@
 # Prompt for release 1.6
 
+**Done in 1.6.0.** Kept as a record of what was asked for.
+
 Paste everything below the line into a new session in this repository, or work through it one phase at a time.
 
 ---

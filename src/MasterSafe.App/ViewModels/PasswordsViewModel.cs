@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Services;
 using MasterSafe.Core;
+using MasterSafe.Crypto;
 
 namespace MasterSafe.App.ViewModels;
 
@@ -44,10 +45,10 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     private string? _status;
 
     /// <summary>Entries matching the current search.</summary>
-    public ObservableCollection<PasswordEntry> Entries { get; } = [];
+    public BulkObservableCollection<PasswordEntry> Entries { get; } = [];
 
     /// <summary>The same entries as rows with a check box, which is what the page shows.</summary>
-    public ObservableCollection<PasswordRow> Rows { get; } = [];
+    public BulkObservableCollection<PasswordRow> Rows { get; } = [];
 
     private readonly HashSet<Guid> _selected = [];
 
@@ -115,6 +116,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         var removed = 0;
         if (forGood)
         {
+            Forget(_all.Where(e => ids.Contains(e.Id) && e.IsDeleted));
             removed = _all.RemoveAll(e => ids.Contains(e.Id) && e.IsDeleted);
         }
         else
@@ -213,9 +215,11 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         IEnumerable<PasswordEntry> entries,
         IEnumerable<string>? folders = null,
         IReadOnlyDictionary<Guid, byte[]>? attachments = null,
-        IReadOnlyDictionary<string, string>? folderIcons = null)
+        IReadOnlyDictionary<string, string>? folderIcons = null,
+        IEnumerable<Tombstone>? tombstones = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
+        LoadTombstones(tombstones);
         ClearBlobs();
         _all.Clear();
         _all.AddRange(entries.Select(WithCleanFolder));
@@ -255,7 +259,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     private static PasswordEntry WithCleanFolder(PasswordEntry entry)
     {
         var clean = FolderPath.Normalize(entry.Folder);
-        return clean == entry.Folder ? entry : entry.WithFolder(clean);
+        return clean == entry.Folder ? entry : entry.WithCleanedFolder(clean);
     }
 
     /// <summary>
@@ -285,7 +289,9 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         // A tick on an entry that the new search hides could delete something the user can no longer see.
         _selected.Clear();
         IsConfirmingBulkDelete = false;
-        ApplyFilter();
+
+        // Typing changes which entries show, not the folders, so they are left alone.
+        FilterEntries();
     }
 
     [RelayCommand]
@@ -305,6 +311,10 @@ public sealed partial class PasswordsViewModel : ViewModelBase
             Tags = Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
             Folder = FolderPath.Normalize(FormFolder?.Path),
             Attachments = FormAttachments.Select(r => r.Attachment).ToList(),
+            Kind = FormKind.Kind,
+            Fields = FieldsFromForm(),
+            ExpiresUtc = FormExpires is { } date ? new DateTimeOffset(DateTime.SpecifyKind(date.Date.AddHours(12), DateTimeKind.Utc)) : null,
+            IconPng = _formIcon,
             ModifiedUtc = DateTimeOffset.UtcNow,
         };
 
@@ -373,6 +383,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         }
 
         ShowHistory(entry);
+        ShowExtras(entry);
 
         PruneBlobs();
         Status = $"Editing {entry.Title}.";
@@ -390,6 +401,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         var current = _all[index];
         if (current.IsDeleted)
         {
+            Forget([current]);
             _all.RemoveAt(index);
             Status = $"Deleted {current.Title} for good.";
         }
@@ -433,6 +445,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     {
         _editingId = null;
         Title = UserName = Password = Url = Notes = Tags = string.Empty;
+        ClearExtras();
         FormFolder = ChoiceFor(SelectedNode?.Path ?? string.Empty) ?? FolderChoices.FirstOrDefault();
         FormAttachments.Clear();
         FormHistory.Clear();
@@ -447,6 +460,7 @@ public sealed partial class PasswordsViewModel : ViewModelBase
     private void ApplyFilter(string? folder, bool bin = false)
     {
         RebuildFolders(folder, bin);
+        RebuildTags();
         FilterEntries();
     }
 
@@ -455,21 +469,27 @@ public sealed partial class PasswordsViewModel : ViewModelBase
         var q = SearchText.Trim();
         var folder = SelectedNode?.Path;
         var inBin = SelectedNode?.IsBin == true;
-        Entries.Clear();
-        Rows.Clear();
         _selected.IntersectWith(_all.Select(e => e.Id));
-        foreach (var e in Sorted(_all
+        var shown = Sorted(_all
             .Where(e => e.IsDeleted == inBin)
             .Where(e => folder is null || FolderPath.IsInside(e.Folder, folder))
+            .Where(MatchesTag)
             .Where(e => q.Length == 0
                 || e.Title.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Folder.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.UserName.Contains(q, StringComparison.OrdinalIgnoreCase)
                 || e.Url.Contains(q, StringComparison.OrdinalIgnoreCase)
-                || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase))), inBin))
+                || e.Tags.Any(t => t.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || e.Fields.Any(f => f.Name.Contains(q, StringComparison.OrdinalIgnoreCase))), inBin)
+            .ToList();
+
+        // The next letter often leaves the same entries. Then the screen has nothing to redo.
+        var same = shown.Count == Rows.Count && _selected.Count == 0 && !Rows.Any(r => r.IsSelected)
+            && shown.Select((e, i) => ReferenceEquals(e, Rows[i].Entry)).All(match => match);
+        if (!same)
         {
-            Entries.Add(e);
-            Rows.Add(new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged) { IsCurrent = e.Id == _currentId });
+            Entries.ReplaceAll(shown);
+            Rows.ReplaceAll(shown.Select(e => new PasswordRow(e, _selected.Contains(e.Id), SelectionChanged) { IsCurrent = e.Id == _currentId }));
         }
 
         NotifySelectionChanged();
@@ -487,6 +507,24 @@ public sealed partial class PasswordRow(PasswordEntry entry, bool isSelected, Ac
 
     /// <summary>True while the entry is in use (not in the recycle bin).</summary>
     public bool IsActive => !Entry.IsDeleted;
+
+    /// <summary>True for an item that has a password to copy.</summary>
+    public bool HasPassword => IsActive && Entry.Password.Length > 0;
+
+    /// <summary>True for an item that has a user name to copy.</summary>
+    public bool HasUserName => IsActive && Entry.UserName.Length > 0;
+
+    /// <summary>The kind of item in words, for notes, cards and identities.</summary>
+    public string KindText => Entry.Kind switch
+    {
+        EntryKind.Note => "Secure note",
+        EntryKind.Card => "Payment card",
+        EntryKind.Identity => "Identity",
+        _ => string.Empty,
+    };
+
+    /// <summary>True when the kind is worth showing.</summary>
+    public bool ShowKind => Entry.Kind != EntryKind.Login;
 
     /// <summary>True when files are attached to the entry.</summary>
     public bool HasAttachments => Entry.Attachments.Count > 0;

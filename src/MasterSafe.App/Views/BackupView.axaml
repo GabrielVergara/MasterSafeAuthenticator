@@ -8,8 +8,8 @@
   <ScrollViewer>
     <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
       <StackPanel Spacing="2">
-        <TextBlock Text="Encrypted backups" Classes="h1" />
-        <TextBlock Classes="hint" Text="Backups are encrypted with your master password before they leave this computer (.sauth files)." />
+        <TextBlock Text="Backups and sync" Classes="h1" />
+        <TextBlock Classes="hint" TextWrapping="Wrap" Text="A backup holds your accounts, passwords and attached files, encrypted with the password you type here before it leaves this computer (.sauth files)." />
       </StackPanel>
 
       <StackPanel>
@@ -49,15 +49,18 @@
       </StackPanel>
 
       <StackPanel>
-        <TextBlock Text="Master password (encrypts the backup)" Classes="label" />
+        <TextBlock Text="Password for this file (at least 12 characters)" Classes="label" />
         <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding MasterPassword, Mode=TwoWay}" />
       </StackPanel>
 
-      <StackPanel Orientation="Horizontal" Spacing="8">
-        <Button Classes="accent" Content="Export backup" Command="{Binding ExportCommand}" />
-        <Button Content="Refresh list" Command="{Binding RefreshCommand}" />
-        <Button Content="Import selected" Command="{Binding ImportCommand}" />
-      </StackPanel>
+      <WrapPanel>
+        <Button Classes="accent" Content="Export backup" Margin="0,0,8,8" Command="{Binding ExportCommand}" />
+        <Button Content="Refresh list" Margin="0,0,8,8" Command="{Binding RefreshCommand}" />
+        <Button Content="Import selected" Margin="0,0,8,8" Command="{Binding ImportCommand}"
+                ToolTip.Tip="Adds what is in the backup to this vault. Nothing here is replaced: a changed item keeps its older values in its history." />
+        <Button Content="Export to KeePass (.kdbx)..." Margin="0,0,8,8" Command="{Binding ExportKdbxCommand}"
+                ToolTip.Tip="So you can always move to another app. It uses the password above." />
+      </WrapPanel>
 
       <StackPanel>
         <TextBlock Text="Existing backups" Classes="label" />
@@ -66,7 +69,78 @@
                  Height="160" />
       </StackPanel>
 
-      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" Classes="hint" />
+      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" Classes="hint" TextWrapping="Wrap" />
+
+      <!-- Sync -->
+      <Border Classes="card" DataContext="{Binding Sync}" x:DataType="vm:SyncViewModel">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Sync between computers (optional)" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Keeps this vault the same on your computers through a folder or a WebDAV server of your own. Only encrypted files go there, locked with a random sync code that does not depend on your master password. Sync only adds files: it never overwrites or deletes anything on a server." />
+
+          <StackPanel Spacing="12" IsVisible="{Binding IsNotConfigured}">
+            <StackPanel>
+              <TextBlock Text="Where sync files go" Classes="label" />
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <RadioButton GroupName="SyncPlace" Content="A folder" IsChecked="{Binding UseFolder, Mode=OneWay}" />
+                <RadioButton GroupName="SyncPlace" Content="A WebDAV server" IsChecked="{Binding UseWebDav, Mode=TwoWay}" />
+              </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="6" IsVisible="{Binding UseFolder}">
+              <StackPanel>
+                <TextBlock Text="Sync folder" Classes="label" />
+                <TextBox Text="{Binding Folder, Mode=TwoWay}" />
+              </StackPanel>
+              <Button Content="Choose folder..." Command="{Binding ChooseFolderCommand}" />
+            </StackPanel>
+
+            <StackPanel Spacing="12" IsVisible="{Binding UseWebDav}">
+              <StackPanel>
+                <TextBlock Text="WebDAV folder address" Classes="label" />
+                <TextBox PlaceholderText="https://cloud.example.com/remote.php/dav/files/you/backups/" Text="{Binding WebDavUrl, Mode=TwoWay}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="WebDAV user name" Classes="label" />
+                <TextBox Text="{Binding WebDavUser, Mode=TwoWay}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="WebDAV password or app password" Classes="label" />
+                <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding WebDavPassword, Mode=TwoWay}" />
+              </StackPanel>
+            </StackPanel>
+
+            <Button Classes="accent" Content="Start syncing from this computer" Command="{Binding StartCommand}" />
+
+            <StackPanel Spacing="6">
+              <TextBlock Text="Or, on a second computer: the sync code from the first one" Classes="label" TextWrapping="Wrap" />
+              <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding JoinCode, Mode=TwoWay}" />
+              <Button Content="Join with this code" Command="{Binding JoinCommand}" />
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="10" IsVisible="{Binding IsConfigured}">
+            <TextBlock Tag="data" Text="{Binding PlaceText}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding LastSyncText}" Classes="hint" />
+            <WrapPanel>
+              <Button Classes="accent" Content="Sync now" Margin="0,0,8,8" Command="{Binding SyncNowCommand}" />
+              <Button Content="Show the sync code" Margin="0,0,8,8" Command="{Binding ShowCodeCommand}" />
+              <Button Classes="danger" Content="Stop syncing on this computer" Margin="0,0,8,8" Command="{Binding StopCommand}" />
+            </WrapPanel>
+            <CheckBox Content="Sync by itself after I unlock and a little after each change" IsChecked="{Binding Automatic, Mode=TwoWay}" />
+            <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" Padding="12" IsVisible="{Binding IsCodeShown}">
+              <StackPanel Spacing="8">
+                <TextBlock TextWrapping="Wrap" Text="Type this code on your other computer. Anyone with this code and access to the sync files can read your vault, so keep it like a password." />
+                <TextBox Tag="data" Text="{Binding ShownCode, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas, Menlo, monospace" AutomationProperties.Name="Sync code" />
+                <Button Content="Hide the code" Command="{Binding HideCodeCommand}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap"
+                     IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </Border>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

@@ -8,7 +8,11 @@ using System.Text.Json.Serialization;
 
 namespace MasterSafe.App.Services;
 
-/// <summary>User settings saved between runs. Holds no secrets: the recovery key is a public key.</summary>
+/// <summary>
+/// User settings saved between runs. Holds no secrets: the recovery key is a public key. This file is not protected, so the
+/// security settings here are only what the sign-in screen uses. Once a vault is open its own encrypted copy wins (see
+/// <see cref="MasterSafe.Crypto.VaultSecurity"/>).
+/// </summary>
 public sealed class AppSettings
 {
     /// <summary>Colour theme.</summary>
@@ -41,6 +45,15 @@ public sealed class AppSettings
 
     /// <summary>Keep the window out of screenshots and screen sharing (Windows).</summary>
     public bool BlockScreenCapture { get; set; } = true;
+
+    /// <summary>Codes stay hidden until they are clicked.</summary>
+    public bool HideCodes { get; set; }
+
+    /// <summary>Revealed passwords hide again when the window loses focus.</summary>
+    public bool HideRevealedOnFocusLoss { get; set; } = true;
+
+    /// <summary>Allow the "use the site's icon" button (off by default; it contacts the site).</summary>
+    public bool WebsiteIconsEnabled { get; set; }
 
     /// <summary>Width of the folder list on the Passwords page in pixels; 0 means fit it to the folder names.</summary>
     public double FolderPaneWidth { get; set; }
@@ -156,6 +169,7 @@ public sealed class SettingsStore(string path) : ISettingsStore
     private static AppSettings Sanitize(AppSettings settings)
     {
         settings.AutoLockMinutes = Math.Clamp(settings.AutoLockMinutes, 1, 120);
+        settings.ClipboardClearSeconds = ClipboardPolicy.Normalize(settings.ClipboardClearSeconds);
         settings.KnownVaultPaths = (settings.KnownVaultPaths ?? [])
             .Where(p => !string.IsNullOrWhiteSpace(p) && Path.IsPathRooted(p))
             .Distinct(StringComparer.OrdinalIgnoreCase)

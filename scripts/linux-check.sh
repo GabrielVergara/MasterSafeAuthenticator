@@ -31,7 +31,20 @@ fi
 echo "core limit: $(grep 'Max core file size' /proc/$pid/limits)"
 echo "memory file owner (root means protected): $(stat -c %U /proc/$pid/mem)"
 su tester -c "head -c 16 /proc/$pid/mem >/dev/null 2>/tmp/err; echo read exit \$?; cat /tmp/err"
-su tester -c "ls -ld /home/tester/.local/share/MasterSafe /home/tester/.config/MasterSafe 2>/dev/null"
+su tester -c "ls -ld /home/tester/.local/share/MasterSafe" || echo "DATA FOLDER NOT WHERE IT SHOULD BE"
+
+echo "=== ONE RUNNING COPY ==="
+su tester -c 'cd /tmp && DISPLAY=:99 HOME=/home/tester timeout 20 /tmp/app/MasterSafe.App >/tmp/second.log 2>&1; echo "second start ended with exit code $? (0 is right, 124 means it did not end)"'
+kill -0 "$pid" 2>/dev/null && echo "first copy: still running" || echo "first copy: GONE"
+echo "copies now: $(pgrep -c -f /tmp/app/MasterSafe.App)"
+ls -l /home/tester/.local/share/MasterSafe/instance.lock 2>/dev/null
+
 kill "$pid"
 sleep 1
 echo "after end: $(kill -0 "$pid" 2>/dev/null && echo still-running || echo ended)"
+
+echo "=== A NEW START AFTER THE FIRST ENDED ==="
+su tester -c 'DISPLAY=:99 HOME=/home/tester /tmp/app/MasterSafe.App >/tmp/third.log 2>&1 & echo $! >/tmp/app3.pid; sleep 8'
+pid3=$(cat /tmp/app3.pid)
+kill -0 "$pid3" 2>/dev/null && echo "third start: running, the lock was released" || { echo "third start: NOT RUNNING"; tail -5 /tmp/third.log; }
+kill "$pid3" 2>/dev/null
