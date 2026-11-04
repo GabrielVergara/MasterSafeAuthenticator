@@ -6,6 +6,8 @@ on:
   pull_request:
   schedule:
     - cron: '0 3 * * 1'
+  # Runs the same full-history scan as the weekly one, on demand.
+  workflow_dispatch:
 
 permissions:
   contents: read
