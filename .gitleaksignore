@@ -4,3 +4,12 @@ ad5bebb01db8f1e906a332c1da3800e6ce9c67df:tests/MasterSafe.Tests/Release16Tests.c
 ad5bebb01db8f1e906a332c1da3800e6ce9c67df:tests/MasterSafe.Tests/Release16Tests.cs:generic-api-key:724
 ad5bebb01db8f1e906a332c1da3800e6ce9c67df:tests/MasterSafe.Tests/Release16Tests.cs:generic-api-key:725
 ad5bebb01db8f1e906a332c1da3800e6ce9c67df:tests/MasterSafe.Tests/Release16Tests.cs:generic-api-key:726
+# Older commits found by the weekly full-history scan. None is a secret: a made-up hash suffix for the breach
+# test, two keyboard shortcut names, a made-up test password, and the standard test code for "1234567890".
+07523538b4137b428036f7640dad4e15179e0a41:tests/MasterSafe.Tests/UpdateAndBreachTests.cs:generic-api-key:284
+f483635962eef8b4157f705c8eaf7f4d5619e254:src/MasterSafe.App/Views/MainWindow.axaml:generic-api-key:16
+f483635962eef8b4157f705c8eaf7f4d5619e254:src/MasterSafe.App/Views/MainWindow.axaml:generic-api-key:19
+2f1e12b0727b07db2cf3419accb19235f4d61612:tests/MasterSafe.Tests/RecycleBinAndStrengthTests.cs:generic-api-key:312
+2f1e12b0727b07db2cf3419accb19235f4d61612:tests/MasterSafe.Tests/RecycleBinAndStrengthTests.cs:generic-api-key:366
+b047b12db583c217cb36d4a55bf877bc30dad56f:tests/MasterSafe.Tests/RecipientBackupTests.cs:generic-api-key:22
+f7066a1033dd45b0a2f8d3e76d7fe057e78126c3:tests/SafeAuthenticator.Tests/CryptoTests.cs:generic-api-key:82
