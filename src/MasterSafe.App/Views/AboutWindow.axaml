@@ -3,10 +3,11 @@
         xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
         x:Class="MasterSafe.App.Views.AboutWindow"
         x:DataType="vm:AboutViewModel"
-        Width="560" Height="720"
-        MinWidth="480" MinHeight="520"
+        Width="560" SizeToContent="Height"
+        MinWidth="480" MinHeight="320"
         WindowStartupLocation="CenterOwner"
         Title="About MasterSafe Authenticator">
+  <LayoutTransformControl x:Name="ZoomHost">
   <DockPanel>
     <Border DockPanel.Dock="Bottom" Padding="20,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardBorderBrush}">
       <Grid ColumnDefinitions="*,Auto">
@@ -67,4 +68,5 @@
       </StackPanel>
     </ScrollViewer>
   </DockPanel>
+  </LayoutTransformControl>
 </Window>

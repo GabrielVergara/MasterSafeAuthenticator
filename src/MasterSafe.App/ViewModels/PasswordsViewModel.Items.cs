@@ -79,17 +79,27 @@ public sealed partial class PasswordsViewModel
     /// <summary>True when tags are in use, so the filter is worth showing.</summary>
     public bool HasTags => TagChoices.Count > 1;
 
-    partial void OnFormKindChanged(EntryKindOption value)
+    partial void OnFormKindChanged(EntryKindOption? oldValue, EntryKindOption newValue)
     {
-        // A new item starts with the fields its kind needs. An item being edited keeps what it has.
-        if (_loadingForm || _editingId is not null || FormFields.Count > 0 || value is null)
+        // A new item gets the fields its kind needs. An item being edited keeps what it has.
+        if (_loadingForm || _editingId is not null || newValue is null)
         {
             return;
         }
 
-        foreach (var (name, secret) in TemplateFor(value.Kind))
+        // The old kind's fields go when still empty. Anything typed in stays, so switching never loses it.
+        var oldNames = oldValue is null ? [] : TemplateFor(oldValue.Kind).Select(t => Loc.T(t.Name)).ToHashSet();
+        foreach (var row in FormFields.Where(f => f.Value.Length == 0 && oldNames.Contains(f.Name)).ToList())
         {
-            FormFields.Add(new FieldRow { Name = Loc.T(name), IsSecret = secret });
+            FormFields.Remove(row);
+        }
+
+        foreach (var (name, secret) in TemplateFor(newValue.Kind))
+        {
+            if (!FormFields.Any(f => f.Name == Loc.T(name)))
+            {
+                FormFields.Add(new FieldRow { Name = Loc.T(name), IsSecret = secret });
+            }
         }
     }
 

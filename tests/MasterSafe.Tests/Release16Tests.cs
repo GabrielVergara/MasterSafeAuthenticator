@@ -781,6 +781,30 @@ public sealed class Release16Tests : IDisposable
     }
 
     [Fact]
+    public void SwitchingTheKind_OfANewItem_ShowsThatKindsFields_AndKeepsWhatWasTyped()
+    {
+        var page = new PasswordsViewModel();
+        EntryKindOption Kind(EntryKind kind) => PasswordsViewModel.KindOptions.First(o => o.Kind == kind);
+
+        page.FormKind = Kind(EntryKind.Note);
+        page.FormFields.Should().BeEmpty();
+
+        page.FormKind = Kind(EntryKind.Card);
+        page.FormFields.Select(f => f.Name).Should().Equal("Cardholder name", "Card number", "Expiry", "Security code", "PIN");
+
+        page.FormKind = Kind(EntryKind.Identity);
+        page.FormFields.Select(f => f.Name).Should().Equal("Full name", "Email", "Phone", "Address", "Passport or ID number");
+
+        page.FormFields.Single(f => f.Name == "Email").Value = "me@example.org";
+        page.FormKind = Kind(EntryKind.Note);
+        page.FormFields.Should().ContainSingle(f => f.Name == "Email" && f.Value == "me@example.org", "switching must not lose what was typed");
+
+        page.FormKind = Kind(EntryKind.Login);
+        page.FormKind = Kind(EntryKind.Identity);
+        page.FormFields.Select(f => f.Name).Should().OnlyHaveUniqueItems();
+    }
+
+    [Fact]
     public void ALogin_StillNeedsAPassword()
     {
         var page = new PasswordsViewModel { Title = "No password" };

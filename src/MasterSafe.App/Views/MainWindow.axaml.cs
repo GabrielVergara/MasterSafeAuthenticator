@@ -119,7 +119,7 @@ public partial class MainWindow : Window
     /// <summary>Opens the About dialog, owned by this window.</summary>
     public void ShowAbout()
     {
-        var about = new AboutWindow();
+        var about = new AboutWindow((DataContext as MainWindowViewModel)?.TextScale ?? 1.0, Screens.ScreenFromWindow(this));
         about.ShowDialog(this);
     }
 }

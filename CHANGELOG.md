@@ -2,6 +2,13 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.6.1 (2026-11-04)
+
+### Fixes
+- **Changing the kind of a new item now changes its fields.** Choosing Payment card and then Identity or Secure note kept the card fields. Now the fields of the new kind replace the empty ones of the old kind, and anything already typed into a field stays.
+- **The About window fits its content.** It is as tall as what it shows, so the signing key fingerprint is no longer hidden below the edge. It also follows the text size setting like the main window, and only scrolls when the screen is too small.
+- **The sign-in screen shows the version**, for example "MasterSafe Authenticator 1.6.1", so you can tell which version you are unlocking.
+
 ## 1.6.0 (2026-11-03)
 
 A release about being harder to attack and easier to use, with sync between your own computers. Vaults from older versions open

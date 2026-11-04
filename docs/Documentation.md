@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.6.0  
+**Version:** 1.6.1  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -126,6 +126,7 @@ On start a rounded splash window shows the logo, product name, author and versio
 main window opens. A left sidebar switches between Authenticator codes, Passwords, Add account, Import, Backup,
 Recovery, Vaults, Settings and Help; Lock vault and About are at the bottom. Every input field has a label above it.
 The sign-in screen has "Forgot your master password?", and the first-run screen has "I already have a vault file".
+The sign-in screen shows the version under its title. The About window is as tall as its content and follows the text size setting.
 Where every file is kept: [FileLocations.md](FileLocations.md).
 
 ## 7. Building, testing and packaging
@@ -190,6 +191,9 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Help, search "clipboard"; About, Open the Article button | Matching topics; the browser opens https://www.gabriel-vergara.com/articles/mastersafe-authenticator/ |
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
+| Settings, Text size 150%, then About | The About window is larger in the same proportion, nothing is cut off; it scrolls only if the screen is too small |
+| Lock the vault | The sign-in screen shows "MasterSafe Authenticator" and the version |
+| Passwords, New, switch the kind Login, Secure note, Payment card, Identity | Each kind shows its own fields; a value typed in a field stays when switching |
 | Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |
 | Exit button in the sidebar, and on the sign-in screen, with "Keep running in the system tray" on | The program closes completely and the tray icon goes away |
 | Copy a password, then press Exit | The clipboard is empty after the program closes |

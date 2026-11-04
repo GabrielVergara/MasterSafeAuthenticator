@@ -12,7 +12,7 @@
       <Image Source="/Assets/logo-256.png" Width="72" Height="72" HorizontalAlignment="Center" />
       <StackPanel Spacing="2">
         <TextBlock Text="{Binding Title}" Classes="h1" HorizontalAlignment="Center" />
-        <TextBlock Text="MasterSafe Authenticator" Classes="hint" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding ProductText}" Classes="hint" HorizontalAlignment="Center" />
       </StackPanel>
 
       <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" Padding="12" IsVisible="{Binding HasRefusedPath}">

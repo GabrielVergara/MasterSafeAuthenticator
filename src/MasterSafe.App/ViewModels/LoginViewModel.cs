@@ -111,6 +111,9 @@ public sealed partial class LoginViewModel : ViewModelBase
 
     public string ButtonText => IsCreateMode ? "Create vault" : "Unlock";
 
+    /// <summary>The product name and version under the title, for example "MasterSafe Authenticator 1.6.1".</summary>
+    public string ProductText => $"MasterSafe Authenticator {AppInfo.Version}";
+
     [ObservableProperty]
     private string? _error;
 

@@ -9,6 +9,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FluentAssertions;
+using MasterSafe.App;
 using MasterSafe.App.Services;
 using MasterSafe.App.ViewModels;
 using MasterSafe.App.Views;
@@ -154,6 +155,30 @@ public sealed class AccessibilityTests
         AutomationProperties.GetLiveSetting(warning).Should().Be(AutomationLiveSetting.Assertive);
         });
     }
+
+    [Fact]
+    public void TheAboutWindow_FitsItsContent_AndGrowsWithTheTextSize()
+    {
+        HeadlessUi.Run(() =>
+        {
+            // The test screen is 1080 high, so larger sizes scroll there as they would on a small screen.
+            foreach (var scale in new[] { 1.0, 1.1 })
+            {
+                var about = new AboutWindow(scale, null);
+                about.Show();
+                Dispatcher.UIThread.RunJobs();
+
+                about.Width.Should().Be(560 * scale);
+                var scroller = about.GetVisualDescendants().OfType<ScrollViewer>().First();
+                scroller.Extent.Height.Should().BeLessThanOrEqualTo(scroller.Viewport.Height + 1, "nothing should be cut off when the screen has room");
+                about.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public void TheSignInPage_ShowsTheVersion()
+        => new LoginViewModel().ProductText.Should().Be("MasterSafe Authenticator " + AppInfo.Version);
 
     [Fact]
     public void ALongList_OnlyGetsControlsForWhatIsOnScreen()
