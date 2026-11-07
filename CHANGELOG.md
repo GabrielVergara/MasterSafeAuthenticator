@@ -2,6 +2,21 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Not released yet
+
+### Licence
+- **Licence version 1.1.** MasterSafe is not open source, and the licence now says so plainly. The code is published for
+  security review and personal builds only: it may not be published or shared, changed or not, put under an open source or
+  any other licence, copied into another project, or used to train AI models. A fork on GitHub may only be used to propose
+  changes back. Contributions and donations are covered too. It applies from 8 November 2026 and to every release from 1.6.2.
+
+### Support the project
+- **Support MasterSafe** button in the About window. It opens the donation page on the author's site, which links to PayPal.
+  The program itself never handles a payment, and the only pages it opens are still the author's own.
+- The Help topic "About, licence and support" explains the licence and donations in English, Spanish and Finnish.
+- The repository has a Sponsor button, a code of conduct, a contributing guide, a support page, issue forms and a
+  pull request template.
+
 ## 1.6.1 (2026-11-04)
 
 ### Fixes

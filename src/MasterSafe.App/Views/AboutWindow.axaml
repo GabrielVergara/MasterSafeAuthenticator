@@ -32,8 +32,12 @@
         <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" Opacity="0.85" />
         <TextBlock Text="{Binding Author, StringFormat='Written by {0}'}" Opacity="0.85" />
 
-        <Button Classes="accent" HorizontalAlignment="Left" Content="Read the article about MasterSafe"
-                Command="{Binding OpenArticleCommand}" ToolTip.Tip="{Binding ArticleUrl}" />
+        <WrapPanel ItemSpacing="8" LineSpacing="8">
+          <Button Classes="accent" Content="Read the article about MasterSafe"
+                  Command="{Binding OpenArticleCommand}" ToolTip.Tip="{Binding ArticleUrl}" />
+          <Button Content="Support MasterSafe" Command="{Binding OpenSupportCommand}"
+                  ToolTip.Tip="MasterSafe is free for personal use. A donation is voluntary and helps pay for code signing and security fixes." />
+        </WrapPanel>
 
         <Border Classes="card" Padding="16">
           <StackPanel Spacing="8">

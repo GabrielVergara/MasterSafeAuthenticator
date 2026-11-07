@@ -100,6 +100,10 @@ public sealed partial class AboutViewModel : ViewModelBase
     [RelayCommand]
     private void OpenArticle() => OpenInBrowser(AppInfo.ArticleUrl);
 
+    /// <summary>Opens the donation page on the author's site. The payment itself happens on PayPal, never in the program.</summary>
+    [RelayCommand]
+    private void OpenSupport() => OpenInBrowser(AppInfo.SupportUrl);
+
     /// <summary>Opens one of <see cref="Links"/> in the browser.</summary>
     [RelayCommand]
     private void OpenLink(AboutLink? link)

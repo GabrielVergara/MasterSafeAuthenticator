@@ -1,7 +1,10 @@
 MasterSafe Authenticator Freeware License
-Version 1.0, 2026
+Version 1.1, 2026
 
 Copyright (c) 2026 Gabriel Vergara Ezcurdia. All rights reserved.
+
+MasterSafe Authenticator is NOT open source software. Its source code is
+published so that its security can be reviewed, not so that it can be reused.
 
 1. GRANT OF LICENSE
    You may download, install and use MasterSafe Authenticator (the "Software")
@@ -18,53 +21,97 @@ Copyright (c) 2026 Gabriel Vergara Ezcurdia. All rights reserved.
    is permitted. Commercial licenses may be offered in the future; contact the
    author to request one.
 
-3. REDISTRIBUTION
-   You may redistribute the Software free of charge, in its original unmodified
-   form and together with this license. You may not charge for it, and you may
-   not remove or alter any copyright notice, product name or author credit.
+3. REDISTRIBUTION OF THE PROGRAM
+   You may redistribute the official, signed release files of the Software free
+   of charge, in their original unmodified form and together with this
+   license. You may not charge for them, and you may not remove or alter any
+   copyright notice, product name or author credit.
 
 4. SOURCE CODE
-   The source code is made available so that its security can be reviewed. You
-   may read, build and modify it for your own personal, non-commercial use.
-   You may not publish or distribute modified versions or derivative works, or
-   use the product name, logo or author name for them, without written
-   permission from the author.
+   "Source Code" means the source code, build scripts, documentation, tests,
+   images and other files in the Software's repository, in whole or in part,
+   other than the third-party components described in section 8.
 
-5. RESTRICTIONS
+   You may read the Source Code and build it on your own devices, only to
+   review its security or for your own personal, non-commercial use. You may
+   change it on your own devices for the same purposes.
+
+   You may NOT, without the author's prior written permission:
+   a) publish, distribute, upload or otherwise make available the Source Code,
+      or any version built from changed Source Code, in original or modified
+      form;
+   b) license, relicense or offer the Source Code, or any part or derivative of
+      it, under any open source, free software, "source available" or other
+      license, or claim that any of it is available under such a license;
+   c) copy any part of the Source Code into another program, library, product,
+      service or project, or create and share derivative works of it;
+   d) use the Source Code, or any part of it, to train, fine-tune or evaluate a
+      machine learning model, or to build a dataset for that purpose;
+   e) use the product name, logo or author name for any changed or derived
+      version.
+
+   Short quotations in a security review, bug report or academic work, with a
+   reference to this repository, are permitted.
+
+5. FORKS ON GITHUB
+   GitHub's terms of service let users view and fork public repositories on
+   GitHub. A fork of this repository may be used only to view the Source Code,
+   to build it as allowed in section 4, and to propose changes back to this
+   repository in a pull request. A fork may not be used to publish, release,
+   distribute or maintain a separate version of the Software, and its contents
+   remain under this license. The author may ask for a fork that breaks this
+   license to be removed.
+
+6. CONTRIBUTIONS
+   If you submit a change, for example in a pull request, you confirm that you
+   wrote it or have the right to submit it, and you grant the author a
+   perpetual, worldwide, royalty-free, irrevocable right to use, change and
+   distribute it as part of the Software under this license or any later
+   license the author chooses. See CONTRIBUTING.md.
+
+7. RESTRICTIONS
    You may not remove or circumvent any security feature of the Software in
    order to attack other users, and you may not use the Software to violate any
    law or the rights of others.
 
-6. TRADEMARKS
+8. TRADEMARKS
    "MasterSafe" and the MasterSafe Authenticator logo are identifiers of the
    author. This license grants no right to use them except to refer to the
    unmodified Software.
 
-7. THIRD-PARTY COMPONENTS
+9. THIRD-PARTY COMPONENTS
    The Software includes third-party components (for example Avalonia,
    SkiaSharp, ZXing.Net, Konscious.Security.Cryptography and the .NET runtime),
    each of which remains under its own license. This license does not change
-   the terms of those components.
+   the terms of those components. See THIRD-PARTY-NOTICES.md.
 
-8. NO WARRANTY
+10. DONATIONS
+   Donations are voluntary gifts to support the author. A donation does not
+   grant any license, right, feature, support or warranty beyond this license,
+   and in particular does not permit commercial use.
+
+11. NO WARRANTY
    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
    FITNESS FOR A PARTICULAR PURPOSE, SECURITY AND NON-INFRINGEMENT. YOU ARE
    RESPONSIBLE FOR KEEPING YOUR MASTER PASSWORD AND YOUR OWN BACKUPS. IF YOU
    LOSE YOUR MASTER PASSWORD, YOUR DATA CANNOT BE RECOVERED.
 
-9. LIMITATION OF LIABILITY
+12. LIMITATION OF LIABILITY
    IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE, INCLUDING LOSS OF DATA OR ACCOUNT ACCESS.
 
-10. TERMINATION
+13. TERMINATION
    This license ends automatically if you breach any of its terms. On
-   termination you must stop using the Software and delete your copies.
+   termination you must stop using the Software and delete your copies,
+   including any copies or forks of the Source Code.
 
-11. CHANGES
+14. CHANGES
    The author may release future versions under different terms. Versions you
    have already received remain under the terms they were released with.
+   This version applies to the Source Code as published from 8 November 2026
+   and to every release from version 1.6.2.
 
 Contact: https://github.com/GabrielVergara/MasterSafeAuthenticator

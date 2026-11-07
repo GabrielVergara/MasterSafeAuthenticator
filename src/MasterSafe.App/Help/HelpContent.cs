@@ -528,10 +528,15 @@ public static class HelpContent
             "Who makes MasterSafe and where to read more.",
             """
             MasterSafe Authenticator is written by Gabriel Vergara Ezcurdia. It is free for personal,
-            non-commercial use; see the LICENSE file for the terms. Its third-party components and their
-            licences are listed in THIRD-PARTY-NOTICES.md.
+            non-commercial use; see the LICENSE file for the terms. It is not open source: the code is
+            published so its security can be reviewed, not to be copied or shared. Its third-party
+            components and their licences are listed in THIRD-PARTY-NOTICES.md.
+
+            If MasterSafe is useful to you, you can support it with a voluntary donation. It helps pay for
+            code signing and security fixes, and it does not unlock anything: every feature stays free.
 
             - Article about MasterSafe: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
+            - Support MasterSafe: https://www.gabriel-vergara.com/support-mastersafe/
             - Website: https://www.gabriel-vergara.com/
             - Source code, releases and issues: https://github.com/GabrielVergara/MasterSafeAuthenticator
 

@@ -127,6 +127,7 @@ main window opens. A left sidebar switches between Authenticator codes, Password
 Recovery, Vaults, Settings and Help; Lock vault and About are at the bottom. Every input field has a label above it.
 The sign-in screen has "Forgot your master password?", and the first-run screen has "I already have a vault file".
 The sign-in screen shows the version under its title. The About window is as tall as its content and follows the text size setting.
+Its **Support MasterSafe** button opens the donation page on the author's site; a donation is voluntary and unlocks nothing.
 Where every file is kept: [FileLocations.md](FileLocations.md).
 
 ## 7. Building, testing and packaging
@@ -192,6 +193,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
 | Settings, Text size 150%, then About | The About window is larger in the same proportion, nothing is cut off; it scrolls only if the screen is too small |
+| About, Support MasterSafe | The browser opens https://www.gabriel-vergara.com/support-mastersafe/ |
 | Lock the vault | The sign-in screen shows "MasterSafe Authenticator" and the version |
 | Passwords, New, switch the kind Login, Secure note, Payment card, Identity | Each kind shows its own fields; a value typed in a field stays when switching |
 | Settings, Easier reading | Letters and lines have more space on every page, nothing is cut off |

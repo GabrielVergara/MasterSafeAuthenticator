@@ -161,8 +161,9 @@ public sealed class AccessibilityTests
     {
         HeadlessUi.Run(() =>
         {
-            // The test screen is 1080 high, so larger sizes scroll there as they would on a small screen.
-            foreach (var scale in new[] { 1.0, 1.1 })
+            // The test screen is 1080 high and the window is about 1000 at 100%, so larger sizes scroll there as they
+            // would on a small screen.
+            foreach (var scale in new[] { 1.0, 1.05 })
             {
                 var about = new AboutWindow(scale, null);
                 about.Show();

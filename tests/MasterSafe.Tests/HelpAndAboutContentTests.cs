@@ -135,6 +135,20 @@ public sealed class HelpAndAboutContentTests
             "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases");
     }
 
+    [Fact]
+    public void TheSupportButton_OpensTheDonationPage_OnTheAuthorsSite()
+    {
+        var about = new AboutViewModel();
+        var opened = new List<string>();
+        about.UrlOpener = opened.Add;
+
+        about.OpenSupportCommand.Execute(null);
+
+        opened.Should().Equal("https://www.gabriel-vergara.com/support-mastersafe/");
+        AboutViewModel.IsAllowedLink("https://www.paypal.com/donate/").Should().BeFalse("the program only opens the author's own pages");
+        HelpContent.Topics.Single(t => t.Title.StartsWith("About")).Body.Should().Contain(AppInfo.SupportUrl);
+    }
+
     [Theory]
     [InlineData("https://www.gabriel-vergara.com/articles/mastersafe-authenticator/", true)]
     [InlineData("https://www.gabriel-vergara.com/", true)]

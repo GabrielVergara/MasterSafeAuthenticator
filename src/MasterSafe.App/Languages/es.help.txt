@@ -341,9 +341,12 @@ No pasa nada al iniciar MasterSafe: ya está en marcha y la ventana viene al fre
 title: Acerca de, licencia y soporte
 summary: Quién hace MasterSafe y dónde leer más.
 body:
-MasterSafe Authenticator está escrito por Gabriel Vergara Ezcurdia. Es gratuito para uso personal y no comercial; vea el archivo LICENSE para los términos. Sus componentes de terceros y sus licencias figuran en THIRD-PARTY-NOTICES.md.
+MasterSafe Authenticator está escrito por Gabriel Vergara Ezcurdia. Es gratuito para uso personal y no comercial; vea el archivo LICENSE para los términos. No es de código abierto: el código se publica para que se pueda revisar su seguridad, no para copiarlo ni compartirlo. Sus componentes de terceros y sus licencias figuran en THIRD-PARTY-NOTICES.md.
+
+Si MasterSafe le resulta útil, puede apoyarlo con una donación voluntaria. Ayuda a pagar la firma de código y las correcciones de seguridad, y no desbloquea nada: todas las funciones siguen siendo gratuitas.
 
 - Artículo sobre MasterSafe: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
+- Apoyar MasterSafe: https://www.gabriel-vergara.com/es/support-mastersafe/
 - Sitio web: https://www.gabriel-vergara.com/
 - Código fuente, versiones e incidencias: https://github.com/GabrielVergara/MasterSafeAuthenticator
 

@@ -15,10 +15,11 @@ reviewed carefully and some ideas will be declined to keep the program small and
 ## Licence of contributions
 
 MasterSafe is not open source. It is freeware for personal, non-commercial use, and its [LICENSE](LICENSE) does not allow
-publishing modified versions. You may still propose changes here. By opening a pull request you confirm that you wrote the
-change, or have the right to submit it, and you agree that the author may include it in MasterSafe and distribute it under
-the MasterSafe licence, including any later licence the author chooses for MasterSafe. If you cannot agree to this, please
-describe the change in an issue instead.
+publishing the code or a changed version anywhere. A fork on GitHub may only be used to propose changes back here.
+By opening a pull request you confirm that you wrote the change, or have the right to submit it, and you grant the author
+the rights in section 6 of the licence: to include it in MasterSafe and distribute it under the MasterSafe licence,
+including any later licence the author chooses for MasterSafe. If you cannot agree to this, please describe the change in
+an issue instead.
 
 ## Building and testing
 

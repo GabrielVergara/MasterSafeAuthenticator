@@ -1,6 +1,8 @@
 # Spanish (Español). Format: English text => translation. {0}, {1} stand for changing parts.
 About MasterSafe Authenticator => Acerca de MasterSafe Authenticator
 Close => Cerrar
+Support MasterSafe => Apoyar MasterSafe
+MasterSafe is free for personal use. A donation is voluntary and helps pay for code signing and security fixes. => MasterSafe es gratuito para uso personal. Una donación es voluntaria y ayuda a pagar la firma de código y las correcciones de seguridad.
 Read the article about MasterSafe => Leer el artículo sobre MasterSafe
 Learn more => Más información
 Open => Abrir

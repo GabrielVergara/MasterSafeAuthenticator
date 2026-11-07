@@ -1,6 +1,8 @@
 # Finnish (Suomi). Format: English text => translation. {0}, {1} stand for changing parts.
 About MasterSafe Authenticator => Tietoja: MasterSafe Authenticator
 Close => Sulje
+Support MasterSafe => Tue MasterSafea
+MasterSafe is free for personal use. A donation is voluntary and helps pay for code signing and security fixes. => MasterSafe on maksuton henkilökohtaiseen käyttöön. Lahjoitus on vapaaehtoinen ja auttaa maksamaan koodin allekirjoituksen ja tietoturvakorjaukset.
 Read the article about MasterSafe => Lue MasterSafea käsittelevä artikkeli
 Learn more => Lue lisää
 Open => Avaa

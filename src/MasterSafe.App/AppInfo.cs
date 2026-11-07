@@ -37,6 +37,9 @@ public static class AppInfo
     /// <summary>The security policy (how to report a vulnerability).</summary>
     public const string SecurityUrl = "https://github.com/GabrielVergara/MasterSafeAuthenticator/security/policy";
 
+    /// <summary>The page about donating to MasterSafe, on the author's site. It links on to PayPal.</summary>
+    public const string SupportUrl = "https://www.gabriel-vergara.com/support-mastersafe/";
+
     /// <summary>The author's web site.</summary>
     public const string WebsiteUrl = "https://www.gabriel-vergara.com/";
 

@@ -215,10 +215,19 @@ Please use the repository's **Security** tab on GitHub (Report a vulnerability) 
 Bug reports, ideas and translation reviews are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md) and the
 [Code of Conduct](CODE_OF_CONDUCT.md). For help using the program, see [SUPPORT.md](SUPPORT.md).
 
+## Support the project
+
+MasterSafe is free for personal use, with no ads, accounts or tracking. If it is useful to you, a donation helps pay
+for a Windows code signing certificate and the time for security fixes:
+[donate with PayPal](https://www.paypal.com/donate/?hosted_button_id=G5SZ7Z8U3EC3N) or read
+[what donations pay for](https://www.gabriel-vergara.com/support-mastersafe/). Donations are voluntary and do not
+grant a licence for commercial use.
+
 ## License
 
-MasterSafe Authenticator is **freeware for personal, non-commercial use**. See [LICENSE](LICENSE).
-The source is available for review and personal use; commercial use and distribution of modified
-versions are not permitted. Third-party components keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+MasterSafe Authenticator is **freeware for personal, non-commercial use**, and it is **not open source**. See [LICENSE](LICENSE).
+The source is published so its security can be reviewed. You may read it and build it for your own personal use, but you
+may not publish or distribute it or a changed version, put it under an open source or any other licence, copy it into
+another project, or use it to train AI models. Forks on GitHub may only be used to propose changes back. Third-party components keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Copyright (c) 2026 Gabriel Vergara Ezcurdia.
