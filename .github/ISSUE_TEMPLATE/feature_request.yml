@@ -1,0 +1,33 @@
+name: Idea or request
+description: Suggest something new or a change.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the idea. Please check the [roadmap](https://github.com/GabrielVergara/MasterSafeAuthenticator/blob/main/docs/Roadmap.md)
+        first: some features are planned, and some are left out on purpose to keep MasterSafe offline and simple.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you want to do
+      description: The problem or need, in your own words, rather than a solution.
+      placeholder: "When I have many cards, I want to ..."
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: Your idea for the screen or behaviour.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do today instead
+      description: Workarounds, or how another app does it.
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Privacy and security
+      options:
+        - label: The idea does not need MasterSafe to send my data to a server it does not send to today, or I explained above why it should.

@@ -1,0 +1,67 @@
+name: Bug report
+description: Something does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem.
+        **A security problem?** Do not use this form: report it privately from the Security tab (see SECURITY.md).
+        **Never paste** a vault, a backup, a password, a recovery key, a code secret or a QR code.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown on the sign-in screen and in About, for example 1.6.1.
+      placeholder: "1.6.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - Windows 11
+        - Windows 10
+        - Linux x64
+        - Linux arm64
+    validations:
+      required: true
+  - type: input
+    id: system-details
+    attributes:
+      label: System details
+      description: For Linux, the distribution and desktop. Also your text size or screen reader, if it matters.
+      placeholder: "Ubuntu 24.04, GNOME, text size 150%"
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you did
+      description: The steps, one per line, so the problem can be repeated.
+      placeholder: |
+        1. Open Passwords
+        2. Choose New
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Error messages and screenshots help. Hide any secret in a screenshot first.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before sending
+      options:
+        - label: This report contains no password, secret, recovery key, vault or backup.
+          required: true
+        - label: I am using the newest release, or I said above why not.

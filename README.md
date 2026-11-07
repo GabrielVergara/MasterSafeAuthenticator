@@ -210,6 +210,11 @@ The Windows WebAuthn (FIDO2) bindings are generated at build time by Microsoft.W
 
 Please use the repository's **Security** tab on GitHub (Report a vulnerability) instead of a public issue.
 
+## Contributing and help
+
+Bug reports, ideas and translation reviews are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md). For help using the program, see [SUPPORT.md](SUPPORT.md).
+
 ## License
 
 MasterSafe Authenticator is **freeware for personal, non-commercial use**. See [LICENSE](LICENSE).

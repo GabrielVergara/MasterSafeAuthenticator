@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem (privately)
+    url: https://github.com/GabrielVergara/MasterSafeAuthenticator/security/advisories/new
+    about: Never report a security problem in a public issue. This form is seen only by the maintainer.
+  - name: How to use MasterSafe
+    url: https://github.com/GabrielVergara/MasterSafeAuthenticator/blob/main/docs/Documentation.md
+    about: The user documentation, also in the Help page inside the program.
+  - name: Article about MasterSafe
+    url: https://www.gabriel-vergara.com/articles/mastersafe-authenticator/
+    about: Why MasterSafe exists and how it works.
