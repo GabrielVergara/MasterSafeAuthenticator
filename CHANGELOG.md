@@ -2,7 +2,12 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Not released yet
+## 1.6.2 (2026-11-08)
+
+### Logo
+- **The logo draws itself on the start screen.** The amber ring sweeps clockwise into the logo and the keyhole fades in,
+  once, in 1.6 seconds, ending on the usual logo. It replaces the separate progress bar. When animation effects are turned
+  off in Windows, the finished logo shows at once.
 
 ### Licence
 - **Licence version 1.1.** MasterSafe is not open source, and the licence now says so plainly. The code is published for

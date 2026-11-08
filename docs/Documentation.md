@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.6.1  
+**Version:** 1.6.2  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -193,6 +193,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Settings, Language, choose Suomi or Español, restart | Every screen, the Help and the messages are in that language; "Follow the system" uses the computer's language |
 | Tray menu, Lock vault; Settings, turn on Ctrl+Alt+L, then press it from another program | The vault locks both ways, also with the window hidden |
 | Settings, Text size 150%, then About | The About window is larger in the same proportion, nothing is cut off; it scrolls only if the screen is too small |
+| Start MasterSafe | The start screen draws the logo once, ring first, then the keyhole; with Windows "Animation effects" off the logo is shown finished |
 | About, Support MasterSafe | The browser opens https://www.gabriel-vergara.com/support-mastersafe/ |
 | Lock the vault | The sign-in screen shows "MasterSafe Authenticator" and the version |
 | Passwords, New, switch the kind Login, Secure note, Payment card, Identity | Each kind shows its own fields; a value typed in a field stays when switching |

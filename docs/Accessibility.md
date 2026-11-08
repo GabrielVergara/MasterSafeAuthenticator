@@ -12,7 +12,7 @@ This page says what is in place, how it is checked, and what is still missing. I
 | Low vision | A **Text and window size** setting (100 to 200%) and Ctrl and plus / minus / 0 at any time. The layout reflows instead of clipping |
 | Contrast | Light, dark and a **High contrast** theme (also chosen automatically when Windows high contrast is on and the theme is "Follow the system"). The colour pairs of the light and dark themes are checked against the 4.5:1 ratio by a test. Colour is never the only signal: errors, the strength bar and the recycle bin also use words and icons |
 | Time limits | The automatic lock shows a warning 30 seconds ahead with a "Keep unlocked" button, and every keypress or click counts as activity. The sign-in pause is shown in words and counts down in text |
-| Motion | The app has no animation apart from a thin progress bar for the code timer |
+| Motion | The only animations are the logo drawing itself once on the start screen (1.6 s) and a thin progress bar for the code timer. With "Animation effects" off in Windows, the start screen shows the finished logo at once |
 | Cognitive load | Plain language, one task per screen, confirmations for destructive actions with an undo (recycle bin), a first-run guide after a new vault is created, and errors that say what to do |
 | Motor | No action needs a double-click, a drag or a long press. Targets are at least the size of standard controls |
 
