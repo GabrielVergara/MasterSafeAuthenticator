@@ -53,6 +53,12 @@ public sealed record Argon2Parameters
 }
 
 /// <summary>Well-known <see cref="KeySlot.Type"/> values.</summary>
+/// <summary>
+/// The result of a master password change: the data key to keep using (the caller must wipe the old one) and the unlock
+/// methods that were removed because they held the old data key.
+/// </summary>
+public sealed record KeyRotation(byte[] DataKey, IReadOnlyList<KeySlotInfo> RemovedSlots);
+
 public static class SlotTypes
 {
     /// <summary>The master password (Argon2id).</summary>
@@ -174,6 +180,25 @@ public sealed record VaultSecurity
     public bool WebsiteIconsEnabled { get; init; }
 }
 
+/// <summary>
+/// Something that matters for security, such as an unlock, wrong passwords or an export. Kept inside the encrypted vault,
+/// never in a log file, and only on this computer: sync does not copy it.
+/// </summary>
+public sealed record SecurityEvent
+{
+    /// <summary>How many are kept. The oldest go first.</summary>
+    public const int MaxKept = 200;
+
+    /// <summary>When it happened.</summary>
+    public DateTimeOffset Utc { get; init; }
+
+    /// <summary>What happened, as a fixed code (see SecurityEvents in the app).</summary>
+    public string Kind { get; init; } = string.Empty;
+
+    /// <summary>A short detail, such as the unlock method or the number of wrong passwords. Never a secret.</summary>
+    public string Detail { get; init; } = string.Empty;
+}
+
 /// <summary>An item deleted for good, remembered so that sync does not bring it back from another computer.</summary>
 public sealed record Tombstone
 {
@@ -260,6 +285,9 @@ public sealed record VaultContents
 
     /// <summary>How this vault syncs. Null when it does not.</summary>
     public SyncSettings? Sync { get; init; }
+
+    /// <summary>Recent security events on this computer, newest first.</summary>
+    public IReadOnlyList<SecurityEvent> Events { get; init; } = [];
 
     /// <summary>
     /// The bytes of the files attached to password entries, by attachment id. They are not part of the JSON; they are

@@ -28,6 +28,9 @@ public sealed class VaultService : IVaultService
     private const int CurrentVersion = 3;
     private const int DataKeySize = 32;
 
+    /// <summary>The most slots of one type, such as spare security keys. Each one is another way in, so they stay few.</summary>
+    public const int MaxSlotsPerType = 5;
+
     private readonly IVaultRepository _repository;
     private readonly IEncryptionService _encryption;
     private readonly IMasterPasswordService _masterPassword;
@@ -196,7 +199,8 @@ public sealed class VaultService : IVaultService
     }
 
     /// <inheritdoc />
-    public async Task RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, CancellationToken cancellationToken = default)
+    public async Task<KeyRotation> RotateMasterPasswordAsync(
+        string currentPassword, string newPassword, Argon2Parameters? kdf = null, bool newDataKey = false, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(newPassword);
         kdf?.Validate();
@@ -206,23 +210,33 @@ public sealed class VaultService : IVaultService
         {
             var contents = await OpenContentsAsync(currentPassword, cancellationToken).ConfigureAwait(false);
             var created = await CreateVaultAsync(newPassword, contents, cancellationToken).ConfigureAwait(false);
-            CryptographicOperations.ZeroMemory(created);
             await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
-            return;
+            return new KeyRotation(created, []);
         }
 
-        var dataKey = UnwrapWithPassword(vault, currentPassword);
+        var oldKey = UnwrapWithPassword(vault, currentPassword);
+        var dataKey = newDataKey ? RandomNumberGenerator.GetBytes(DataKeySize) : (byte[])oldKey.Clone();
         try
         {
+            var contents = DecodeCurrent(vault, oldKey);
             var passwordSlot = FindSlot(vault, SlotTypes.Password);
             var replacement = CreatePasswordSlot(vault.VaultId, newPassword, dataKey, kdf ?? StrongerOf(passwordSlot.Kdf));
-            var slots = vault.Slots.Select(s => s.Id == passwordSlot.Id ? replacement : s).ToList();
-            await WriteCurrentAsync(vault.VaultId, slots, dataKey, DecodeCurrent(vault, dataKey), cancellationToken).ConfigureAwait(false);
+
+            // A hardware slot wraps the old data key and can only be rewrapped with the hardware present, so it goes.
+            var removed = newDataKey ? vault.Slots.Where(s => s.Type != SlotTypes.Password).ToList() : [];
+            var slots = vault.Slots.Except(removed).Select(s => s.Id == passwordSlot.Id ? replacement : s).ToList();
+            await WriteCurrentAsync(vault.VaultId, slots, dataKey, contents, cancellationToken).ConfigureAwait(false);
             await _repository.ForgetOldCopiesAsync(cancellationToken).ConfigureAwait(false);
+            return new KeyRotation(dataKey, removed.Select(s => new KeySlotInfo(s.Id, s.Type, s.Label, s.CreatedUtc, s.Kdf)).ToList());
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(dataKey);
+            throw;
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(dataKey);
+            CryptographicOperations.ZeroMemory(oldKey);
         }
     }
 
@@ -259,8 +273,19 @@ public sealed class VaultService : IVaultService
 
         CryptographicOperations.ZeroMemory(DecodeCurrentBytes(vault, dataKey));
 
-        // Only one slot per hardware method: enrolling again replaces the old one.
-        var existing = vault.Slots.FirstOrDefault(s => s.Type == provider.SlotType);
+        // One slot per hardware method, where enrolling again replaces the old one, unless the method allows spares.
+        var sameType = vault.Slots.Where(s => s.Type == provider.SlotType).ToList();
+        if (provider.AllowsSeveral && sameType.Count >= MaxSlotsPerType)
+        {
+            throw new InvalidOperationException($"A vault can have up to {MaxSlotsPerType} of these. Remove one first.");
+        }
+
+        var existing = provider.AllowsSeveral ? null : sameType.FirstOrDefault();
+        if (provider.AllowsSeveral && sameType.Count > 0 && string.Equals(label, provider.DisplayName, StringComparison.Ordinal))
+        {
+            label = $"{provider.DisplayName} {sameType.Count + 1}";
+        }
+
         var slotId = NewId();
         var enrollment = await provider.EnrollAsync(slotId, cancellationToken).ConfigureAwait(false);
         try
@@ -298,15 +323,22 @@ public sealed class VaultService : IVaultService
         ArgumentNullException.ThrowIfNull(provider);
 
         var vault = await LoadRequiredAsync(cancellationToken).ConfigureAwait(false);
-        var slot = vault.Version >= CurrentVersion ? vault.Slots.FirstOrDefault(s => s.Type == provider.SlotType) : null;
-        if (slot is null)
+        var candidates = vault.Version >= CurrentVersion ? vault.Slots.Where(s => s.Type == provider.SlotType).ToList() : [];
+        if (candidates.Count == 0)
         {
             throw new InvalidOperationException($"{provider.DisplayName} is not set up for this vault.");
         }
 
-        var key = await provider.DeriveAsync(slot.Id, Convert.FromBase64String(slot.Salt), cancellationToken).ConfigureAwait(false);
+        var (slotId, key) = await provider.DeriveAnyAsync(
+            candidates.Select(s => (s.Id, Convert.FromBase64String(s.Salt))).ToList(), cancellationToken).ConfigureAwait(false);
+        var slot = candidates.FirstOrDefault(s => s.Id == slotId);
         try
         {
+            if (slot is null)
+            {
+                throw new InvalidDataException("The unlock method answered for a slot this vault does not have.");
+            }
+
             return UnwrapSlot(vault.VaultId, slot, key);
         }
         finally

@@ -42,10 +42,11 @@ Añadir una cuenta:
 - Imagen de código QR: arrastre una imagen PNG, JPG o BMP del código QR a la ventana con la bóveda desbloqueada, o elíjala con «Elegir una imagen...». Se pueden soltar varias imágenes a la vez. Una cuenta que ya está en su bóveda no se añade dos veces.
 
 Traer datos de KeePass o KeePassXC:
-- En KeePass elija Archivo, Exportar, KeePass XML (2.x). En KeePassXC elija Base de datos, Exportar a CSV (o XML). Después use «Elegir un archivo exportado...» en la página Importar, o suelte el archivo en la ventana.
+- Elija la propia base de datos (.kdbx) con «Elegir un archivo exportado...» en la página Importar, o suéltela en la ventana. Escriba su contraseña, elija su archivo de clave si lo tiene y pulse Abrir. Las bases de datos de KeePass 2 y KeePassXC se abren directamente (AES-256 o ChaCha20). Una base cifrada con Twofish debe cambiarse antes a AES-256 en KeePass. La base de datos solo se lee, nunca se cambia.
+- También puede importar una exportación KeePass XML (2.x) o CSV de KeePassXC.
 - Un resumen muestra qué se añadirá y qué se omite (entradas de la papelera, versiones antiguas, duplicados, archivos demasiado grandes). No se añade nada hasta que elija Importar.
-- Los grupos pasan a ser carpetas, los campos de contraseña de un solo uso pasan a ser cuentas del autenticador y los archivos adjuntos (exportaciones KeePass XML) vienen incluidos, hasta 5 MB cada uno.
-- El archivo exportado no está cifrado. Elimínelo en cuanto lo haya importado. La página tiene un botón «Mostrar archivo» para ello. Abrir archivos .kdbx directamente aún no es posible.
+- Los grupos pasan a ser carpetas, los campos de contraseña de un solo uso pasan a ser cuentas del autenticador y los archivos adjuntos vienen incluidos, hasta 5 MB cada uno. Los demás campos, como un PIN, pasan a ser campos extra, ocultos si KeePass los protegía.
+- Una exportación XML o CSV no está cifrada. Elimínela en cuanto la haya importado. La página tiene un botón «Mostrar archivo» para ello.
 
 MasterSafe comprueba cada cuenta y archivo que lee. Los archivos dañados o inesperados se rechazan con un mensaje en vez de importarse a medias.
 
@@ -226,9 +227,9 @@ body:
 Además de la contraseña maestra puede desbloquear con:
 
 - Windows Hello: usa una clave que guarda Windows (en el TPM si su equipo lo tiene) y que solo funciona tras verificarse con su PIN, huella o rostro.
-- Una llave de seguridad FIDO2: la llave calcula un secreto que nunca sale de ella. Necesita el PIN de la llave y un toque. La mayoría de las llaves actuales admiten la función hmac-secret que esto requiere. Se puede configurar una llave de seguridad por bóveda.
+- Una llave de seguridad FIDO2: la llave calcula un secreto que nunca sale de ella. Necesita el PIN de la llave y un toque. La mayoría de las llaves actuales admiten la función hmac-secret que esto requiere. Puede configurar hasta 5 llaves por bóveda, así una llave de repuesto sigue funcionando si pierde una: al desbloquear, toque la que tenga.
 
-Añádalos o quítelos en Ajustes. La contraseña maestra siempre sigue funcionando y no se puede quitar. Los intentos fallidos con Windows Hello o una llave están limitados por Windows y por la propia llave.
+Añádalos o quítelos en Ajustes. La contraseña maestra siempre sigue funcionando y no se puede quitar. Cambiar la contraseña maestra da a la bóveda una clave de cifrado nueva, así que Windows Hello y las llaves de seguridad se quitan y hay que añadirlos de nuevo. Los intentos fallidos con Windows Hello o una llave están limitados por Windows y por la propia llave.
 
 ### Privacy and locking
 title: Privacidad y bloqueo
@@ -243,6 +244,9 @@ Ajustes, «Privacidad y bloqueo» y General:
 - Mantener la ventana fuera de las capturas y de la pantalla compartida (activado por defecto, Windows): la ventana se ve negra en las capturas. Desactívelo si necesita hacer una captura de MasterSafe.
 - Portapapeles: elija 30 segundos, 1 minuto o 2 minutos. Las copias se mantienen fuera del historial del portapapeles de Windows y del portapapeles en la nube.
 - Al bloquear se quitan los datos descifrados de las pantallas respaldadas en memoria y se borra la clave de sesión.
+- Copiar se pausa 30 segundos tras copiar 20 secretos en un minuto. Una persona nunca lo hace; un programa o un agente de IA que maneje la aplicación abierta sí podría. Queda registrado abajo.
+
+Los eventos de seguridad, en Ajustes, muestran los desbloqueos, contraseñas erróneas, exportaciones y cambios recientes en este equipo. Se guardan dentro de la bóveda cifrada, nunca en un archivo de registro. Si ve uno que no hizo usted, cambie su contraseña maestra.
 
 Las contraseñas visibles se ocultan cuando la ventana pierde el foco, salvo que lo desactive. Estos ajustes se guardan dentro de su bóveda cifrada, así que un programa que edite el archivo de ajustes no puede desactivarlos cuando la bóveda está abierta.
 
@@ -258,7 +262,7 @@ body:
 - Recordatorios: muestre u oculte los avisos de la página de códigos (clave de recuperación, copias, actualizaciones).
 - Seguir en la bandeja: cerrar o minimizar la ventana la oculta en el área de notificaciones en vez de salir. Ábrala de nuevo con un clic en el icono de la bandeja. Su menú muestra u oculta la ventana, bloquea la bóveda, abre Acerca de o sale.
 - Salir: el botón Salir de la barra lateral y de la pantalla de entrada bloquea la bóveda y cierra MasterSafe por completo, sea cual sea el ajuste de la bandeja.
-- Cambiar la contraseña maestra: vuelve a proteger su bóveda con una contraseña nueva. Windows Hello y la llave de seguridad siguen funcionando.
+- Cambiar la contraseña maestra: vuelve a proteger su bóveda con una contraseña y una clave de cifrado nuevas. Después añada de nuevo Windows Hello y las llaves de seguridad.
 
 En Windows 11 un icono nuevo de la bandeja empieza en la zona de iconos ocultos (la flecha junto al reloj). Para que esté siempre visible, arrástrelo a la barra de tareas o actívelo en Configuración, Personalización, Barra de tareas, Otros iconos de la bandeja del sistema.
 

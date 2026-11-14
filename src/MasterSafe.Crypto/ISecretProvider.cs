@@ -36,4 +36,18 @@ public interface ISecretProvider
 
     /// <summary>Deletes the credential created for a slot. Does nothing if it no longer exists.</summary>
     Task RemoveAsync(string slotId, CancellationToken cancellationToken = default);
+
+    /// <summary>True when a vault may hold several slots of this type, for example a spare security key.</summary>
+    bool AllowsSeveral => false;
+
+    /// <summary>
+    /// Derives the key of whichever enrolled slot the user can present, in one request, and says which one it was.
+    /// The default asks for the first slot only.
+    /// </summary>
+    async Task<(string SlotId, byte[] Key)> DeriveAnyAsync(IReadOnlyList<(string SlotId, byte[] Data)> slots, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(slots);
+        var first = slots[0];
+        return (first.SlotId, await DeriveAsync(first.SlotId, first.Data, cancellationToken).ConfigureAwait(false));
+    }
 }

@@ -152,6 +152,21 @@
         </StackPanel>
       </Border>
 
+      <Border Classes="card" IsVisible="{Binding Events, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Security events" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Unlocks, wrong passwords, exports and changes on this computer, kept inside the encrypted vault. If you see one you did not make, change your master password." />
+          <ItemsControl ItemsSource="{Binding Events.Lines}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <TextBlock Tag="data" Text="{Binding}" TextWrapping="Wrap" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <Border Classes="card">
         <StackPanel Spacing="12">
           <TextBlock Text="Strength of the password protection" Classes="h2" />

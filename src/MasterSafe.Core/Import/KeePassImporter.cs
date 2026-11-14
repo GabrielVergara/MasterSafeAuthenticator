@@ -54,9 +54,7 @@ public static class KeePassImporter
 
         if (bytes.Length >= 4 && bytes[0] == 0x03 && bytes[1] == 0xD9 && bytes[2] == 0xA2 && bytes[3] == 0x9A)
         {
-            throw new KeePassImportException(
-                "This is a KeePass database (.kdbx). Opening it directly is not supported yet. In KeePass choose File, Export, KeePass XML (2.x), "
-                + "or in KeePassXC choose Database, Export to CSV, and import that file.");
+            throw new KeePassImportException("This is a KeePass database (.kdbx). Choose it on the Import page and enter its password to open it.");
         }
 
         if (bytes.Length >= 4 && bytes[0] == (byte)'P' && bytes[1] == (byte)'K' && bytes[2] == 3 && bytes[3] == 4)
@@ -220,6 +218,7 @@ public static class KeePassImporter
             var attachments = ReadAttachments(entry, pool, result);
 
             var fields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var hidden = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var field in entry.Elements("String"))
             {
                 var key = field.Element("Key")?.Value;
@@ -241,6 +240,10 @@ public static class KeePassImporter
                 }
 
                 fields[key] = value.Value;
+                if (string.Equals((string?)value.Attribute("ProtectInMemory"), "True", StringComparison.OrdinalIgnoreCase))
+                {
+                    hidden.Add(key);
+                }
             }
 
             var modified = DateTimeOffset.TryParse(
@@ -261,7 +264,8 @@ public static class KeePassImporter
                 OtpValue(fields),
                 here,
                 modified,
-                attachments);
+                attachments,
+                ExtraFields(fields, hidden));
         }
 
         foreach (var child in group.Elements("Group"))
@@ -344,6 +348,26 @@ public static class KeePassImporter
         }
     }
 
+    private static readonly HashSet<string> StandardFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Title", "UserName", "Password", "URL", "Notes", "otp",
+    };
+
+    /// <summary>
+    /// The entry's own fields, such as a PIN or a recovery code, kept as extra fields. A field KeePass protected stays
+    /// hidden. One-time-password settings and KeePassXC's internal fields are left out.
+    /// </summary>
+    private static List<CustomField> ExtraFields(Dictionary<string, string> fields, HashSet<string> hidden)
+        => fields
+            .Where(f => !StandardFields.Contains(f.Key)
+                && !f.Key.StartsWith("TimeOtp-", StringComparison.OrdinalIgnoreCase)
+                && !f.Key.StartsWith("KPXC_", StringComparison.OrdinalIgnoreCase)
+                && !f.Key.StartsWith("_", StringComparison.Ordinal)
+                && f.Value.Length > 0)
+            .Take(CustomField.MaxPerEntry)
+            .Select(f => new CustomField { Name = f.Key, Value = f.Value, IsSecret = hidden.Contains(f.Key) })
+            .ToList();
+
     /// <summary>Collects the one-time-password settings of an entry into an otpauth link or a key string.</summary>
     private static string OtpValue(Dictionary<string, string> fields)
     {
@@ -378,7 +402,8 @@ public static class KeePassImporter
         string otp,
         List<string> groupPath,
         DateTimeOffset modified,
-        List<PasswordAttachment> attachments)
+        List<PasswordAttachment> attachments,
+        IReadOnlyList<CustomField>? extra = null)
     {
         var folder = FolderPath.Normalize(string.Join(FolderPath.Separator, groupPath));
         IReadOnlyList<string> tags = folder.Length == 0 ? [] : [folder];
@@ -395,6 +420,7 @@ public static class KeePassImporter
                 Notes = notes,
                 Folder = folder,
                 Attachments = attachments,
+                Fields = extra ?? [],
                 ModifiedUtc = modified,
             });
             added = true;

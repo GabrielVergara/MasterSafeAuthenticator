@@ -15,19 +15,18 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
 - 1.6.0: one running copy, security settings in the vault, network shares refused until confirmed, older vault copies noticed, version bound into the release signature; letter and website icons, hidden codes, your own order and groups, more health checks and expiry dates; notes, cards, identities, extra fields and a tag filter; full encrypted backups, KeePass export, imports from Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator; sync through your own folder or WebDAV server; a printed emergency sheet; a review pack in [SecurityReview.md](SecurityReview.md).
+- 1.7.0: a new data key with every new master password, spare security keys, security events, a pause after many quick copies, KeePass databases opened directly, a countdown ring.
 - 1.6.2: the logo draws itself on the start screen; licence 1.1 (not open source); a Support MasterSafe button.
 - 1.6.1: changing the kind of a new item changes its fields; the About window fits its content and follows the text size; the sign-in screen shows the version.
 - 1.5.1: attacker-style review: trusted recovery key kept in the vault, stronger password protection kept when the password changes, every lock and Exit clears a copied secret, process memory protection on Windows and Linux. Linux tests can also run in Docker.
 
-## Next (1.7): deep protection
+## Next (1.8): deep protection
 
 | Item | Why |
 | --- | --- |
-| Data key rotation | Old copies and exported backups stop being useful after a password change |
 | Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed |
 | Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |
 | Keep secrets out of .NET strings | Hold decrypted passwords as wipeable buffers and decrypt only while copying. A large internal change that touches every screen |
-| Event history | A small encrypted list of recent security events (failed sign-ins, exports, saved attachments), shown in Settings |
 | Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
 | Printable large-print recovery sheet | A recovery copy that does not depend on a file |
 | Key file (optional) | A small file needed alongside the master password, so a stolen vault cannot be guessed without it. Easier to move between computers than binding to one |
@@ -36,13 +35,14 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 
 The last three change how a vault is opened, so they come last and need migration and rollback tests.
 
-## 1.8: KeePass and more keys
+## Next after that
 
 | Item | Notes |
 | --- | --- |
-| **KeePass import, step 2: open `.kdbx` files directly** | See the plan below |
-| Several security keys per vault | A spare key means a lost key does not lock you out of the quick unlock |
+| Android test version | First the codes only: open the synced vault, show and copy codes, unlock with a fingerprint. Then passwords. Same vault format and sync |
+| winget and Flathub | Free, and easier to find than a GitHub download |
 | Linux hardware unlock | FIDO2 through libfido2 |
+| Ignore simulated input for copying (optional) | On Windows, input made by another program is marked. MasterSafe could refuse copies started that way. Off by default, because voice control and other assistive tools work like that |
 
 ## Later
 
@@ -140,7 +140,7 @@ licensed helpers (for example BouncyCastle, MIT, for the ChaCha20 and Salsa20 st
 - Safe parsing: DTDs and external entities are disabled, document size and entry counts are limited.
 - The export file is **unencrypted**. The app warns about this and offers to open the folder so you can delete it.
 
-### Step 2: open `.kdbx` 3.1 and 4.x directly (read only)
+### Step 2: open `.kdbx` 3.1 and 4.x directly (read only, done in 1.7)
 
 - Password, key file, or both. Supports the KDFs KeePass uses (AES-KDF, Argon2d, Argon2id), the outer ciphers
   (AES-256, ChaCha20), the HMAC block stream, gzip, and protected values.

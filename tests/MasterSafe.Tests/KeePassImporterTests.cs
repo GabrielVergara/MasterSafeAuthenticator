@@ -249,14 +249,14 @@ public sealed class KeePassImporterTests : IDisposable
     }
 
     [Fact]
-    public void ReadFile_OfAKdbxDatabase_ExplainsHowToExport()
+    public void ReadFile_OfAKdbxDatabase_SaysToOpenItWithItsPassword()
     {
         var path = Path.Combine(_folder, "db.kdbx");
         File.WriteAllBytes(path, [0x03, 0xD9, 0xA2, 0x9A, 0x67, 0xFB, 0x4B, 0xB5, 0, 0, 4, 0]);
 
         var act = () => KeePassImporter.ReadFile(path);
 
-        act.Should().Throw<KeePassImportException>().WithMessage("*Export*");
+        act.Should().Throw<KeePassImportException>().WithMessage("*enter its password*");
     }
 
     [Fact]

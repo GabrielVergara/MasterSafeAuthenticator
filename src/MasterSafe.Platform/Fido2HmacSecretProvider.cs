@@ -72,7 +72,7 @@ public sealed unsafe class Fido2HmacSecretProvider : ISecretProvider
         {
             var salt = RandomNumberGenerator.GetBytes(SaltLength);
             var credentialId = CreateCredential();
-            var secret = GetHmacSecret(credentialId, salt);
+            var (_, secret) = GetHmacSecret([(credentialId, salt)]);
             try
             {
                 return new SecretEnrollment(Pack(credentialId, salt), DeriveKey(secret, slotId));
@@ -90,11 +90,39 @@ public sealed unsafe class Fido2HmacSecretProvider : ISecretProvider
 
         return Task.Run(() =>
         {
-            var (credentialId, salt) = Unpack(enrollmentData);
-            var secret = GetHmacSecret(credentialId, salt);
+            var (_, secret) = GetHmacSecret([Unpack(enrollmentData)]);
             try
             {
                 return DeriveKey(secret, slotId);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(secret);
+            }
+        }, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public bool AllowsSeveral => true;
+
+    /// <inheritdoc />
+    public Task<(string SlotId, byte[] Key)> DeriveAnyAsync(IReadOnlyList<(string SlotId, byte[] Data)> slots, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(slots);
+        var enrolled = slots.Select(s => (s.SlotId, Unpack(s.Data))).ToList();
+
+        // One request lists every enrolled key, so the user touches whichever one they have, and Windows says which it was.
+        return Task.Run(() =>
+        {
+            var (credentialId, secret) = GetHmacSecret(enrolled.Select(e => e.Item2).ToList());
+            try
+            {
+                var match = enrolled.First(e => e.Item2.CredentialId.AsSpan().SequenceEqual(credentialId));
+                return (match.SlotId, DeriveKey(secret, match.SlotId));
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("The security key answered for a credential this vault does not have.");
             }
             finally
             {
@@ -208,29 +236,39 @@ public sealed unsafe class Fido2HmacSecretProvider : ISecretProvider
         return false;
     }
 
-    private static byte[] GetHmacSecret(byte[] credentialId, byte[] salt)
+    /// <summary>Asks for any of the given credentials, each with its own salt, and returns the one used and its secret.</summary>
+    private static (byte[] CredentialId, byte[] Secret) GetHmacSecret(IReadOnlyList<(byte[] CredentialId, byte[] Salt)> credentials)
     {
         var apiVersion = ApiVersion();
         using var native = new NativeScope();
 
         var clientData = ClientData(native, "webauthn.get");
 
-        var credential = native.Alloc<WEBAUTHN_CREDENTIAL_EX>();
-        *credential = new WEBAUTHN_CREDENTIAL_EX
+        var count = credentials.Count;
+        var pointers = (WEBAUTHN_CREDENTIAL_EX**)native.Alloc(sizeof(nint) * count);
+        var salted = (WEBAUTHN_CRED_WITH_HMAC_SECRET_SALT*)native.Alloc(sizeof(WEBAUTHN_CRED_WITH_HMAC_SECRET_SALT) * count);
+        for (var i = 0; i < count; i++)
         {
-            dwVersion = 1,
-            cbId = (uint)credentialId.Length,
-            pbId = native.Bytes(credentialId),
-            pwszCredentialType = native.Text("public-key"),
-            dwTransports = 0,
-        };
-        var credentialPointer = native.Alloc<nint>();
-        *credentialPointer = (nint)credential;
-        var allowList = new WEBAUTHN_CREDENTIAL_LIST { cCredentials = 1, ppCredentials = (WEBAUTHN_CREDENTIAL_EX**)credentialPointer };
+            var (credentialId, salt) = credentials[i];
+            var id = native.Bytes(credentialId);
+            var credential = native.Alloc<WEBAUTHN_CREDENTIAL_EX>();
+            *credential = new WEBAUTHN_CREDENTIAL_EX
+            {
+                dwVersion = 1,
+                cbId = (uint)credentialId.Length,
+                pbId = id,
+                pwszCredentialType = native.Text("public-key"),
+                dwTransports = 0,
+            };
+            pointers[i] = credential;
 
-        var saltStruct = native.Alloc<WEBAUTHN_HMAC_SECRET_SALT>();
-        *saltStruct = new WEBAUTHN_HMAC_SECRET_SALT { cbFirst = (uint)salt.Length, pbFirst = native.Bytes(salt) };
-        var saltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES { pGlobalHmacSalt = saltStruct };
+            var saltStruct = native.Alloc<WEBAUTHN_HMAC_SECRET_SALT>();
+            *saltStruct = new WEBAUTHN_HMAC_SECRET_SALT { cbFirst = (uint)salt.Length, pbFirst = native.Bytes(salt) };
+            salted[i] = new WEBAUTHN_CRED_WITH_HMAC_SECRET_SALT { cbCredID = (uint)credentialId.Length, pbCredID = id, pHmacSecretSalt = saltStruct };
+        }
+
+        var allowList = new WEBAUTHN_CREDENTIAL_LIST { cCredentials = (uint)count, ppCredentials = pointers };
+        var saltValues = new WEBAUTHN_HMAC_SECRET_SALT_VALUES { cCredWithHmacSecretSaltList = (uint)count, pCredWithHmacSecretSaltList = salted };
 
         var options = new WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS
         {
@@ -257,7 +295,8 @@ public sealed unsafe class Fido2HmacSecretProvider : ISecretProvider
                 throw new InvalidOperationException("The security key did not return a secret. It may not support hmac-secret.");
             }
 
-            return new ReadOnlySpan<byte>(assertion->pHmacSecret->pbFirst, SaltLength).ToArray();
+            var used = new ReadOnlySpan<byte>(assertion->Credential.pbId, (int)assertion->Credential.cbId).ToArray();
+            return (used, new ReadOnlySpan<byte>(assertion->pHmacSecret->pbFirst, SaltLength).ToArray());
         }
         finally
         {
@@ -358,6 +397,14 @@ public sealed unsafe class Fido2HmacSecretProvider : ISecretProvider
             new Span<byte>((void*)pointer, sizeof(T)).Clear();
             _allocations.Add(pointer);
             return (T*)pointer;
+        }
+
+        public void* Alloc(int bytes)
+        {
+            var pointer = Marshal.AllocHGlobal(Math.Max(1, bytes));
+            new Span<byte>((void*)pointer, Math.Max(1, bytes)).Clear();
+            _allocations.Add(pointer);
+            return (void*)pointer;
         }
 
         public void Dispose()

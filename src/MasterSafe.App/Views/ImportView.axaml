@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:MasterSafe.App.Views"
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.ImportView"
              x:DataType="vm:ImportViewModel">
@@ -26,10 +27,24 @@
       <StackPanel Spacing="10">
         <TextBlock Text="From another app" Classes="h2" />
         <TextBlock TextWrapping="Wrap" Classes="hint"
-                   Text="Export from KeePass, KeePassXC, Bitwarden, 1Password, Proton Pass, Aegis or 2FAS without a password on the export, then choose the file here. A Google Authenticator export QR code goes in the link box or the image box above. You see a summary first and nothing is added until you confirm." />
+                   Text="Choose a KeePass database (.kdbx) directly, or export from KeePassXC, Bitwarden, 1Password, Proton Pass, Aegis or 2FAS without a password on the export, then choose the file here. A Google Authenticator export QR code goes in the link box or the image box above. You see a summary first and nothing is added until you confirm." />
         <TextBlock TextWrapping="Wrap" Classes="hint"
                    Text="The export file is not encrypted. Delete it as soon as you have imported it." />
         <Button Content="Choose an export file..." HorizontalAlignment="Left" Command="{Binding ChooseFileCommand}" />
+        <StackPanel Spacing="8" IsVisible="{Binding NeedsDatabaseKey}">
+          <TextBlock Text="KeePass database password" Classes="label" />
+          <v:SecretTextBox Classes="revealPasswordButton" Text="{Binding DatabasePassword, Mode=TwoWay}"
+                           AutomationProperties.Name="KeePass database password">
+            <v:SecretTextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding OpenDatabaseCommand}" />
+            </v:SecretTextBox.KeyBindings>
+          </v:SecretTextBox>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Choose a key file..." Command="{Binding ChooseKeyFileCommand}" />
+            <TextBlock VerticalAlignment="Center" Classes="hint" Text="{Binding KeyFilePath}" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <Button Classes="accent" Content="Open" HorizontalAlignment="Left" Command="{Binding OpenDatabaseCommand}" />
+        </StackPanel>
         <StackPanel Spacing="8" IsVisible="{Binding HasPreview}">
           <ItemsControl ItemsSource="{Binding Preview}">
             <ItemsControl.ItemTemplate>

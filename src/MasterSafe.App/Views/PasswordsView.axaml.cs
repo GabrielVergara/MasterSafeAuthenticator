@@ -371,7 +371,7 @@ public partial class PasswordsView : UserControl
     {
         if (_vm is not null && !await ClipboardHelper.CopyAsync(this, text))
         {
-            _vm.Status = "Could not copy: the clipboard is in use by another program. Try again.";
+            _vm.Status = ClipboardHelper.FailureMessage;
         }
     }
 }

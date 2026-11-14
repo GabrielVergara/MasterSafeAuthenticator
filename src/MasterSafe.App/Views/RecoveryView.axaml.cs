@@ -19,7 +19,7 @@ public partial class RecoveryView : UserControl
             var copied = await ClipboardHelper.CopyAsync(this, vm.GeneratedPassphrase);
             vm.Status = copied
                 ? $"Copied the passphrase. The clipboard clears in {Services.ClipboardPolicy.ClearAfterText}."
-                : "Could not copy: the clipboard is in use by another program. Try again.";
+                : ClipboardHelper.FailureMessage;
         }
     }
 }

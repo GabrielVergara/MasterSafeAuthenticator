@@ -131,6 +131,19 @@ public sealed class FuzzTests
     }
 
     [Fact]
+    public void KeePassDatabases_AreRefusedWhenDamaged()
+    {
+        // Cheap key derivation, so each round costs milliseconds: 3.1 with few AES rounds, 4.x as MasterSafe exports it.
+        var version3 = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Fixtures", "kdbx", "kdbx3-aes-aeskdf.kdbx"));
+        var fast = new Argon2Parameters { MemorySizeKib = 1024, Iterations = 1, DegreeOfParallelism = 1, KeyLength = 32 };
+        var version4 = MasterSafe.Backup.KdbxWriter.Write(
+            new VaultContents { Passwords = [new PasswordEntry { Title = "T", Password = "p", Folder = "F" }] }, "fuzz", fast);
+
+        Run("KDBX 3.1", version3, d => KeePassImporter.ParseXml(MasterSafe.Backup.KdbxReader.ReadXml(d, "fixture-kdbx-3", null)), Iterations / 4);
+        Run("KDBX 4", version4, d => KeePassImporter.ParseXml(MasterSafe.Backup.KdbxReader.ReadXml(d, "fuzz", null)), Iterations / 4);
+    }
+
+    [Fact]
     public void TheVaultContents_AreRefusedWhenDamaged()
     {
         var fileId = Guid.NewGuid();

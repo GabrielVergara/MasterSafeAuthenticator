@@ -5,6 +5,7 @@
 
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Services;
@@ -26,6 +27,9 @@ public enum BackupProviderKind
 /// </summary>
 public sealed partial class BackupViewModel : ViewModelBase
 {
+    /// <summary>Told what was exported, for the security events; set by the shell.</summary>
+    public Action<string>? Exported { get; set; }
+
     private readonly IBackupService _backupService;
 
     [ObservableProperty]
@@ -137,6 +141,7 @@ public sealed partial class BackupViewModel : ViewModelBase
             var contents = ContentsProvider();
             var password = MasterPassword;
             await File.WriteAllBytesAsync(path, await Task.Run(() => KdbxWriter.Write(contents, password)));
+            Exported?.Invoke("KeePass database");
             Status = $"Saved {System.IO.Path.GetFileName(path)}. It opens in KeePass and KeePassXC with the password you typed. Recycle bin items and earlier versions are not included.";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -176,6 +181,7 @@ public sealed partial class BackupViewModel : ViewModelBase
         try
         {
             var location = await _backupService.ExportAsync(accounts, MasterPassword, provider!).ConfigureAwait(false);
+            Dispatcher.UIThread.Post(() => Exported?.Invoke("encrypted backup"));
             await RefreshAsync(provider).ConfigureAwait(false);
             Status = $"Backup saved: {System.IO.Path.GetFileName(location)}";
             return true;

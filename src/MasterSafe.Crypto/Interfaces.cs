@@ -85,10 +85,12 @@ public interface IVaultService
     Task SaveAsync(string masterPassword, IEnumerable<MasterSafe.Core.OtpAccount> accounts, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Re-encrypts the vault under a new master password (key rotation). With <paramref name="kdf"/> the new password slot
-    /// uses those key-derivation settings, which is how an existing vault is moved to stronger ones.
+    /// Re-encrypts the vault under a new master password. With <paramref name="kdf"/> the new password slot uses those
+    /// key-derivation settings, which is how an existing vault is moved to stronger ones. With <paramref name="newDataKey"/>
+    /// the contents are also encrypted with a new random data key, so anyone who learned the old key or has an old copy and
+    /// the old password cannot read what is saved from now on. Hardware unlock methods hold the old key and are removed then.
     /// </summary>
-    Task RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, CancellationToken cancellationToken = default);
+    Task<KeyRotation> RotateMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null, bool newDataKey = false, CancellationToken cancellationToken = default);
 
     /// <summary>The random identifier of the vault, or null for a legacy vault or when there is none.</summary>
     Task<string?> GetVaultIdAsync(CancellationToken cancellationToken = default);

@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using MasterSafe.App.Services;
 using MasterSafe.App.ViewModels;
 using MasterSafe.App.Views;
@@ -142,6 +143,7 @@ public partial class App : Application
 
         viewModel.ExitRequested = ExitProgram;
         viewModel.ClearClipboard = ClipboardHelper.ClearNowAsync;
+        CopyGuard.Shared.Paused += (_, _) => Dispatcher.UIThread.Post(() => viewModel.SecurityLog.Record(SecurityEventsViewModel.CopyingPaused));
 
         _tray = new AvaloniaSystemTray();
         _tray.Show(AppInfo.ProductName, TrayCommands.DefaultMenu);

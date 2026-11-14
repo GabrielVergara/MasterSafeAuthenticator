@@ -19,11 +19,16 @@ internal static class ClipboardHelper
 {
     private static readonly ClipboardClearScheduler Scheduler = new(StartTimer);
 
-    /// <summary>Copies <paramref name="text"/>. Returns false when the clipboard could not be written.</summary>
+    /// <summary>Why the last copy did not happen, for the status line.</summary>
+    public static string FailureMessage => Services.CopyGuard.Shared.IsPaused
+        ? "Many secrets were copied in a short time, so copying is paused for 30 seconds. If this was not you, lock the vault now."
+        : "Could not copy: the clipboard is in use by another program. Try again.";
+
+    /// <summary>Copies <paramref name="text"/>. Returns false when the clipboard could not be written or copying is paused.</summary>
     public static async Task<bool> CopyAsync(Visual visual, string text)
     {
         var clipboard = TopLevel.GetTopLevel(visual)?.Clipboard;
-        if (clipboard is null)
+        if (clipboard is null || !Services.CopyGuard.Shared.TryCopy())
         {
             return false;
         }

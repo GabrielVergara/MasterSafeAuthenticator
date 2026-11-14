@@ -34,7 +34,7 @@ public partial class DashboardView : UserControl
     {
         if (_vm is not null && !await ClipboardHelper.CopyAsync(this, code))
         {
-            _vm.StatusMessage = "Could not copy: the clipboard is in use by another program. Try again.";
+            _vm.StatusMessage = ClipboardHelper.FailureMessage;
         }
     }
 }

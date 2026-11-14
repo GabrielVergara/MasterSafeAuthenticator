@@ -176,6 +176,60 @@ public class VaultSecurityTests
     }
 
     [Fact]
+    public async Task ChangePassword_WithANewDataKey_LocksOutTheOldKey_AndDropsHardwareSlots()
+    {
+        var repo = new MemoryRepo();
+        var vault = NewVault(repo);
+        var hello = new FakeSecretProvider();
+        await vault.SaveContentsAsync("old", Sample);
+        var oldKey = await vault.DeriveKeyAsync("old");
+        await vault.AddSlotAsync(oldKey, hello, "Hello");
+
+        var rotation = await vault.RotateMasterPasswordAsync("old", "new-password", newDataKey: true);
+
+        rotation.DataKey.Should().NotEqual(oldKey);
+        rotation.RemovedSlots.Should().ContainSingle(s => s.Type == SlotTypes.WindowsHello);
+        (await vault.ListSlotsAsync()).Should().ContainSingle(s => s.Type == SlotTypes.Password);
+        (await vault.OpenWithKeyAsync(rotation.DataKey)).Should().BeEquivalentTo(await vault.OpenContentsAsync("new-password"));
+        (await vault.OpenContentsAsync("new-password")).Passwords.Should().HaveCount(1);
+
+        var withOldKey = () => vault.OpenWithKeyAsync(oldKey);
+        await withOldKey.Should().ThrowAsync<Exception>("a leaked old key must not read what is saved from now on");
+        var saveWithOldKey = () => vault.SaveWithKeyAsync(oldKey, Sample);
+        await saveWithOldKey.Should().ThrowAsync<Exception>();
+    }
+
+    [Fact]
+    public async Task SpareSecurityKeys_EitherOneUnlocks_UpToFive()
+    {
+        var repo = new MemoryRepo();
+        var vault = NewVault(repo);
+        var keys = new FakeSecurityKeys();
+        await vault.SaveContentsAsync("pw", Sample);
+        var dataKey = await vault.DeriveKeyAsync("pw");
+
+        await vault.AddSlotAsync(dataKey, keys, keys.DisplayName);
+        await vault.AddSlotAsync(dataKey, keys, keys.DisplayName);
+        var slots = (await vault.ListSlotsAsync()).Where(s => s.Type == SlotTypes.Fido2).ToList();
+        slots.Select(s => s.Label).Should().Equal("Security key", "Security key 2");
+
+        keys.Present = 1;
+        (await vault.UnlockWithProviderAsync(keys)).Should().Equal(dataKey, "the spare key opens the vault too");
+
+        await vault.RemoveSlotAsync(dataKey, slots[1].Id);
+        keys.Present = 0;
+        (await vault.UnlockWithProviderAsync(keys)).Should().Equal(dataKey);
+
+        for (var i = 0; i < 4; i++)
+        {
+            await vault.AddSlotAsync(dataKey, keys, keys.DisplayName);
+        }
+
+        var sixth = () => vault.AddSlotAsync(dataKey, keys, keys.DisplayName);
+        await sixth.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Fact]
     public async Task UnlockMethod_CanBeAddedUsedAndRemoved_ButNotThePassword()
     {
         var repo = new MemoryRepo();
@@ -530,7 +584,80 @@ public class VaultSecurityTests
         vm.Login.Error.Should().Contain("cancelled");
     }
 
-    private sealed class MemoryRepo : IVaultRepository
+[Fact]
+    public async Task SecurityEvents_RecordUnlocksAndWrongPasswords_InsideTheVault_AndLeaveMemoryOnLock()
+    {
+        var repo = new MemoryRepo();
+        var vault = NewVault(repo);
+        await vault.SaveContentsAsync("right-password", Sample);
+        var vm = new MainWindowViewModel(vault, startIdleTimer: false);
+
+        await vm.UnlockVaultAsync("wrong-password");
+        await vm.UnlockVaultAsync("right-password");
+        await vm.PersistAsync();
+
+        var kinds = vm.SecurityLog.Snapshot().Select(e => e.Kind).ToList();
+        kinds.Should().Equal(SecurityEventsViewModel.Unlocked, SecurityEventsViewModel.WrongPasswords);
+        vm.SecurityLog.Snapshot()[1].Detail.Should().Be("1");
+        vm.Settings.Events!.Lines.Should().HaveCount(2);
+        (await vault.OpenContentsAsync("right-password")).Events.Should().HaveCount(2, "the events are saved encrypted in the vault");
+
+        vm.LockCommand.Execute(null);
+        vm.SecurityLog.Snapshot().Should().BeEmpty("nothing from the vault stays in memory after locking");
+        vm.SecurityLog.Lines.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CopyingManySecretsQuickly_Pauses_ThenWorksAgain()
+    {
+        var now = DateTimeOffset.UnixEpoch;
+        var guard = new MasterSafe.App.Services.CopyGuard(() => now);
+        var paused = 0;
+        guard.Paused += (_, _) => paused++;
+
+        for (var i = 0; i < MasterSafe.App.Services.CopyGuard.Limit; i++)
+        {
+            guard.TryCopy().Should().BeTrue("a person copying normally is never stopped");
+            now += TimeSpan.FromSeconds(1);
+        }
+
+        guard.TryCopy().Should().BeFalse();
+        guard.IsPaused.Should().BeTrue();
+        paused.Should().Be(1);
+        guard.TryCopy().Should().BeFalse();
+        paused.Should().Be(1, "the event is raised once per pause");
+
+        now += MasterSafe.App.Services.CopyGuard.Pause;
+        guard.TryCopy().Should().BeTrue();
+    }
+
+    [Fact]
+    public void CopiesSpreadOverTime_NeverPause()
+    {
+        var now = DateTimeOffset.UnixEpoch;
+        var guard = new MasterSafe.App.Services.CopyGuard(() => now);
+        for (var i = 0; i < 200; i++)
+        {
+            guard.TryCopy().Should().BeTrue();
+            now += TimeSpan.FromSeconds(4);
+        }
+    }
+
+    [Fact]
+    public void SecurityEvents_KeepOnlyTheNewest()
+    {
+        var log = new SecurityEventsViewModel();
+        for (var i = 0; i < SecurityEvent.MaxKept + 30; i++)
+        {
+            log.Record(SecurityEventsViewModel.FileSaved, i.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        log.Snapshot().Should().HaveCount(SecurityEvent.MaxKept);
+        log.Snapshot()[0].Detail.Should().Be((SecurityEvent.MaxKept + 29).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        log.Lines.Should().HaveCount(50);
+    }
+
+        private sealed class MemoryRepo : IVaultRepository
     {
         private VaultFile? _vault;
 

@@ -24,6 +24,9 @@ public sealed record AttachmentRow(PasswordAttachment Attachment)
 /// <summary>Files attached to password entries. The bytes stay in memory only while the vault is unlocked.</summary>
 public sealed partial class PasswordsViewModel
 {
+    /// <summary>Told when an attached file is saved outside the vault, for the security events; set by the shell.</summary>
+    public Action? FileSaved { get; set; }
+
     // Bytes of every attachment of an entry, plus files added in the form that are not saved yet.
     private readonly Dictionary<Guid, byte[]> _blobs = [];
 
@@ -136,6 +139,7 @@ public sealed partial class PasswordsViewModel
         try
         {
             File.WriteAllBytes(path, bytes);
+            FileSaved?.Invoke();
             Status = $"Saved {row.Name}. The copy is not protected by your vault: delete it when you are done.";
             return true;
         }

@@ -164,6 +164,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public BackupViewModel Backup { get; } = new();
 
+    /// <summary>Recent security events, shown in Settings.</summary>
+    public SecurityEventsViewModel SecurityLog { get; } = new();
+
     /// <summary>Sync between computers, on the Backup page.</summary>
     public SyncViewModel Sync => Backup.Sync;
 
@@ -245,6 +248,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Vaults = new VaultsViewModel(services, _providers);
         Recovery = new RecoveryViewModel(services, BuildContents) { SaveRequested = PersistAsync };
         Recovery.IsVaultUnlocked = () => IsUnlocked;
+        SecurityLog.Changed += (_, _) => _ = PersistAsync();
+        Settings.Events = SecurityLog;
+        Backup.Exported = what => SecurityLog.Record(SecurityEventsViewModel.Exported, what);
+        Passwords.FileSaved = () => SecurityLog.Record(SecurityEventsViewModel.FileSaved);
         Recovery.Clock = _clock;
         Recovery.SheetData = services is null ? null : () => SheetData(services);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
@@ -591,9 +598,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>Resets the failure counter after a correct unlock and tells the user about any wrong attempts before it.</summary>
-    private void AfterSuccessfulUnlock()
+    private void AfterSuccessfulUnlock(string method)
     {
         var failed = _throttle.RecordSuccess();
+        if (failed > 0)
+        {
+            SecurityLog.Record(SecurityEventsViewModel.WrongPasswords, failed.ToString(System.Globalization.CultureInfo.InvariantCulture), save: false);
+        }
+
+        // Saved by the unlock itself, which waits for it, so it never races another save.
+        SecurityLog.Record(SecurityEventsViewModel.Unlocked, method, save: false);
         UpdateLockout();
         CheckForUpdatesOnce();
         if (failed > 0)
@@ -624,7 +638,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
             var key = await _vault.DeriveKeyAsync(password);
             await CompleteUnlockWithKeyAsync(key);
-            AfterSuccessfulUnlock();
+            AfterSuccessfulUnlock("master password");
+            await PersistAsync();
         }
         catch (InvalidPasswordException)
         {
@@ -656,7 +671,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             var key = await _vault!.UnlockWithProviderAsync(provider);
             await CompleteUnlockWithKeyAsync(key);
-            AfterSuccessfulUnlock();
+            AfterSuccessfulUnlock(provider.DisplayName);
+            await PersistAsync();
         }
         catch (InvalidPasswordException)
         {
@@ -755,6 +771,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     public async Task<string?> ChangeMasterPasswordAsync(string currentPassword, string newPassword, Argon2Parameters? kdf = null)
+        => await SaveEventsAfterAsync(await ChangeMasterPasswordCoreAsync(currentPassword, newPassword, kdf));
+
+    private async Task<string?> ChangeMasterPasswordCoreAsync(string currentPassword, string newPassword, Argon2Parameters? kdf)
     {
         if (_vault is null || _sessionKey is null)
         {
@@ -764,7 +783,41 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         await _saveLock.WaitAsync();
         try
         {
-            await _vault.RotateMasterPasswordAsync(currentPassword, newPassword, kdf);
+            // A real change also replaces the data key, so a leaked old key or an old copy with the old password reads
+            // nothing saved from now on. Strengthening keeps the same password and key, and so the hardware methods.
+            var newDataKey = !string.Equals(currentPassword, newPassword, StringComparison.Ordinal);
+            var rotation = await _vault.RotateMasterPasswordAsync(currentPassword, newPassword, kdf, newDataKey);
+            var old = _sessionKey;
+            _sessionKey = rotation.DataKey;
+            CryptographicOperations.ZeroMemory(old);
+
+            foreach (var slot in rotation.RemovedSlots)
+            {
+                var provider = _providers.FirstOrDefault(p => p.SlotType == slot.Type);
+                if (provider is not null)
+                {
+                    try
+                    {
+                        await provider.RemoveAsync(slot.Id);
+                    }
+                    catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+                    {
+                        // The slot is gone from the vault; a leftover credential can only open old copies.
+                    }
+                }
+            }
+
+            if (newDataKey)
+            {
+                SecurityLog.Record(SecurityEventsViewModel.PasswordChanged, save: false);
+            }
+
+            if (rotation.RemovedSlots.Count > 0)
+            {
+                await RefreshUnlockMethodsAsync();
+                Settings.UnlockMethodStatus = Loc.T("The vault now has a new encryption key, so Windows Hello and security keys were removed. Add them again below.");
+            }
+
             return null;
         }
         catch (InvalidPasswordException)
@@ -783,6 +836,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Adds a hardware or OS unlock method. Returns null on success or an error message.</summary>
     public async Task<string?> AddUnlockMethodAsync(ISecretProvider provider)
+        => await SaveEventsAfterAsync(await AddUnlockMethodCoreAsync(provider));
+
+    private async Task<string?> AddUnlockMethodCoreAsync(ISecretProvider provider)
     {
         if (_vault is null || _sessionKey is null)
         {
@@ -793,6 +849,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         try
         {
             await _vault.AddSlotAsync(_sessionKey, provider, provider.DisplayName);
+            SecurityLog.Record(SecurityEventsViewModel.MethodAdded, provider.DisplayName, save: false);
             await RefreshUnlockMethodsAsync();
             return null;
         }
@@ -806,8 +863,25 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Saves the security event an operation recorded, after it let go of the save lock. Saving from inside it would start a
+    /// second save that races the operation.
+    /// </summary>
+    private async Task<string?> SaveEventsAfterAsync(string? error)
+    {
+        if (error is null)
+        {
+            await PersistAsync();
+        }
+
+        return error;
+    }
+
     /// <summary>Removes an unlock method. Returns null on success or an error message.</summary>
     public async Task<string?> RemoveUnlockMethodAsync(string slotId)
+        => await SaveEventsAfterAsync(await RemoveUnlockMethodCoreAsync(slotId));
+
+    private async Task<string?> RemoveUnlockMethodCoreAsync(string slotId)
     {
         if (_vault is null || _sessionKey is null)
         {
@@ -821,6 +895,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             var slot = slots.FirstOrDefault(s => s.Id == slotId);
             var provider = _providers.FirstOrDefault(p => p.SlotType == slot?.Type);
             await _vault.RemoveSlotAsync(_sessionKey, slotId, provider);
+            SecurityLog.Record(SecurityEventsViewModel.MethodRemoved, slot?.Label ?? string.Empty, save: false);
             await RefreshUnlockMethodsAsync();
             return null;
         }
@@ -877,11 +952,14 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 continue;
             }
 
-            if (slots.Any(s => s.Type == provider.SlotType))
+            var enrolled = slots.Count(s => s.Type == provider.SlotType);
+            if (enrolled > 0)
             {
                 Login.UnlockMethods.Add(new UnlockMethodViewModel(provider));
             }
-            else
+
+            // A spare security key can be added, so losing one does not lose the quick unlock.
+            if (enrolled == 0 || (provider.AllowsSeveral && enrolled < VaultService.MaxSlotsPerType))
             {
                 Settings.AddableMethods.Add(new AddMethodOptionViewModel(provider));
             }
@@ -968,6 +1046,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             _sessionKey = null;
         }
 
+        SecurityLog.Clear();
+
         // However the vault locks, a copied secret goes with it.
         _ = ClearClipboard?.Invoke();
 
@@ -1033,6 +1113,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Tombstones = Passwords.TombstoneSnapshot().Concat(Dashboard.TombstoneSnapshot())
             .OrderByDescending(t => t.DeletedUtc).Take(Tombstone.MaxKept).ToList(),
         Sync = Sync.Settings,
+        Events = SecurityLog.Snapshot(),
         AttachmentData = Passwords.AttachmentSnapshot(),
     };
 
@@ -1066,6 +1147,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private void CompleteUnlock(VaultContents contents)
     {
         ReloadEntries(contents);
+        SecurityLog.Load(contents.Events);
         Sync.Settings = contents.Sync;
         Recovery.TrustedKeyFingerprint = contents.RecoveryKeyFingerprint;
         Recovery.Refresh();

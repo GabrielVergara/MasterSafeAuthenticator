@@ -2,6 +2,36 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.7.0 (not released yet)
+
+A release about deeper protection and an easier move from KeePass.
+
+### Security
+- **A new encryption key with every new master password.** Changing the master password now also replaces the vault's
+  random data key and encrypts everything again. Anyone who copied the old key, or an old vault file and the old password,
+  cannot read anything saved afterwards. Windows Hello and security keys hold the old key, so they are removed and
+  Settings asks you to add them again. "Test and strengthen" keeps the same password and key, and so keeps them.
+- **Spare security keys.** Up to 5 security keys per vault. Unlocking asks Windows once for all of them, so you touch
+  whichever key you have.
+- **Security events.** Settings lists recent unlocks (and with what), wrong passwords before an unlock, master password
+  changes, unlock methods added or removed, exports and attached files saved to disk. They are kept inside the encrypted
+  vault, never in a log file, stay on this computer (sync does not copy them) and leave memory when the vault locks.
+- **Copying many secrets pauses.** After 20 secrets copied within a minute, copying pauses for 30 seconds and the pause
+  is recorded as a security event. A person never copies that fast; a script or an AI agent driving the open program
+  could empty the vault in a minute. This slows it to hours and leaves a trace.
+- The new KeePass reader is part of the fuzz tests, and limits the memory and time a database may ask for before any work.
+- Packages updated: Avalonia 12.1.6, SkiaSharp 4.156 (image decoding), CsWin32 0.3.371. No known vulnerable packages.
+
+### KeePass
+- **Open KeePass databases (.kdbx) directly**, with their password and key file: KeePass 2 and KeePassXC, format 3.1 and
+  4.x, AES-256 or ChaCha20, AES-KDF, Argon2d or Argon2id. The database is only read and goes through the same preview as
+  an export. No unencrypted export file is needed any more. Twofish is not supported.
+- **Extra fields come along.** A KeePass field such as a PIN becomes an extra field, hidden when KeePass protected it.
+
+### Codes
+- **A countdown ring** beside each code, drawn like the logo: it empties clockwise and turns red in the last 5 seconds.
+  The seconds stay as text in its middle, and screen readers read "N seconds until the next code".
+
 ## 1.6.2 (2026-11-08)
 
 ### Logo

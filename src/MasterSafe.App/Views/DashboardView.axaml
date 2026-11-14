@@ -106,11 +106,14 @@
                   <TextBlock Tag="data" Text="{Binding Group}" Classes="hint" IsVisible="{Binding HasGroup}" />
                   <TextBlock Tag="data" Text="{Binding DisplayCode}" Classes="code" Margin="0,6,0,0" />
                 </StackPanel>
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6" Margin="16,0" Width="72">
-                  <TextBlock Text="{Binding SecondsRemaining, StringFormat='{}{0} s'}"
-                             HorizontalAlignment="Center" Classes="hint" />
-                  <ProgressBar ToolTip.Tip="Time until the next code" Minimum="0" Maximum="1" MinWidth="0" Width="72" Height="4" Value="{Binding Progress}" />
-                </StackPanel>
+                <Panel Grid.Column="2" VerticalAlignment="Center" Margin="16,0" Width="44" Height="44"
+                       IsVisible="{Binding IsTimed}" ToolTip.Tip="Time until the next code">
+                  <v:CountdownRing Progress="{Binding Progress}" IsEnding="{Binding IsEndingSoon}"
+                                   RingBrush="{DynamicResource TimerBrush}" EndingBrush="{DynamicResource DangerBrush}"
+                                   TrackBrush="{DynamicResource CardBorderBrush}" />
+                  <TextBlock Text="{Binding SecondsRemaining}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             FontSize="13" FontWeight="SemiBold" AutomationProperties.Name="{Binding TimerText}" />
+                </Panel>
                 <WrapPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,8,0,0">
                   <WrapPanel.Styles>
                     <Style Selector="WrapPanel > Button">

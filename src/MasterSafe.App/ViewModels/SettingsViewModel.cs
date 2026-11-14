@@ -80,6 +80,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     /// </summary>
     public Func<string, string, Task<string?>>? ChangePasswordHandler { get; set; }
 
+    /// <summary>The vault's recent security events; set by the shell.</summary>
+    public SecurityEventsViewModel? Events { get; set; }
+
     /// <summary>Unlock methods currently set up for the vault, including the master password.</summary>
     public ObservableCollection<UnlockMethodRowViewModel> UnlockMethods { get; } = [];
 

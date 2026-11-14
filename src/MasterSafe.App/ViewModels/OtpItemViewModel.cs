@@ -4,6 +4,7 @@
 // License: See LICENSE
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using MasterSafe.App.Services;
 using MasterSafe.Core;
 
 namespace MasterSafe.App.ViewModels;
@@ -51,7 +52,21 @@ public sealed partial class OtpItemViewModel : ViewModelBase
     private double _progress;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TimerText))]
     private int _secondsRemaining;
+
+    /// <summary>The last seconds of a code, when the ring warns that a new code is coming.</summary>
+    public const int EndingSeconds = 5;
+
+    /// <summary>True in the last seconds of a time-based code.</summary>
+    [ObservableProperty]
+    private bool _isEndingSoon;
+
+    /// <summary>True for a time-based code, which has a timer. A counter-based code changes only when asked.</summary>
+    public bool IsTimed => _account.Type == OtpType.Totp;
+
+    /// <summary>The time left in words, for screen readers.</summary>
+    public string TimerText => string.Format(System.Globalization.CultureInfo.CurrentCulture, Loc.T("{0} seconds until the next code"), SecondsRemaining);
 
     public OtpItemViewModel(OtpAccount account)
     {
@@ -90,11 +105,13 @@ public sealed partial class OtpItemViewModel : ViewModelBase
         {
             SecondsRemaining = TotpGenerator.RemainingSeconds(now, _account.Period);
             Progress = (double)SecondsRemaining / _account.Period;
+            IsEndingSoon = SecondsRemaining <= EndingSeconds;
         }
         else
         {
             SecondsRemaining = 0;
             Progress = 1.0;
+            IsEndingSoon = false;
         }
     }
 

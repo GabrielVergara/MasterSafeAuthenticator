@@ -70,8 +70,8 @@ These are known and need no report, though better ideas are welcome.
 - The sign-in pause and the idle timer use the wall clock, and the pause counter is in `settings.json`.
 - The save counter copy can be changed by any program of the same user, so it notices a swapped file only.
 - On the first unlock of a vault from before 1.6 its security settings come from the settings file, once.
-- The master password protects each vault copy for ever: there is no data key rotation yet, so `.bak`, snapshots and old
-  exports open with the password they had. Rotation is planned for 1.7.
+- A vault copy made before a password change (`.bak`, a snapshot, an old backup) still opens with the old password and shows
+  what it held then. Since 1.7 a new password also brings a new data key, so nothing saved afterwards opens that way.
 - Old sync files stay on a server that refuses deletion, and the sync code still opens them. A hostile server can withhold files
   or show an older set, so a computer can miss changes without knowing. It cannot change or forge a file.
 - Anyone with the sync code and access to the place can add items to the vault. Items are data; nothing in them runs.
@@ -81,6 +81,11 @@ These are known and need no report, though better ideas are welcome.
   `.kdbx` exports and sync files do not.
 - A `.kdbx` export is only as strong as the password chosen, and leaves the vault's own protections behind.
 - Installers are signed with ML-DSA-65 only. There is no Authenticode signature, so Windows warns about them.
+- The pause after many quick copies slows a program driving the open app; it does not stop one. Such a program can also
+  read what is on screen unless capture blocking and hidden codes are on.
+- The KeePass reader uses its own ChaCha20 and Salsa20 (checked against RFC 8439 and an independent implementation) only to
+  read KeePass files. A hostile `.kdbx` can make an import use up to 1 GiB of memory or 30 million AES rounds, after the user
+  chose the file and typed its password.
 - Linux has only been run in a container, not on a real desktop. There is no hardware unlock on Linux.
 
 ## Past findings

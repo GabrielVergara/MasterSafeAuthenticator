@@ -1,6 +1,6 @@
 # MasterSafe Authenticator Documentation
 
-**Version:** 1.6.2  
+**Version:** 1.7.0  
 **Author:** Gabriel Vergara Ezcurdia
 
 MasterSafe Authenticator is a privacy-first, offline-first authenticator (TOTP/HOTP) with an encrypted
@@ -77,8 +77,12 @@ the next time the vault is unlocked with the master password. Details: [Security
 
 Settings lists the unlock methods. The master password is always present and cannot be removed. Windows
 Hello and a FIDO2 security key can be added or removed. A security key must support the CTAP2 `hmac-secret`
-extension; adding it takes a PIN and a touch twice and unlocking takes them once. One key can be set up per vault.
-Changing the master password replaces only the password slot, so other methods keep working.
+extension; adding it takes a PIN and a touch twice and unlocking takes them once. Up to 5 keys can be set up per vault
+(`ISecretProvider.AllowsSeveral`); unlocking sends one WebAuthn request listing every enrolled credential, each with its
+own salt, and the key answers for itself (`DeriveAnyAsync`).
+Changing the master password (1.7) also creates a new random data key and re-encrypts the contents
+(`RotateMasterPasswordAsync(..., newDataKey: true)`); the hardware slots wrap the old key, so they are removed and the
+app asks to add them again. "Test and strengthen" keeps the password and the key, and so the other methods.
 
 ## 5. Vault contents model
 
@@ -112,6 +116,13 @@ A password entry also carries `DeletedUtc` (set while it is in the recycle bin; 
 when the vault opens) and `History` (up to ten earlier versions, newest first). Both are inside the encrypted contents.
 Older versions of the app ignore these fields, so a vault that was used with 1.4 still opens, but the bin and history
 are not shown there.
+
+### Added in 1.7
+
+`VaultContents.Events` holds up to 200 `SecurityEvent`s (time, kind, short detail, never a secret), shown in Settings.
+They are not merged by sync. `KdbxReader` (Backup) opens KeePass 3.1 and 4.x databases and hands readable XML to
+`KeePassImporter.ParseXml`; `StreamCipher` provides ChaCha20 and Salsa20 for it. `CopyGuard` pauses copying after 20
+secrets in a minute.
 
 ### Added in 1.6
 
@@ -164,7 +175,9 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Lock vault, Unlock with Security key | PIN and touch once; the vault opens with the same accounts |
 | Unlock with Security key, then cancel the prompt | A "cancelled" message; the master password still works |
 | Remove the security key in Settings | The login button disappears; the master password still works |
-| Change the master password | Hello and the security key still unlock the vault |
+| Add a second security key, lock, unlock with either key | One prompt; whichever key is touched opens the vault; Settings lists "Security key 2" |
+| Change the master password | Settings says Hello and the security keys were removed; add them again and they unlock |
+| Settings, Security events after the steps above | Unlocks with each method, the password change and the methods added and removed are listed |
 | Recovery, Create and save recovery key, then Create recovery backup | A `.msrk` key file and a `recovery-*.sauth` file are written where you chose |
 | Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
@@ -219,6 +232,8 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Attach a file over 5 MB | A message names the file and the limit; nothing is attached |
 | Select a folder, Change icon, click an icon | The picker closes, the icon shows in the folder list and the folder pickers, and stays after Lock and unlock |
 | Recovery, Create recovery key automatically, choose where to save | The key file is written and the passphrase is shown once; "I have written it down" hides it; the saved key opens with that passphrase |
+| Import a real KeePass 2 `.kdbx` and a KeePassXC `.kdbx` (one with a key file) | The page asks for the password; the preview lists entries, codes and files; a protected custom field arrives hidden |
+| Copy 21 codes or passwords quickly | The 21st says copying is paused; Security events lists it; copying works again after 30 seconds |
 | Import a KeePass XML export that has attachments | The preview lists the attached files to add; they appear on the entries |
 | Passwords, type a folder name, New folder, then tick two entries and Move selected to that folder | The entries show "Folder: name" and appear under the folder; after Lock and unlock the folder is still there |
 | Delete a folder that holds passwords | The passwords are still listed, one level up |

@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Services;
+using MasterSafe.Backup;
 using MasterSafe.Core;
 using MasterSafe.Core.Import;
 
@@ -31,6 +32,23 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
     [ObservableProperty]
     private bool _hasPreview;
 
+    /// <summary>True while a KeePass database waits for its password or key file.</summary>
+    [ObservableProperty]
+    private bool _needsDatabaseKey;
+
+    /// <summary>The KeePass database's password. Cleared as soon as it has been used.</summary>
+    [ObservableProperty]
+    private string _databasePassword = string.Empty;
+
+    /// <summary>The KeePass key file, if the database uses one.</summary>
+    [ObservableProperty]
+    private string? _keyFilePath;
+
+    /// <summary>True while the database is being opened, which can take a few seconds.</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(OpenDatabaseCommand))]
+    private bool _isOpening;
+
     /// <summary>Lines of the preview: what was found and what will be skipped.</summary>
     public ObservableCollection<string> Preview { get; } = [];
 
@@ -54,27 +72,114 @@ public sealed partial class KeePassImportViewModel : ViewModelBase
             return;
         }
 
-        var path = await Dialogs.OpenFileAsync("Choose an export file", "Export files", "*.xml", "*.csv", "*.json", "*.1pux", "*.2fas", "*.zip", "*.txt", "*.kdbx");
+        var path = await Dialogs.OpenFileAsync("Choose an export file", "Export files", "*.kdbx", "*.xml", "*.csv", "*.json", "*.1pux", "*.2fas", "*.zip", "*.txt");
         if (path is not null)
         {
             Load(path);
         }
     }
 
+    /// <summary>Chooses the key file of a KeePass database.</summary>
+    [RelayCommand]
+    private async Task ChooseKeyFileAsync()
+    {
+        if (Dialogs is not null && await Dialogs.OpenFileAsync("Choose the database's key file", "Key files", "*.keyx", "*.key", "*.*") is { } path)
+        {
+            KeyFilePath = path;
+        }
+    }
+
+    /// <summary>Opens the KeePass database with the password and key file given, then shows the preview.</summary>
+    [RelayCommand(CanExecute = nameof(CanOpenDatabase))]
+    private async Task OpenDatabaseAsync()
+    {
+        if (FilePath is null)
+        {
+            return;
+        }
+
+        IsOpening = true;
+        Status = "Opening the KeePass database. This can take a few seconds.";
+        var path = FilePath;
+        var password = DatabasePassword;
+        DatabasePassword = string.Empty;
+        try
+        {
+            if (new FileInfo(path).Length > MaxDatabaseBytes || (KeyFilePath is not null && new FileInfo(KeyFilePath).Length > 1024 * 1024))
+            {
+                throw new KeePassImportException($"The database is larger than {MaxDatabaseBytes / (1024 * 1024)} MiB, or the key file larger than 1 MiB, which is more than MasterSafe reads.");
+            }
+
+            var keyFile = KeyFilePath is null ? null : await File.ReadAllBytesAsync(KeyFilePath);
+            var file = await File.ReadAllBytesAsync(path);
+            var xml = await Task.Run(() => KdbxReader.ReadXml(file, password, keyFile));
+            var result = await Task.Run(() => KeePassImporter.ParseXml(xml));
+            NeedsDatabaseKey = false;
+            KeyFilePath = null;
+            ShowPreview(path, result);
+        }
+        catch (KeePassImportException ex)
+        {
+            Status = ex.Message;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Status = $"The file could not be read: {ex.Message}";
+        }
+        finally
+        {
+            IsOpening = false;
+        }
+    }
+
+    private bool CanOpenDatabase() => !IsOpening;
+
+    /// <summary>Largest KeePass database that is opened.</summary>
+    public const long MaxDatabaseBytes = 64L * 1024 * 1024;
+
     /// <summary>Reads an export and builds the preview. Returns true when there is something to import.</summary>
     public bool Load(string path)
     {
         Discard();
+        NeedsDatabaseKey = false;
+        KeyFilePath = null;
         try
         {
-            _result = KeePassImporter.ReadFile(path);
+            if (IsDatabase(path))
+            {
+                // A KeePass database is encrypted: ask for its password first. Nothing is read until then.
+                FilePath = path;
+                NeedsDatabaseKey = true;
+                Status = "This is a KeePass database. Enter its password, and choose its key file if it has one, then choose Open.";
+                return false;
+            }
+
+            return ShowPreview(path, KeePassImporter.ReadFile(path));
         }
         catch (KeePassImportException ex)
         {
             Status = ex.Message;
             return false;
         }
+    }
 
+    private static bool IsDatabase(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            Span<byte> start = stackalloc byte[8];
+            return stream.ReadAtLeast(start, 8, throwOnEndOfStream: false) == 8 && KdbxReader.IsKdbx(start);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            throw new KeePassImportException($"The file could not be read: {ex.Message}");
+        }
+    }
+
+    private bool ShowPreview(string path, KeePassImportResult result)
+    {
+        _result = result;
         FilePath = path;
         var knownPasswords = (ExistingPasswords?.Invoke() ?? []).Select(PasswordKey).ToHashSet(StringComparer.Ordinal);
         var knownAccounts = (ExistingAccounts?.Invoke() ?? []).Select(AccountKey).ToHashSet(StringComparer.Ordinal);

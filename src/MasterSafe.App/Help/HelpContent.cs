@@ -87,14 +87,18 @@ public static class HelpContent
               that is already in your vault is not added twice.
 
             Moving over from KeePass or KeePassXC:
-            - In KeePass choose File, Export, KeePass XML (2.x). In KeePassXC choose Database, Export to CSV
-              (or XML). Then use "Choose an export file..." on the Import page, or drop the file on the window.
+            - Choose the database itself (.kdbx) with "Choose an export file..." on the Import page, or drop it
+              on the window. Enter its password, choose its key file if it has one, and choose Open. KeePass 2
+              and KeePassXC databases open directly (AES-256 or ChaCha20). A database encrypted with Twofish
+              must be changed to AES-256 in KeePass first. The database is only read, never changed.
+            - You can still import a KeePass XML (2.x) or KeePassXC CSV export instead.
             - A summary shows what will be added and what is skipped (recycle bin entries, old versions,
               duplicates, files that are too large). Nothing is added until you choose Import.
             - Groups become folders, one-time-password fields become authenticator accounts, and attached files
-              (KeePass XML exports) come along, up to 5 MB each.
-            - The export file is not encrypted. Delete it as soon as you have imported it. The page has a
-              "Show file" button for that. Opening .kdbx files directly is not supported yet.
+              come along, up to 5 MB each. Other fields, such as a PIN, become extra fields, hidden when KeePass
+              protected them.
+            - An XML or CSV export is not encrypted. Delete it as soon as you have imported it. The page has a
+              "Show file" button for that.
 
             MasterSafe checks every account and file it reads. Broken or unexpected files are refused with a
             message instead of being half imported.
@@ -362,10 +366,13 @@ public static class HelpContent
             - Windows Hello: uses a key held by Windows (in the TPM when your computer has one) that only works
               after you verify with your PIN, fingerprint or face.
             - A FIDO2 security key: the key computes a secret that never leaves it. It needs the key's PIN
-              and a touch. Most current keys support the hmac-secret feature this needs. One security key can
-              be set up per vault.
+              and a touch. Most current keys support the hmac-secret feature this needs. You can set up to 5
+              keys per vault, so a spare key keeps working if one is lost: when you unlock, touch whichever
+              one you have.
 
             Add or remove them in Settings. The master password always keeps working and cannot be removed.
+            Changing the master password gives the vault a new encryption key, so Windows Hello and security
+            keys are removed then and you add them again.
             Wrong attempts with Windows Hello or a key are limited by Windows and by the key itself.
             """),
         new(
@@ -390,6 +397,12 @@ public static class HelpContent
             - Clipboard: choose 30 seconds, 1 minute or 2 minutes. Copies are kept out of the Windows
               clipboard history and the cloud clipboard.
             - Locking removes the decrypted data from memory-backed screens and wipes the session key.
+            - Copying is paused for 30 seconds after 20 secrets are copied within a minute. A person never
+              does that; a program or an AI agent controlling the open app could. It is recorded below.
+
+            Security events, in Settings, list recent unlocks, wrong passwords, exports and changes on this
+            computer. They are kept inside the encrypted vault, never in a log file. If you see one you did
+            not make, change your master password.
 
             Revealed passwords hide when the window loses focus, unless you turn that off. These settings are
             kept inside your encrypted vault, so a program that edits the settings file cannot turn them off
@@ -413,8 +426,9 @@ public static class HelpContent
               locks the vault, opens About, or exits.
             - Exit: the Exit button in the sidebar and on the sign-in screen locks the vault and closes MasterSafe
               completely, whatever the tray setting.
-            - Change master password: re-protects your vault with a new password. Windows Hello and a security
-              key keep working.
+            - Change master password: re-protects your vault with a new password and a new encryption key, so an
+              old copy of the key, or an old vault file with the old password, opens nothing you save from then
+              on. Add Windows Hello and security keys again afterwards.
 
             On Windows 11, a new tray icon starts in the hidden-icons area (the arrow next to the clock). To
             keep it always visible, drag it out onto the taskbar, or turn it on under Settings,

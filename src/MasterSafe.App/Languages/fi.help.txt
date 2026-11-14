@@ -42,10 +42,11 @@ Yhden tilin lisääminen:
 - QR-koodikuva: vedä QR-koodin PNG-, JPG- tai BMP-kuva ikkunaan holvin ollessa avattuna tai valitse se kohdasta "Valitse kuva...". Useita kuvia voi pudottaa kerralla. Tiliä, joka on jo holvissasi, ei lisätä kahdesti.
 
 Siirtyminen KeePassista tai KeePassXC:stä:
-- Valitse KeePassissa Tiedosto, Vie, KeePass XML (2.x). KeePassXC:ssä valitse Tietokanta, Vie CSV-muotoon (tai XML). Käytä sitten Tuo-sivulla kohtaa "Valitse vientitiedosto..." tai pudota tiedosto ikkunaan.
+- Valitse itse tietokanta (.kdbx) Tuo-sivun kohdasta "Valitse vientitiedosto..." tai pudota se ikkunaan. Kirjoita sen salasana, valitse avaintiedosto, jos sellainen on, ja valitse Avaa. KeePass 2- ja KeePassXC-tietokannat aukeavat suoraan (AES-256 tai ChaCha20). Twofish-salattu tietokanta pitää ensin vaihtaa KeePassissa AES-256:een. Tietokantaa vain luetaan, sitä ei muuteta.
+- Voit edelleen tuoda myös KeePass XML (2.x) -viennin tai KeePassXC:n CSV-viennin.
 - Yhteenveto näyttää, mitä lisätään ja mitä ohitetaan (roskakorin merkinnät, vanhat versiot, kaksoiskappaleet, liian suuret tiedostot). Mitään ei lisätä ennen kuin valitset Tuo.
-- Ryhmistä tulee kansioita, kertakäyttösalasanakentistä todennustilejä ja liitetiedostot (KeePass XML -viennit) tulevat mukaan, enintään 5 Mt kukin.
-- Vientitiedosto ei ole salattu. Poista se heti tuonnin jälkeen. Sivulla on siihen "Näytä tiedosto" -painike. .kdbx-tiedostojen avaamista suoraan ei vielä tueta.
+- Ryhmistä tulee kansioita, kertakäyttösalasanakentistä todennustilejä ja liitetiedostot tulevat mukaan, enintään 5 Mt kukin. Muista kentistä, kuten PIN-koodista, tulee lisäkenttiä, piilotettuja jos KeePass suojasi ne.
+- XML- tai CSV-vienti ei ole salattu. Poista se heti tuonnin jälkeen. Sivulla on siihen "Näytä tiedosto" -painike.
 
 MasterSafe tarkistaa jokaisen lukemansa tilin ja tiedoston. Rikkinäiset tai odottamattomat tiedostot hylätään ilmoituksella sen sijaan, että ne tuotaisiin puoliksi.
 
@@ -226,9 +227,9 @@ body:
 Pääsalasanan lisäksi voit avata holvin:
 
 - Windows Hello: käyttää Windowsin hallussa pitämää avainta (TPM-sirulla, jos tietokoneessasi on sellainen), joka toimii vasta PIN-koodilla, sormenjäljellä tai kasvoilla vahvistamisen jälkeen.
-- FIDO2-suojausavain: avain laskee salaisuuden, joka ei koskaan poistu siitä. Se vaatii avaimen PIN-koodin ja kosketuksen. Useimmat nykyiset avaimet tukevat tähän tarvittavaa hmac-secret-ominaisuutta. Yksi suojausavain voidaan ottaa käyttöön holvia kohden.
+- FIDO2-suojausavain: avain laskee salaisuuden, joka ei koskaan poistu siitä. Se vaatii avaimen PIN-koodin ja kosketuksen. Useimmat nykyiset avaimet tukevat tähän tarvittavaa hmac-secret-ominaisuutta. Voit ottaa käyttöön enintään 5 avainta holvia kohden, joten varavain toimii, jos yksi katoaa: kosketa avattaessa sitä, joka sinulla on.
 
-Lisää tai poista ne Asetuksissa. Pääsalasana toimii aina eikä sitä voi poistaa. Windows ja avain itse rajoittavat väärien yritysten määrää Windows Hellolla tai avaimella.
+Lisää tai poista ne Asetuksissa. Pääsalasana toimii aina eikä sitä voi poistaa. Pääsalasanan vaihtaminen antaa holville uuden salausavaimen, joten Windows Hello ja suojausavaimet poistetaan ja ne lisätään uudelleen. Windows ja avain itse rajoittavat väärien yritysten määrää Windows Hellolla tai avaimella.
 
 ### Privacy and locking
 title: Yksityisyys ja lukitus
@@ -243,6 +244,9 @@ Asetukset, "Yksityisyys ja lukitus" ja Yleiset:
 - Pidä ikkuna poissa kuvakaappauksista ja näytön jaosta (oletuksena päällä, Windows): ikkuna näkyy mustana kaappauksissa. Poista käytöstä, jos tarvitset kuvakaappauksen MasterSafesta.
 - Leikepöytä: valitse 30 sekuntia, 1 minuutti tai 2 minuuttia. Kopiot pidetään poissa Windowsin leikepöytähistoriasta ja pilvileikepöydältä.
 - Lukitus poistaa puretut tiedot muistiin perustuvilta näytöiltä ja pyyhkii istuntoavaimen.
+- Kopiointi pysähtyy 30 sekunniksi, kun minuutissa on kopioitu 20 salaisuutta. Ihminen ei tee niin; avointa sovellusta ohjaava ohjelma tai tekoälyagentti voisi. Se kirjataan alle.
+
+Tietoturvatapahtumat Asetuksissa näyttävät tämän tietokoneen viimeaikaiset avaukset, väärät salasanat, viennit ja muutokset. Ne säilytetään salatussa holvissa, ei koskaan lokitiedostossa. Jos näet tapahtuman, jota et tehnyt, vaihda pääsalasanasi.
 
 Näkyvät salasanat piiloutuvat, kun ikkuna menettää kohdistuksen, ellet poista tätä käytöstä. Nämä asetukset ovat salatussa holvissasi, joten asetustiedostoa muuttava ohjelma ei voi poistaa niitä käytöstä, kun holvi on auki.
 
@@ -258,7 +262,7 @@ body:
 - Muistutukset: näytä tai piilota koodisivun ilmoitukset (palautusavain, varmuuskopiot, päivitykset).
 - Jatka toimintaa ilmoitusalueella: ikkunan sulkeminen tai pienentäminen piilottaa sen ilmoitusalueelle sen sijaan, että sovellus sulkeutuisi. Avaa se uudelleen napsauttamalla ilmoitusalueen kuvaketta. Sen valikosta voi näyttää tai piilottaa ikkunan, lukita holvin, avata Tietoja tai lopettaa.
 - Lopeta: sivupalkin ja kirjautumisnäytön Lopeta-painike lukitsee holvin ja sulkee MasterSafen kokonaan ilmoitusalueen asetuksesta riippumatta.
-- Vaihda pääsalasana: suojaa holvisi uudelleen uudella salasanalla. Windows Hello ja suojausavain toimivat edelleen.
+- Vaihda pääsalasana: suojaa holvisi uudelleen uudella salasanalla ja uudella salausavaimella. Lisää sen jälkeen Windows Hello ja suojausavaimet uudelleen.
 
 Windows 11:ssä uusi ilmoitusalueen kuvake alkaa piilotettujen kuvakkeiden alueelta (kellon vieressä oleva nuoli). Pitääksesi sen aina näkyvissä vedä se tehtäväpalkkiin tai ota se käyttöön kohdassa Asetukset, Mukauttaminen, Tehtäväpalkki, Muut ilmaisinalueen kuvakkeet.
 
