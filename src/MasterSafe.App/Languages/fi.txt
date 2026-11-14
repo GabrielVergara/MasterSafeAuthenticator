@@ -805,3 +805,5 @@ encrypted backup => salattu varmuuskopio
 {0} seconds until the next code => {0} sekuntia seuraavaan koodiin
 Many secrets were copied in a short time, so copying is paused for 30 seconds. If this was not you, lock the vault now. => Monta salaisuutta kopioitiin lyhyessä ajassa, joten kopiointi on tauolla 30 sekuntia. Jos se et ollut sinä, lukitse holvi nyt.
 Copying paused: many secrets were copied in a short time => Kopiointi tauolla: monta salaisuutta kopioitiin lyhyessä ajassa
+Export cancelled. No file was written. => Vienti peruttu. Tiedostoa ei kirjoitettu.
+Choose a folder for backups => Valitse kansio varmuuskopioille

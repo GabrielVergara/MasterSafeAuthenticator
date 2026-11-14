@@ -807,3 +807,5 @@ encrypted backup => respaldo cifrado
 {0} seconds until the next code => {0} segundos hasta el siguiente código
 Many secrets were copied in a short time, so copying is paused for 30 seconds. If this was not you, lock the vault now. => Se copiaron muchos secretos en poco tiempo, así que copiar queda en pausa 30 segundos. Si no fue usted, bloquee la bóveda ahora.
 Copying paused: many secrets were copied in a short time => Copia en pausa: se copiaron muchos secretos en poco tiempo
+Export cancelled. No file was written. => Exportación cancelada. No se escribió ningún archivo.
+Choose a folder for backups => Elija una carpeta para las copias

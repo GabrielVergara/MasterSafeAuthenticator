@@ -68,7 +68,7 @@ public sealed class Release16Tests : IDisposable
     {
         public Task<string?> OpenFileAsync(string title, string description, params string[] patterns) => Task.FromResult<string?>(null);
 
-        public Task<string?> SaveFileAsync(string title, string suggestedName, string extension) => Task.FromResult<string?>(null);
+        public Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null) => Task.FromResult<string?>(null);
 
         public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);
 

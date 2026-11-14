@@ -243,7 +243,7 @@ public sealed class PasswordAttachmentAndIconTests : IDisposable
     {
         public Task<string?> OpenFileAsync(string title, string description, params string[] patterns) => Task.FromResult<string?>(openPath);
 
-        public Task<string?> SaveFileAsync(string title, string suggestedName, string extension) => Task.FromResult<string?>(savePath);
+        public Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null) => Task.FromResult<string?>(savePath);
 
         public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);
 

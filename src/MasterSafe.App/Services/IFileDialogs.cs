@@ -17,8 +17,8 @@ public interface IFileDialogs
     /// <param name="patterns">File patterns such as <c>*.sauth</c>.</param>
     Task<string?> OpenFileAsync(string title, string description, params string[] patterns);
 
-    /// <summary>Asks the user where to save a file. Returns null when cancelled.</summary>
-    Task<string?> SaveFileAsync(string title, string suggestedName, string extension);
+    /// <summary>Asks the user where to save a file, starting in <paramref name="startFolder"/> when given. Returns null when cancelled.</summary>
+    Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null);
 
     /// <summary>Asks the user to choose a folder. Returns null when cancelled.</summary>
     Task<string?> PickFolderAsync(string title);
@@ -50,7 +50,7 @@ public sealed class WindowFileDialogs(Func<TopLevel?> owner) : IFileDialogs
     }
 
     /// <inheritdoc />
-    public async Task<string?> SaveFileAsync(string title, string suggestedName, string extension)
+    public async Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null)
     {
         var storage = owner()?.StorageProvider;
         if (storage is null)
@@ -58,12 +58,16 @@ public sealed class WindowFileDialogs(Func<TopLevel?> owner) : IFileDialogs
             return null;
         }
 
+        var start = !string.IsNullOrWhiteSpace(startFolder) && Directory.Exists(startFolder)
+            ? await storage.TryGetFolderFromPathAsync(startFolder)
+            : null;
         var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = title,
             SuggestedFileName = suggestedName,
             DefaultExtension = extension,
             ShowOverwritePrompt = true,
+            SuggestedStartLocation = start,
         });
 
         return file?.TryGetLocalPath();

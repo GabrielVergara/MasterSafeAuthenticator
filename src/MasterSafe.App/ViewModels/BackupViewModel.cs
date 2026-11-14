@@ -119,6 +119,16 @@ public sealed partial class BackupViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Chooses the backup folder in the system's folder dialog.</summary>
+    [RelayCommand]
+    private async Task ChooseFolderAsync()
+    {
+        if (Dialogs is not null && await Dialogs.PickFolderAsync("Choose a folder for backups") is { } folder)
+        {
+            Folder = folder;
+        }
+    }
+
     /// <summary>Writes a KeePass database, protected by the password in the form, to a file the user chooses.</summary>
     [RelayCommand(CanExecute = nameof(CanExportKdbx))]
     private async Task ExportKdbxAsync()
@@ -128,9 +138,10 @@ public sealed partial class BackupViewModel : ViewModelBase
             return;
         }
 
-        var path = await Dialogs.SaveFileAsync("Save the KeePass database", "MasterSafe-export.kdbx", "kdbx");
+        var path = await Dialogs.SaveFileAsync("Save the KeePass database", "MasterSafe-export.kdbx", "kdbx", IsLocal ? Folder : null);
         if (path is null)
         {
+            Status = "Export cancelled. No file was written.";
             return;
         }
 
@@ -144,8 +155,9 @@ public sealed partial class BackupViewModel : ViewModelBase
             Exported?.Invoke("KeePass database");
             Status = $"Saved {System.IO.Path.GetFileName(path)}. It opens in KeePass and KeePassXC with the password you typed. Recycle bin items and earlier versions are not included.";
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex)
         {
+            // An async command would hide any error, and the button would seem to do nothing.
             Status = $"Export failed: {ex.Message}";
         }
         finally

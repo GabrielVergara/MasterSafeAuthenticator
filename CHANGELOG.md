@@ -28,6 +28,11 @@ A release about deeper protection and an easier move from KeePass.
   an export. No unencrypted export file is needed any more. Twofish is not supported.
 - **Extra fields come along.** A KeePass field such as a PIN becomes an extra field, hidden when KeePass protected it.
 
+### Backup page
+- **Export to KeePass always says what happened.** A short or empty file password, a cancelled dialog or any error is
+  shown right under the buttons, instead of the button seeming to do nothing. The save dialog opens in the backup folder.
+- **Choose the backup folder in the folder dialog** with "Choose folder...", instead of typing the path.
+
 ### Codes
 - **A countdown ring** beside each code, drawn like the logo: it empties clockwise and turns red in the last 5 seconds.
   The seconds stay as text in its middle, and screen readers read "N seconds until the next code".

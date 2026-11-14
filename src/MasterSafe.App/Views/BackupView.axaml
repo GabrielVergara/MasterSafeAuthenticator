@@ -28,7 +28,11 @@
       <!-- Local folder -->
       <StackPanel IsVisible="{Binding IsLocal}">
         <TextBlock Text="Backup folder" Classes="label" />
-        <TextBox PlaceholderText="e.g. D:\Backups\MasterSafe" Text="{Binding Folder, Mode=TwoWay}" />
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox PlaceholderText="e.g. D:\Backups\MasterSafe" Text="{Binding Folder, Mode=TwoWay}"
+                   AutomationProperties.Name="Backup folder" />
+          <Button Grid.Column="1" Margin="8,0,0,0" Content="Choose folder..." Command="{Binding ChooseFolderCommand}" />
+        </Grid>
       </StackPanel>
 
       <!-- WebDAV (Nextcloud, ownCloud, others) -->
@@ -61,6 +65,7 @@
         <Button Content="Export to KeePass (.kdbx)..." Margin="0,0,8,8" Command="{Binding ExportKdbxCommand}"
                 ToolTip.Tip="So you can always move to another app. It uses the password above." />
       </WrapPanel>
+      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" />
 
       <StackPanel>
         <TextBlock Text="Existing backups" Classes="label" />
@@ -69,7 +74,6 @@
                  Height="160" />
       </StackPanel>
 
-      <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" Classes="hint" TextWrapping="Wrap" />
 
       <!-- Sync -->
       <Border Classes="card" DataContext="{Binding Sync}" x:DataType="vm:SyncViewModel">
