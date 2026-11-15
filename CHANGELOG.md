@@ -16,6 +16,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   says which package to download instead.
 
 ### Stores
+- **The winget workflow waits for the first package.** It warns instead of failing while `GabrielVergara.MasterSafeAuthenticator` is not yet in winget-pkgs; run it by hand for 1.7.2 once the 1.7.1 pull request is merged.
 - **Flathub is on hold.** Its rules ask for a build from source, a longer history and a person-written manifest, so the
   submission waits (see [docs/Distribution.md](docs/Distribution.md)). The winget package is under review.
 
