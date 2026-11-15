@@ -17,7 +17,7 @@ ICON="$PREFIX/share/icons/hicolor/256x256/apps/masterSafe-authenticator.png"
 is_running() {
   local first
   for proc in /proc/[0-9]*; do
-    first="$(tr '\0' '\n' < "$proc/cmdline" 2>/dev/null | head -n 1)" || continue
+    first="$( { tr '\0' '\n' < "$proc/cmdline"; } 2>/dev/null | head -n 1)" || continue
     [[ "$first" == "$APP_DIR/MasterSafe.App" || "$first" == "$BIN" ]] && return 0
   done
   return 1
@@ -33,6 +33,19 @@ if [[ "${1:-}" == "--uninstall" ]]; then
   echo "Removed. Your vault in ~/.local/share/MasterSafe was not touched."
   exit 0
 fi
+
+# The package must match this processor: an arm64 package on an x86_64 computer (or the reverse) installs, but then
+# cannot start ("Exec format error"). The ELF header says which processor a program is for.
+machine="$(od -An -tx1 -j18 -N1 "$HERE/app/MasterSafe.App" | tr -d ' ')"
+case "$machine:$(uname -m)" in
+  3e:x86_64|b7:aarch64|b7:arm64) ;;
+  *)
+    case "$machine" in 3e) package=x64 ;; b7) package=arm64 ;; *) package=unknown ;; esac
+    echo "This is the $package package, but this computer is $(uname -m)."
+    echo "Download MasterSafe-Authenticator-<version>-linux-$( [[ "$(uname -m)" == x86_64 ]] && echo x64 || echo arm64 ).tar.gz instead."
+    exit 1
+    ;;
+esac
 
 # Replacing the files under a running copy leaves that old copy in charge: a new start only wakes it up.
 if is_running; then

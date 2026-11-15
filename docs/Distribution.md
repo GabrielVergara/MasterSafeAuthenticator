@@ -43,6 +43,26 @@ its description and replies must be written by a person. The files in `packaging
 assistant, so they serve as a reference only: the maintainer writes the Flathub manifest by hand. The submission must
 also disclose the AI-assisted parts of the application itself (code and documentation) and their approximate extent.
 
+**Status (2026-11-15): on hold.** The requirements page (https://docs.flathub.org/docs/for-app-authors/requirements)
+has points that the current plan, repackaging the signed binary release, does not meet:
+
+- **Built entirely from source.** "All source available submissions must be built entirely from source code." MasterSafe is
+  source-available, not open source. Exceptions are for well-known vendors. A source build is possible (the
+  `org.freedesktop.Sdk.Extension.dotnet10` extension exists for runtime 26.08, and `flatpak-dotnet-generator.py` from
+  `flatpak/flatpak-builder-tools` lists the NuGet packages as sources, because there is no network during the build), but it
+  is several days of work.
+- **Development history.** Very young projects "will generally not be accepted". The repository was created on 2026-10-31.
+- **Generative AI.** Most of the code, tests and documentation were written with an AI assistant (60 of the first 85 commits
+  carry a `Co-Authored-By` line). It must be disclosed with the affected parts and approximate extent, and reviewers may
+  reject on that basis.
+- **Translations.** The Spanish and Finnish texts are machine-written and not yet reviewed by native speakers.
+- **Licence.** Section 3 of licence 1.2 allows approved repositories to distribute the official signed release files only. A
+  source build on Flathub's servers makes other files, so a licence 1.3 would have to allow that.
+
+Until these are solved, Linux users get the `.tar.gz` with `install.sh` (and its `masterSafe-authenticator-uninstall`), and
+the plan is a `.flatpak` bundle and a `.deb` attached to each release. A bundle for your own distribution can use the files in
+`packaging/flatpak/`; the AI rule above is only for submissions to Flathub.
+
 **Before submitting:**
 
 1. Test the Linux build on a real desktop (GNOME or KDE, X11 and Wayland): unlock, add a code from a QR image, copy,

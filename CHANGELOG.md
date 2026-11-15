@@ -2,6 +2,13 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Linux
+- **The installer checks the processor.** An arm64 package on an x86_64 computer (or the reverse) installed without
+  complaint and then could not start ("Exec format error"), so clicking the menu entry did nothing. `install.sh` now
+  says which package to download instead.
+
 ## 1.7.1 (2026-11-15)
 
 Fixes found on Linux Mint 22, and the packages for winget and Flathub.
