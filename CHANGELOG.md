@@ -2,6 +2,12 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Maintenance
+- **SkiaSharp 4.156.1** (drawing and QR codes) and its Linux native library. They must change together, so the two
+  separate Dependabot updates failed; the lock files are refreshed. Tests pass on Windows and Linux.
+
 ## 1.7.2 (2026-11-15)
 
 ### Linux
