@@ -15,12 +15,12 @@ approved repositories to do that. Neither needs a code-signing certificate.
 
 **First submission (once, by the maintainer):**
 
-1. Check the manifests: `winget validate --manifest packaging\winget\1.7.0`.
+1. Check the manifests: `winget validate --manifest packaging\winget\1.7.1`.
 2. Test them (needs an administrator once: `winget settings --enable LocalManifestFiles`), with MasterSafe closed:
-   `winget install --manifest packaging\winget\1.7.0`. Then `winget list mastersafe` must show 1.7.0.
+   `winget install --manifest packaging\winget\1.7.1`. Then `winget list mastersafe` must show 1.7.1.
 3. Submit, from your own GitHub account. Either with Komac (`winget install komac`):
-   `komac submit packaging\winget\1.7.0`, or by hand: fork `microsoft/winget-pkgs`, copy the three files to
-   `manifests/g/GabrielVergara/MasterSafeAuthenticator/1.7.0/` and open a pull request.
+   `komac submit packaging\winget\1.7.1`, or by hand: fork `microsoft/winget-pkgs`, copy the three files to
+   `manifests/g/GabrielVergara/MasterSafeAuthenticator/1.7.1/` and open a pull request.
 4. Microsoft's pipeline installs the package in a clean machine and scans it. A reviewer may comment on the pull
    request; the label "Moderator-Approved" and a merge usually come within a few days. The installer is not
    Authenticode-signed, which winget accepts.
@@ -39,8 +39,6 @@ installer's AppId, so winget also recognises copies installed from the GitHub do
 
 **Before submitting:**
 
-0. Release 1.7.1 first and point the manifest's two `archive` sources at its Linux files (URL and SHA-256). 1.7.0 does
-   not yet know it runs inside a Flatpak, so it would still offer its own update download, which Flathub refuses.
 1. Test the Linux build on a real desktop (GNOME or KDE, X11 and Wayland): unlock, add a code from a QR image, copy,
    tray icon, lock, a backup to a folder chosen in the file dialog.
 2. The screenshots in `docs/screenshots/` are drawn by `tools/MasterSafe.Screenshots` (the app itself blocks screen
@@ -56,8 +54,9 @@ installer's AppId, so winget also recognises copies installed from the GitHub do
    flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.GabrielVergara.MasterSafeAuthenticator.yml
    ```
 
-**Submit:** fork `flathub/flathub`, create a branch from `new-pr`, add the files of `packaging/flatpak/` (the manifest,
-`mastersafe.sh`, the `.desktop`, the metainfo and `logo.svg`) at the top level and open a pull request against
+**Submit:** fork `flathub/flathub`, create a branch from `new-pr`, add the manifest
+`packaging/flatpak/io.github.GabrielVergara.MasterSafeAuthenticator.yml` at the top level (everything else comes from the
+release archive) and open a pull request against
 `new-pr`, titled "Add io.github.GabrielVergara.MasterSafeAuthenticator". The `io.github.GabrielVergara` id is verified through your
 GitHub account, so no website file is needed. Answer the reviewers' comments; review usually takes a few weeks. After
 the merge Flathub creates `flathub/io.github.GabrielVergara.MasterSafeAuthenticator` and invites you as maintainer.

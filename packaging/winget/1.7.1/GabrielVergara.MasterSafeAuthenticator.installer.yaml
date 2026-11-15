@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
 
 PackageIdentifier: GabrielVergara.MasterSafeAuthenticator
-PackageVersion: 1.7.0
+PackageVersion: 1.7.1
 InstallerType: inno
 MinimumOSVersion: 10.0.17763.0
 UpgradeBehavior: install
@@ -11,14 +11,14 @@ ReleaseDate: 2026-11-15
 Installers:
 - Architecture: x64
   Scope: user
-  InstallerUrl: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.0/MasterSafe-Authenticator-1.7.0-win-x64-setup.exe
-  InstallerSha256: D97F071041D707C233425DD40575F7CAAB8CE9B6A0449CC177A57B0F49B80CD8
+  InstallerUrl: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.1/MasterSafe-Authenticator-1.7.1-win-x64-setup.exe
+  InstallerSha256: E86EF0E55228DB5ADA8304C578F8B778AE3D624C0CE4773E1C45C986FFB71FBD
   InstallerSwitches:
     Custom: /CURRENTUSER
 - Architecture: x64
   Scope: machine
-  InstallerUrl: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.0/MasterSafe-Authenticator-1.7.0-win-x64-setup.exe
-  InstallerSha256: D97F071041D707C233425DD40575F7CAAB8CE9B6A0449CC177A57B0F49B80CD8
+  InstallerUrl: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.1/MasterSafe-Authenticator-1.7.1-win-x64-setup.exe
+  InstallerSha256: E86EF0E55228DB5ADA8304C578F8B778AE3D624C0CE4773E1C45C986FFB71FBD
   InstallerSwitches:
     Custom: /ALLUSERS
 ManifestType: installer

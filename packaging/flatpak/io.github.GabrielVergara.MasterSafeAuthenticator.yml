@@ -1,5 +1,7 @@
 # Flatpak manifest for Flathub. It repackages the official signed Linux release (licence 1.2, section 3): the program files
 # are exactly those of the release, checked by SHA-256. See docs/Distribution.md.
+# The launcher, desktop entry, metainfo and icon come from the archive's flatpak/ folder (from 1.7.1), so a new version
+# only changes the two URLs and checksums below; Flathub's data checker does that by itself.
 # Local build: flatpak-builder --user --install --force-clean build-dir io.github.GabrielVergara.MasterSafeAuthenticator.yml
 id: io.github.GabrielVergara.MasterSafeAuthenticator
 runtime: org.freedesktop.Platform
@@ -24,17 +26,17 @@ modules:
       - install -d /app/lib/mastersafe
       - cp -a app/. /app/lib/mastersafe/
       - chmod 0755 /app/lib/mastersafe/MasterSafe.App
-      - install -Dm0755 mastersafe.sh /app/bin/mastersafe
+      - install -Dm0755 flatpak/mastersafe.sh /app/bin/mastersafe
       - install -Dm0644 masterSafe-authenticator.png /app/share/icons/hicolor/256x256/apps/${FLATPAK_ID}.png
-      - install -Dm0644 logo.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
-      - install -Dm0644 ${FLATPAK_ID}.desktop /app/share/applications/${FLATPAK_ID}.desktop
-      - install -Dm0644 ${FLATPAK_ID}.metainfo.xml /app/share/metainfo/${FLATPAK_ID}.metainfo.xml
+      - install -Dm0644 flatpak/logo.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
+      - install -Dm0644 flatpak/${FLATPAK_ID}.desktop /app/share/applications/${FLATPAK_ID}.desktop
+      - install -Dm0644 flatpak/${FLATPAK_ID}.metainfo.xml /app/share/metainfo/${FLATPAK_ID}.metainfo.xml
       - install -Dm0644 LICENSE /app/share/licenses/${FLATPAK_ID}/LICENSE
     sources:
       - type: archive
         only-arches: [x86_64]
-        url: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.0/MasterSafe-Authenticator-1.7.0-linux-x64.tar.gz
-        sha256: 0a5572d57197c2d82083a8763bfa5ccb44a5b7a12cef66dba2bf7a2bea8c0e5d
+        url: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.1/MasterSafe-Authenticator-1.7.1-linux-x64.tar.gz
+        sha256: d126c0e7e5b55ed156a77fb033e16b97f5157e4507fb8a936596857f0ba7672d
         x-checker-data:
           type: json
           url: https://api.github.com/repos/GabrielVergara/MasterSafeAuthenticator/releases/latest
@@ -43,18 +45,10 @@ modules:
           is-main-source: true
       - type: archive
         only-arches: [aarch64]
-        url: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.0/MasterSafe-Authenticator-1.7.0-linux-arm64.tar.gz
-        sha256: 3cc9be7361f67c037294e8955aa1c7e43693816a2b1278d03ed3eb7776b891f3
+        url: https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.7.1/MasterSafe-Authenticator-1.7.1-linux-arm64.tar.gz
+        sha256: cebe17630c79fc2a4c45688ede37f88a555429fba92862736eda9e1dbd4470de
         x-checker-data:
           type: json
           url: https://api.github.com/repos/GabrielVergara/MasterSafeAuthenticator/releases/latest
           version-query: .tag_name | sub("^v"; "")
           url-query: '"https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v" + $version + "/MasterSafe-Authenticator-" + $version + "-linux-arm64.tar.gz"'
-      - type: file
-        path: mastersafe.sh
-      - type: file
-        path: logo.svg
-      - type: file
-        path: io.github.GabrielVergara.MasterSafeAuthenticator.desktop
-      - type: file
-        path: io.github.GabrielVergara.MasterSafeAuthenticator.metainfo.xml
