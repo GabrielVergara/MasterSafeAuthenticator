@@ -37,6 +37,12 @@ installer's AppId, so winget also recognises copies installed from the GitHub do
 
 ## Flathub
 
+**Flathub's Generative AI policy** (https://docs.flathub.org/docs/for-app-authors/requirements#generative-ai-policy):
+the manifest must not contain AI-generated or AI-assisted content, even when disclosed, and the submission pull request,
+its description and replies must be written by a person. The files in `packaging/flatpak/` were prepared with an AI
+assistant, so they serve as a reference only: the maintainer writes the Flathub manifest by hand. The submission must
+also disclose the AI-assisted parts of the application itself (code and documentation) and their approximate extent.
+
 **Before submitting:**
 
 1. Test the Linux build on a real desktop (GNOME or KDE, X11 and Wayland): unlock, add a code from a QR image, copy,
