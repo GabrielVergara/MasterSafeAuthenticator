@@ -65,7 +65,7 @@ jobs:
             echo "::warning::The WINGET_TOKEN secret is not set, so nothing was submitted. See docs/Distribution.md."
             exit 0
           fi
-          path="manifests/${PACKAGE_ID:0:1}/${PACKAGE_ID//.//}"
+          path="manifests/${PACKAGE_ID:0:1,,}/${PACKAGE_ID//.//}"
           if ! curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/microsoft/winget-pkgs/contents/$path" >/dev/null; then
             echo "::warning::$PACKAGE_ID is not in winget-pkgs yet (the first pull request is still open), so $VERSION was not submitted. Run this workflow by hand once it is merged."
             exit 0
