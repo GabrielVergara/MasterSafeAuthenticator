@@ -51,6 +51,17 @@ public sealed partial class DistributionTests
     }
 
     [Fact]
+    public void TheReleaseWorkflow_BuildsAndUploadsTheDebPackages()
+    {
+        var workflow = File.ReadAllText(Path.Combine(Root(), ".github", "workflows", "release.yml"));
+        workflow.Should().Contain("build-deb.sh").And.Contain("artifacts/*.deb");
+
+        var script = File.ReadAllText(Path.Combine(Root(), "installer", "linux", "build-deb.sh"));
+        script.Should().Contain("Package: $PKG").And.Contain("--root-owner-group");
+        script.Should().Contain("PKG=mastersafe-authenticator", "Debian package names are lowercase");
+    }
+
+    [Fact]
     public void TheFlathubData_DescribesThisVersion()
     {
         var folder = Path.Combine(Root(), "packaging", "flatpak");

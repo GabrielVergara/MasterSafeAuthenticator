@@ -69,6 +69,12 @@ jobs:
           bash installer/linux/build-linux.sh "$version" linux-x64
           bash installer/linux/build-linux.sh "$version" linux-arm64
 
+      - name: Build .deb packages
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          bash installer/linux/build-deb.sh "artifacts/MasterSafe-Authenticator-$version-linux-x64.tar.gz"
+          bash installer/linux/build-deb.sh "artifacts/MasterSafe-Authenticator-$version-linux-arm64.tar.gz"
+
       - name: Software bill of materials
         run: |
           dotnet tool install --global CycloneDX
@@ -80,6 +86,8 @@ jobs:
           path: |
             artifacts/*.tar.gz
             artifacts/*.tar.gz.sha256
+            artifacts/*.deb
+            artifacts/*.deb.sha256
             artifacts/MasterSafe-Cli-*-linux-*
             artifacts/sbom.cyclonedx.json
 

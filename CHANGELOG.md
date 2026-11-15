@@ -2,12 +2,22 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.7.2 (2026-11-15)
 
 ### Linux
+- **A `.deb` package for Debian, Ubuntu and Linux Mint**, for x64 and arm64:
+  `mastersafe-authenticator_<version>_<arch>.deb`. Install it with a double click or
+  `sudo apt install ./mastersafe-authenticator_<version>_amd64.deb`; remove it with
+  `sudo apt remove mastersafe-authenticator`. The package manager checks the processor and the dependencies, and removing it
+  keeps your vault. It holds the same files as the `.tar.gz`, is signed like the other files, and installs in `/opt`.
+  To update, install the newer `.deb`; the in-app update still downloads and verifies the `.tar.gz`.
 - **The installer checks the processor.** An arm64 package on an x86_64 computer (or the reverse) installed without
   complaint and then could not start ("Exec format error"), so clicking the menu entry did nothing. `install.sh` now
   says which package to download instead.
+
+### Stores
+- **Flathub is on hold.** Its rules ask for a build from source, a longer history and a person-written manifest, so the
+  submission waits (see [docs/Distribution.md](docs/Distribution.md)). The winget package is under review.
 
 ## 1.7.1 (2026-11-15)
 

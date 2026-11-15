@@ -73,6 +73,12 @@
     <control>pointing</control>
   </supports>
   <releases>
+    <release version="1.7.2" date="2026-11-15">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.7.2</url>
+      <description>
+        <p>A .deb package for Debian, Ubuntu and Linux Mint, and a processor check in the Linux installer.</p>
+      </description>
+    </release>
     <release version="1.7.1" date="2026-11-15">
       <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.7.1</url>
       <description>

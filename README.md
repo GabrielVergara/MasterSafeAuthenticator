@@ -67,6 +67,7 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 | System | File | How |
 | --- | --- | --- |
 | Windows 10/11 (x64) | `MasterSafe-Authenticator-<version>-win-x64-setup.exe` | Run it. Installs for your user, no administrator needed |
+| Linux x64 / arm64, Debian, Ubuntu, Mint | `mastersafe-authenticator_<version>_<amd64 or arm64>.deb` | Double click, or `sudo apt install ./<file>.deb`. To remove it: `sudo apt remove mastersafe-authenticator` (your vault is kept) |
 | Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`). To remove it: `masterSafe-authenticator-uninstall` (your vault is kept) |
 
 Coming soon, once the stores accept the package: `winget install mastersafe` on Windows, and
@@ -141,6 +142,7 @@ targets `net10.0`. To build for Linux from any machine pass `-p:MasterSafeTarget
 | Windows installer | `./installer/build-windows.ps1 -Version 1.2.0 [-SigningKey key.file]` (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php): `winget install JRSoftware.InnoSetup`) | `MasterSafe-Authenticator-<v>-win-x64-setup.exe` + `.sha256` (+ `.sig`) |
 | Linux x64 | `bash installer/linux/build-linux.sh 1.2.0 linux-x64` | `MasterSafe-Authenticator-<v>-linux-x64.tar.gz` + `.sha256` |
 | Linux arm64 | `bash installer/linux/build-linux.sh 1.2.0 linux-arm64` | `MasterSafe-Authenticator-<v>-linux-arm64.tar.gz` + `.sha256` |
+| Linux .deb | `bash installer/linux/build-deb.sh artifacts/MasterSafe-Authenticator-<v>-linux-x64.tar.gz` (needs `dpkg-deb`; on Windows run it in a `debian` container) | `mastersafe-authenticator_<v>_amd64.deb` + `.sha256` |
 
 All packages are self-contained, so users do not need to install .NET. The Linux script also runs on Windows
 (Git Bash). Pushing a tag such as `v1.2.0` runs `.github/workflows/release.yml`, which tests on both systems,

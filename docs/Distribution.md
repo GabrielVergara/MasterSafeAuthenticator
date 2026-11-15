@@ -59,9 +59,18 @@ has points that the current plan, repackaging the signed binary release, does no
 - **Licence.** Section 3 of licence 1.2 allows approved repositories to distribute the official signed release files only. A
   source build on Flathub's servers makes other files, so a licence 1.3 would have to allow that.
 
-Until these are solved, Linux users get the `.tar.gz` with `install.sh` (and its `masterSafe-authenticator-uninstall`), and
-the plan is a `.flatpak` bundle and a `.deb` attached to each release. A bundle for your own distribution can use the files in
-`packaging/flatpak/`; the AI rule above is only for submissions to Flathub.
+Until these are solved, Linux users get the `.deb` (Debian, Ubuntu, Mint) or the `.tar.gz` with `install.sh` (and its
+`masterSafe-authenticator-uninstall`), both attached to each release. A `.flatpak` bundle for your own distribution can use
+the files in `packaging/flatpak/`; the AI rule above is only for submissions to Flathub.
+
+## The .deb package
+
+`installer/linux/build-deb.sh <archive.tar.gz>` repackages the release archive, so the `.deb` holds the same files: the app in
+`/opt/masterSafe-authenticator`, the command `/usr/bin/masterSafe-authenticator`, the menu entry and the icon. The release
+workflow builds it for x64 and arm64 and the maintainer signs it with the other files. Build one by hand on Windows with
+Docker: `docker run --rm -v "%cd%:/w" debian:12 bash /w/installer/linux/build-deb.sh /w/artifacts/<archive>.tar.gz`.
+The package name is lowercase (`mastersafe-authenticator`, Debian's rule); the files keep the `masterSafe-authenticator`
+names of the `.tar.gz` install. Removing it keeps `~/.local/share/MasterSafe`.
 
 **Before submitting:**
 

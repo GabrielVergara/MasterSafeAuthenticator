@@ -117,6 +117,12 @@ when the vault opens) and `History` (up to ten earlier versions, newest first). 
 Older versions of the app ignore these fields, so a vault that was used with 1.4 still opens, but the bin and history
 are not shown there.
 
+### Added in 1.7.2
+
+`installer/linux/build-deb.sh` repackages the Linux archive as `mastersafe-authenticator_<version>_<amd64|arm64>.deb`
+(`/opt/masterSafe-authenticator`, `/usr/bin/masterSafe-authenticator`, menu entry, icon); the release workflow builds and
+uploads it, and `sign-release.ps1` signs it with the rest. The in-app update still offers the `.tar.gz`.
+
 ### Added in 1.7.1
 
 `AppInfo.UpdatedBy` is "Flathub" when `FLATPAK_ID` is set; `UpdatesViewModel` then gets no `UpdateChecker`, the
