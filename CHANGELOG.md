@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## 1.7.0 (not released yet)
+## 1.7.0 (2026-11-15)
 
 A release about deeper protection and an easier move from KeePass.
 
