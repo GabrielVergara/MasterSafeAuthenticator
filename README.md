@@ -67,7 +67,11 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 | System | File | How |
 | --- | --- | --- |
 | Windows 10/11 (x64) | `MasterSafe-Authenticator-<version>-win-x64-setup.exe` | Run it. Installs for your user, no administrator needed |
-| Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`; `bash install.sh --uninstall` removes it) |
+| Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`). To remove it: `masterSafe-authenticator-uninstall` (your vault is kept) |
+
+Coming soon, once the stores accept the package: `winget install mastersafe` on Windows, and
+`flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` on Linux. Both install the same signed release files; see
+[docs/Distribution.md](docs/Distribution.md).
 
 ### How to verify a download
 
@@ -168,6 +172,7 @@ MasterSafe.slnx
 ├─ src/MasterSafe.Cli          # Release tools: verify-release, verify, fingerprint, keygen, sign (also a demo)
 ├─ tests/MasterSafe.Tests      # Unit tests (RFC vectors, vault security, view models)
 ├─ installer/                  # Windows (Inno Setup) and Linux (tar.gz) packaging
+├─ packaging/                  # winget manifests and the Flathub (Flatpak) manifest and metainfo
 └─ docs/                       # Architecture, security, threat model, formats
 ```
 
@@ -198,6 +203,7 @@ and release builds bundle the newest patched .NET runtime. The self-assessment a
 | Package | Purpose |
 | --- | --- |
 | Konscious.Security.Cryptography.Argon2 | Argon2id KDF |
+| BouncyCastle.Cryptography | ML-DSA-65 signature checks on systems without ML-DSA (OpenSSL older than 3.5) |
 | ZXing.Net + SkiaSharp | QR decode/generate |
 | Microsoft.EntityFrameworkCore.Sqlite + SQLitePCLRaw | Persistence library |
 | Avalonia 12 + CommunityToolkit.Mvvm | Desktop UI |
@@ -228,6 +234,8 @@ grant a licence for commercial use.
 MasterSafe Authenticator is **freeware for personal, non-commercial use**, and it is **not open source**. See [LICENSE](LICENSE).
 The source is published so its security can be reviewed. You may read it and build it for your own personal use, but you
 may not publish or distribute it or a changed version, put it under an open source or any other licence, copy it into
-another project, or use it to train AI models. Forks on GitHub may only be used to propose changes back. Third-party components keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+another project, or use it to train AI models. Forks on GitHub may only be used to propose changes back. The approved
+software repositories (the Windows Package Manager community repository and Flathub) may distribute the official signed
+release files in their own package format (licence 1.2, section 3). Third-party components keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Copyright (c) 2026 Gabriel Vergara Ezcurdia.

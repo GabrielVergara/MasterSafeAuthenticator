@@ -1,0 +1,69 @@
+name: winget
+
+# After a release is signed and published, proposes the new version to the Windows Package Manager community repository
+# (microsoft/winget-pkgs) with Komac. The first version was submitted by hand from packaging/winget; see
+# docs/Distribution.md. Needs the secret WINGET_TOKEN: a classic token of the maintainer's account with the public_repo
+# scope, so Komac can update the fork of winget-pkgs and open the pull request. Without it the job only says so.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to submit, for example 1.7.1'
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  PACKAGE_ID: GabrielVergara.MasterSafeAuthenticator
+  KOMAC_VERSION: 2.17.1
+  KOMAC_SHA256: e694e79cd451afabf47bead66ed34586fef4814f7b94e4b61a098f419978d5d7
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    steps:
+      - name: Work out the version
+        id: v
+        env:
+          INPUT: ${{ github.event.inputs.version }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="${INPUT:-${TAG#v}}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "Not a version: $version"; exit 1; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check that the release is signed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          # Only a release the maintainer signed offline is offered to winget.
+          gh release view "v$VERSION" -R "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' > assets.txt
+          grep -qx "MasterSafe-Authenticator-$VERSION-win-x64-setup.exe.sig" assets.txt
+          grep -qx "MasterSafe-release-manifest.json.sig" assets.txt
+
+      - name: Install Komac
+        run: |
+          curl -fsSL -o komac.tar.gz "https://github.com/russellbanks/Komac/releases/download/v$KOMAC_VERSION/komac-$KOMAC_VERSION-x86_64-unknown-linux-gnu.tar.gz"
+          echo "$KOMAC_SHA256  komac.tar.gz" | sha256sum -c -
+          mkdir komac && tar -xzf komac.tar.gz -C komac
+          bin="$(find "$PWD/komac" -type f -name komac | head -n 1)"
+          chmod +x "$bin"
+          dirname "$bin" >> "$GITHUB_PATH"
+
+      - name: Submit to winget-pkgs
+        env:
+          GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "::warning::The WINGET_TOKEN secret is not set, so nothing was submitted. See docs/Distribution.md."
+            exit 0
+          fi
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/MasterSafe-Authenticator-$VERSION-win-x64-setup.exe"
+          komac update "$PACKAGE_ID" --version "$VERSION" --urls "$url" --submit

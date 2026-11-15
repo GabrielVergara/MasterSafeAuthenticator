@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=MasterSafe Authenticator
+GenericName=Authenticator
+Comment=Two-factor codes and passwords in one encrypted vault
+Exec=mastersafe
+Icon=io.github.GabrielVergara.MasterSafeAuthenticator
+Terminal=false
+Categories=Utility;Security;
+Keywords=2FA;TOTP;OTP;authenticator;password;vault;KeePass;
+StartupWMClass=MasterSafe.App

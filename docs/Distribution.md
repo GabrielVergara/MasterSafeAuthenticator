@@ -1,0 +1,81 @@
+# Distribution: winget and Flathub
+
+MasterSafe is offered through two free stores besides the GitHub releases:
+
+| Store | Command once accepted | Package id | Files here |
+| --- | --- | --- | --- |
+| Windows Package Manager | `winget install mastersafe` | `GabrielVergara.MasterSafeAuthenticator` | `packaging/winget/<version>/` |
+| Flathub | `flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` | `io.github.GabrielVergara.MasterSafeAuthenticator` | `packaging/flatpak/` |
+
+Both install the **official signed release files**: winget downloads the installer from the GitHub release and checks
+its SHA-256; the Flatpak repackages the Linux `.tar.gz`, also checked by SHA-256. Licence 1.2, section 3, allows these
+approved repositories to do that. Neither needs a code-signing certificate.
+
+## winget
+
+**First submission (once, by the maintainer):**
+
+1. Check the manifests: `winget validate --manifest packaging\winget\1.7.0`.
+2. Test them (needs an administrator once: `winget settings --enable LocalManifestFiles`), with MasterSafe closed:
+   `winget install --manifest packaging\winget\1.7.0`. Then `winget list mastersafe` must show 1.7.0.
+3. Submit, from your own GitHub account. Either with Komac (`winget install komac`):
+   `komac submit packaging\winget\1.7.0`, or by hand: fork `microsoft/winget-pkgs`, copy the three files to
+   `manifests/g/GabrielVergara/MasterSafeAuthenticator/1.7.0/` and open a pull request.
+4. Microsoft's pipeline installs the package in a clean machine and scans it. A reviewer may comment on the pull
+   request; the label "Moderator-Approved" and a merge usually come within a few days. The installer is not
+   Authenticode-signed, which winget accepts.
+
+**Later versions** are automatic: `.github/workflows/winget.yml` runs when a release is published, checks that the
+release is signed (`.sig` and the signed manifest are present) and opens the update pull request with Komac. It needs
+the repository secret `WINGET_TOKEN`: a classic GitHub token of the maintainer's account with the `public_repo` scope
+(Settings, Developer settings, Personal access tokens). Without it the workflow only prints a warning. It can also be
+run by hand ("Run workflow", with a version).
+
+winget installs for the current user by default, like the installer; `--scope machine` installs for all users. The
+in-app update check keeps working, and `winget upgrade mastersafe` updates too. `ProductCode` in the manifest is the
+installer's AppId, so winget also recognises copies installed from the GitHub download.
+
+## Flathub
+
+**Before submitting:**
+
+0. Release 1.7.1 first and point the manifest's two `archive` sources at its Linux files (URL and SHA-256). 1.7.0 does
+   not yet know it runs inside a Flatpak, so it would still offer its own update download, which Flathub refuses.
+1. Test the Linux build on a real desktop (GNOME or KDE, X11 and Wayland): unlock, add a code from a QR image, copy,
+   tray icon, lock, a backup to a folder chosen in the file dialog.
+2. The screenshots in `docs/screenshots/` are drawn by `tools/MasterSafe.Screenshots` (the app itself blocks screen
+   capture): `dotnet run --project tools/MasterSafe.Screenshots -- docs/screenshots`. It renders the real pages without
+   a screen from a demo vault in a temporary folder; your vault is never opened. Push them: the metainfo links to them
+   on `main`.
+3. Build and lint locally (needs `flatpak`, `flatpak-builder` and the `org.flatpak.Builder` app):
+
+   ```
+   cd packaging/flatpak
+   flatpak-builder --user --install --force-clean build io.github.GabrielVergara.MasterSafeAuthenticator.yml
+   flatpak run io.github.GabrielVergara.MasterSafeAuthenticator
+   flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.GabrielVergara.MasterSafeAuthenticator.yml
+   ```
+
+**Submit:** fork `flathub/flathub`, create a branch from `new-pr`, add the files of `packaging/flatpak/` (the manifest,
+`mastersafe.sh`, the `.desktop`, the metainfo and `logo.svg`) at the top level and open a pull request against
+`new-pr`, titled "Add io.github.GabrielVergara.MasterSafeAuthenticator". The `io.github.GabrielVergara` id is verified through your
+GitHub account, so no website file is needed. Answer the reviewers' comments; review usually takes a few weeks. After
+the merge Flathub creates `flathub/io.github.GabrielVergara.MasterSafeAuthenticator` and invites you as maintainer.
+
+**Later versions:** the manifest's `x-checker-data` lets Flathub's external data checker open a pull request with the
+new URLs and checksums when a GitHub release appears. Before merging it, check that the release is the signed one. The
+software centre shows the release notes from the metainfo, so every release adds a `<release>` entry to
+`packaging/flatpak/io.github.GabrielVergara.MasterSafeAuthenticator.metainfo.xml` (a test checks this). From 1.7.1 the Linux archive
+also contains these files in `flatpak/`, so the Flathub manifest can take them from the archive and only the URL and
+checksum change.
+
+**Inside the Flatpak:**
+
+- `FLATPAK_ID` is set, so the app knows Flathub updates it (`AppInfo.UpdatedBy`). It never checks for or downloads
+  updates itself; Flathub's rules forbid it. The Updates section in Settings says so.
+- Data is in `~/.var/app/io.github.GabrielVergara.MasterSafeAuthenticator/data/MasterSafe` (and `config/MasterSafe`). A vault from
+  the `.tar.gz` install (`~/.local/share/MasterSafe`) is not seen; open it with "Open a vault file" or make a full
+  backup and restore it.
+- Permissions: X11, the GPU, the network (only for what you turn on: breach check, WebDAV, site icons) and the tray.
+  No file system access: files are opened and saved through the desktop's file dialogs.
+- Windows Hello and FIDO2 security keys exist only on Windows; on Linux the vault is unlocked with the master password.

@@ -24,12 +24,25 @@ public sealed partial class UpdatesViewModel : ViewModelBase
     /// <param name="checker">The update checker; without it updates are unavailable.</param>
     /// <param name="dialogs">Used to show the downloaded file in the file manager.</param>
     /// <param name="downloadFolder">Where downloads go (the Downloads folder when not given).</param>
-    public UpdatesViewModel(UpdateChecker? checker = null, IFileDialogs? dialogs = null, Func<string>? downloadFolder = null)
+    /// <param name="updatedBy">The store that updates this copy (for example "Flathub"); MasterSafe then never looks for updates itself.</param>
+    public UpdatesViewModel(UpdateChecker? checker = null, IFileDialogs? dialogs = null, Func<string>? downloadFolder = null, string? updatedBy = null)
     {
-        _checker = checker;
+        UpdatedBy = string.IsNullOrWhiteSpace(updatedBy) ? null : updatedBy;
+        _checker = UpdatedBy is null ? checker : null;
         _dialogs = dialogs;
         _downloadFolder = downloadFolder ?? DefaultDownloadFolder;
     }
+
+    /// <summary>The store that updates this copy, or null when MasterSafe offers its own updates.</summary>
+    public string? UpdatedBy { get; }
+
+    /// <summary>True when MasterSafe looks for and downloads its own updates.</summary>
+    public bool UpdatesItself => UpdatedBy is null;
+
+    /// <summary>For example "This copy was installed from Flathub, which keeps it up to date. ..."</summary>
+    public string StoreText => UpdatedBy is null
+        ? string.Empty
+        : $"This copy was installed from {UpdatedBy}, which keeps it up to date. Update it in your software centre, or run: flatpak update";
 
     /// <summary>Progress and results.</summary>
     [ObservableProperty]

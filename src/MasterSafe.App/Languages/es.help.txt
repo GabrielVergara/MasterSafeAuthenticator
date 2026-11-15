@@ -276,6 +276,8 @@ Ajustes tiene una sección Actualizaciones.
 - «Descargar y verificar» guarda el instalador de su sistema y comprueba su firma ML-DSA-65 y su suma SHA-256 con la clave de firma del proyecto, que está integrada en la aplicación. Una descarga que no se verifica se elimina. Después cierra MasterSafe y ejecuta usted el instalador. Las actualizaciones nunca se instalan solas y su bóveda no se toca.
 - No se envía nada sobre usted ni su bóveda. Solo se solicita la información pública de la versión.
 
+¿Lo instaló con winget? «winget upgrade mastersafe» también lo actualiza. ¿Lo instaló desde Flathub? Entonces lo actualiza Flathub, desde su centro de software o con «flatpak update», y la sección Actualizaciones solo lo indica: Flathub no permite que las aplicaciones se actualicen solas.
+
 También puede verificar cualquier descarga a mano con la herramienta de línea de comandos de MasterSafe. La huella de la clave se publica en el README y en SECURITY.md del proyecto.
 
 Cada versión tiene también una lista firmada de sus archivos y su número de versión. MasterSafe rechaza una actualización cuya versión firmada difiera de la ofrecida, o que no sea más reciente que la suya.

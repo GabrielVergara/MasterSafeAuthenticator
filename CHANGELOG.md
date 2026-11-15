@@ -2,6 +2,31 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.7.1 (2026-11-15)
+
+Fixes found on Linux Mint 22, and the packages for winget and Flathub.
+
+### Linux
+- **Signatures are checked on every Linux.** Linux Mint 22, Ubuntu 24.04 and other systems with OpenSSL older than 3.5
+  have no ML-DSA, so "Download and verify" refused every update and the command-line tool could not verify a download.
+  Verifying now falls back to the managed ML-DSA-65 of BouncyCastle (MIT licence); signing still needs the system's.
+  Versions 1.7.0 and older cannot verify on these systems, so download 1.7.1 once by hand and check it on another
+  computer, or compare its SHA-256 with the release page.
+- **Installing while MasterSafe runs is refused.** Replacing the files under a running copy (often hidden in the tray)
+  left the old copy in charge, so the new version seemed not to start. `install.sh` now asks you to choose Exit first.
+- **An uninstaller stays installed:** `masterSafe-authenticator-uninstall` removes the program, the launcher and the
+  menu entry, and keeps your vault. It also refuses while MasterSafe runs.
+
+### Stores
+- **winget and Flathub packages.** Manifests for the Windows Package Manager (`winget install mastersafe`) and a Flatpak
+  for Flathub, both built from the signed release files. A workflow proposes each new signed release to winget. See
+  [docs/Distribution.md](docs/Distribution.md).
+- **Updates inside a Flatpak come from Flathub.** The app no longer looks for or downloads updates there, and Settings
+  says how to update instead.
+- **Licence 1.2.** Approved software repositories (winget and Flathub) may distribute the official signed release files
+  in their own package format.
+- The Linux archive also contains the Flathub desktop entry, metainfo and launcher, in `flatpak/`.
+
 ## 1.7.0 (2026-11-15)
 
 A release about deeper protection and an easier move from KeePass.

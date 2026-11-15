@@ -23,6 +23,7 @@ Avalonia and SkiaSharp. The SBOM above lists the NuGet packages; the runtime ver
 | Component | Version | License |
 | --- | --- | --- |
 | Konscious.Security.Cryptography.Argon2 | 1.3.1 | MIT |
+| BouncyCastle.Cryptography | 2.7.0 | MIT |
 | Microsoft.Win32.SystemEvents | 10.0.0 | MIT |
 | Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent, Avalonia.Fonts.Inter | 12.1.4 | MIT |
 | CommunityToolkit.Mvvm | 8.4.2 | MIT |

@@ -3,4 +3,7 @@
     <RootNamespace>MasterSafe.PostQuantum</RootNamespace>
     <AssemblyName>MasterSafe.PostQuantum</AssemblyName>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
+  </ItemGroup>
 </Project>

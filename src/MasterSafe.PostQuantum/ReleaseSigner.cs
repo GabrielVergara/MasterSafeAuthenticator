@@ -4,6 +4,8 @@
 // License: See LICENSE
 
 using System.Security.Cryptography;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 
 namespace MasterSafe.PostQuantum;
 
@@ -14,8 +16,14 @@ namespace MasterSafe.PostQuantum;
 /// </summary>
 public static class ReleaseSigner
 {
-    /// <summary>True when the operating system provides ML-DSA.</summary>
+    /// <summary>True when the operating system provides ML-DSA, which signing needs.</summary>
     public static bool IsSupported => MLDsa.IsSupported;
+
+    /// <summary>
+    /// Always true: verifying also works without the operating system's ML-DSA (for example OpenSSL 3.0 on Ubuntu 24.04 and
+    /// Linux Mint 22), through the managed BouncyCastle implementation.
+    /// </summary>
+    public static bool CanVerify => true;
 
     /// <summary>Creates a signing key pair. The seed (32 bytes) is the private key.</summary>
     public static (byte[] PublicKey, byte[] PrivateSeed) GenerateKeyPair()
@@ -43,7 +51,10 @@ public static class ReleaseSigner
         ArgumentNullException.ThrowIfNull(data);
         ArgumentNullException.ThrowIfNull(signature);
         ArgumentNullException.ThrowIfNull(publicKey);
-        EnsureSupported();
+        if (!MLDsa.IsSupported)
+        {
+            return VerifyManaged(data, signature, publicKey);
+        }
 
         try
         {
@@ -51,6 +62,33 @@ public static class ReleaseSigner
             return key.VerifyData(data, signature);
         }
         catch (CryptographicException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Verifies with BouncyCastle's managed ML-DSA-65 (pure mode, empty context, as <see cref="MLDsa.SignData(byte[], byte[])"/>
+    /// signs). Used when the operating system has no ML-DSA. Public for tests, which compare it with the system one.
+    /// </summary>
+    public static bool VerifyManaged(byte[] data, byte[] signature, byte[] publicKey)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        ArgumentNullException.ThrowIfNull(signature);
+        ArgumentNullException.ThrowIfNull(publicKey);
+        if (publicKey.Length != MLDsaAlgorithm.MLDsa65.PublicKeySizeInBytes || signature.Length != MLDsaAlgorithm.MLDsa65.SignatureSizeInBytes)
+        {
+            return false;
+        }
+
+        try
+        {
+            var signer = new MLDsaSigner(MLDsaParameters.ml_dsa_65, deterministic: true);
+            signer.Init(false, MLDsaPublicKeyParameters.FromEncoding(MLDsaParameters.ml_dsa_65, publicKey));
+            signer.BlockUpdate(data, 0, data.Length);
+            return signer.VerifySignature(signature);
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or Org.BouncyCastle.Crypto.CryptoException)
         {
             return false;
         }

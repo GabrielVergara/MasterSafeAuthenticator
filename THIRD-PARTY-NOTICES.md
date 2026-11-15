@@ -33,7 +33,7 @@ server, wifi, credit-card, school, heart, star, music-note, camera, code-braces,
 ## Other components
 
 Avalonia (MIT), CommunityToolkit.Mvvm (MIT), SkiaSharp (MIT), ZXing.Net (Apache-2.0), Inter font (SIL OFL 1.1),
-Konscious.Security.Cryptography (MIT), Microsoft.Win32.SystemEvents (MIT), Microsoft.Windows.CsWin32 (MIT) and the .NET runtime (MIT). See
+Konscious.Security.Cryptography (MIT), BouncyCastle.Cryptography (MIT, ML-DSA signature checks where the system has none), Microsoft.Win32.SystemEvents (MIT), Microsoft.Windows.CsWin32 (MIT) and the .NET runtime (MIT). See
 [docs/SBOM.md](docs/SBOM.md) for the exact list.
 
 ## Trademarks and independence

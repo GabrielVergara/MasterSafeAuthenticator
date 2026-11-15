@@ -220,8 +220,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             }
         };
         Settings.Updates = new UpdatesViewModel(
-            TryCreateUpdateChecker(),
-            services?.Dialogs);
+            AppInfo.UpdatedBy is null ? TryCreateUpdateChecker() : null,
+            services?.Dialogs,
+            updatedBy: AppInfo.UpdatedBy);
         Settings.Updates.UpdateFound += (_, info) =>
         {
             _newerRelease = info;
@@ -562,7 +563,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 new RelayCommand(() => CurrentPage = Settings)));
         }
 
-        if (!Settings.CheckForUpdatesOnStart)
+        if (!Settings.CheckForUpdatesOnStart && Settings.Updates?.UpdatesItself != false)
         {
             notices.Add(new NoticeRow(
                 "updates",
@@ -588,7 +589,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Looks for a newer version once per run, when the user allowed it.</summary>
     private void CheckForUpdatesOnce()
     {
-        if (_updateChecked || !Settings.CheckForUpdatesOnStart || Settings.Updates is null)
+        if (_updateChecked || !Settings.CheckForUpdatesOnStart || Settings.Updates is not { UpdatesItself: true })
         {
             return;
         }

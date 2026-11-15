@@ -807,3 +807,4 @@ Many secrets were copied in a short time, so copying is paused for 30 seconds. I
 Copying paused: many secrets were copied in a short time => Kopiointi tauolla: monta salaisuutta kopioitiin lyhyessä ajassa
 Export cancelled. No file was written. => Vienti peruttu. Tiedostoa ei kirjoitettu.
 Choose a folder for backups => Valitse kansio varmuuskopioille
+This copy was installed from {0}, which keeps it up to date. Update it in your software centre, or run: flatpak update => Tämä kopio asennettiin palvelusta {0}, joka pitää sen ajan tasalla. Päivitä se ohjelmistokeskuksessa tai suorita: flatpak update

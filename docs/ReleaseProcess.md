@@ -26,6 +26,10 @@ verification.
    Without `-Publish` it signs and leaves the draft for review.
 5. **Check.** Download the published files into a new folder and run `MasterSafe.Cli verify-release <folder> signing/masterSafe-release.pub`.
    Install the installer on a test computer.
+6. **Stores.** Publishing triggers `.github/workflows/winget.yml`, which proposes the version to winget (needs the
+   `WINGET_TOKEN` secret). For Flathub, add the `<release>` entry to the metainfo in step 1 (a test checks it) and merge
+   the pull request that Flathub's data checker opens after checking it points at the signed release. See
+   [Distribution.md](Distribution.md).
 
 ## Why there is a signed manifest
 

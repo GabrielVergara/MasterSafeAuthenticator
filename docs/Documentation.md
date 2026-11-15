@@ -117,6 +117,15 @@ when the vault opens) and `History` (up to ten earlier versions, newest first). 
 Older versions of the app ignore these fields, so a vault that was used with 1.4 still opens, but the bin and history
 are not shown there.
 
+### Added in 1.7.1
+
+`AppInfo.UpdatedBy` is "Flathub" when `FLATPAK_ID` is set; `UpdatesViewModel` then gets no `UpdateChecker`, the
+start-up check and its notice are skipped, and Settings shows `StoreText`. winget installs need no change.
+`ReleaseSigner.Verify` falls back to `VerifyManaged` (BouncyCastle ML-DSA-65, pure mode, empty context) when
+`MLDsa.IsSupported` is false, for example OpenSSL 3.0 on Ubuntu 24.04 and Linux Mint 22; signing still needs the system's
+ML-DSA. `installer/linux/install.sh` refuses to install or uninstall while a copy runs (found by its command line) and
+installs `masterSafe-authenticator-uninstall`.
+
 ### Added in 1.7
 
 `VaultContents.Events` holds up to 200 `SecurityEvent`s (time, kind, short detail, never a secret), shown in Settings.
@@ -156,6 +165,8 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
 | Package lock files | after changing a package: `pwsh scripts/update-lock-files.ps1` and commit the `packages.*.lock.json` files. CI restores in locked mode, so a Dependabot package update fails until they are refreshed | same |
 | Fuzzing | `dotnet test --filter Category=Fuzz`; `MASTERSAFE_FUZZ_ITERATIONS` sets the rounds, `MASTERSAFE_FUZZ_SEED` repeats a failed run. `.github/workflows/fuzz.yml` runs 2 million rounds per reader each week | same |
+| winget manifests | `winget validate --manifest packaging\winget\<v>`; later versions go out through `.github/workflows/winget.yml` (see [Distribution.md](Distribution.md)) | n/a |
+| Flatpak | n/a | `cd packaging/flatpak && flatpak-builder --user --install --force-clean build io.github.GabrielVergara.MasterSafeAuthenticator.yml` |
 | Release | push a tag `v<version>`; `.github/workflows/release.yml` builds and tests Windows and Linux, attests the files and drafts a release. The maintainer then signs offline with `scripts/sign-release.ps1 -Tag v<version> -Publish` (see [ReleaseProcess.md](ReleaseProcess.md)) | |
 
 Continuous integration (`.github/workflows/build.yml`) builds and tests on Ubuntu and Windows for every push and pull

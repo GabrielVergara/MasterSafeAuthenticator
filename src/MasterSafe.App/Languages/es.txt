@@ -809,3 +809,4 @@ Many secrets were copied in a short time, so copying is paused for 30 seconds. I
 Copying paused: many secrets were copied in a short time => Copia en pausa: se copiaron muchos secretos en poco tiempo
 Export cancelled. No file was written. => Exportación cancelada. No se escribió ningún archivo.
 Choose a folder for backups => Elija una carpeta para las copias
+This copy was installed from {0}, which keeps it up to date. Update it in your software centre, or run: flatpak update => Esta copia se instaló desde {0}, que la mantiene al día. Actualícela en su centro de software o ejecute: flatpak update

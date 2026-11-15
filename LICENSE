@@ -1,5 +1,5 @@
 MasterSafe Authenticator Freeware License
-Version 1.1, 2026
+Version 1.2, 2026
 
 Copyright (c) 2026 Gabriel Vergara Ezcurdia. All rights reserved.
 
@@ -26,6 +26,16 @@ published so that its security can be reviewed, not so that it can be reused.
    of charge, in their original unmodified form and together with this
    license. You may not charge for them, and you may not remove or alter any
    copyright notice, product name or author credit.
+
+   Software repositories that the author publishes the Software in, or lists
+   in the project's README as approved (for example the Windows Package
+   Manager community repository and Flathub), may host, mirror, repackage and
+   distribute the official release files free of charge, in the package
+   format of that repository, so that users can install and update the
+   Software with it. The program files inside the package must be those of
+   the official, signed release, and this license must be included or
+   linked. This permission covers only the Software as published by the
+   author; it does not extend to any changed or derived version.
 
 4. SOURCE CODE
    "Source Code" means the source code, build scripts, documentation, tests,
@@ -111,7 +121,8 @@ published so that its security can be reviewed, not so that it can be reused.
 14. CHANGES
    The author may release future versions under different terms. Versions you
    have already received remain under the terms they were released with.
-   This version applies to the Source Code as published from 8 November 2026
-   and to every release from version 1.6.2.
+   Version 1.2 adds the permission for approved software repositories in
+   section 3. It applies to the Source Code as published from 15 November
+   2026 and to every release from version 1.7.1.
 
 Contact: https://github.com/GabrielVergara/MasterSafeAuthenticator

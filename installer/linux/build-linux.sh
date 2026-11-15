@@ -4,7 +4,7 @@
 # Works on Linux, macOS and Windows (Git Bash). The result is in artifacts/.
 set -euo pipefail
 
-VERSION="${1:-1.7.0}"
+VERSION="${1:-1.7.1}"
 RID="${2:-linux-x64}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUT="$ROOT/artifacts/$RID"
@@ -26,6 +26,11 @@ cp "$ROOT/LICENSE" "$STAGE/LICENSE"
 cp "$ROOT/src/MasterSafe.App/Assets/logo-256.png" "$STAGE/masterSafe-authenticator.png"
 cp "$ROOT/installer/linux/masterSafe-authenticator.desktop" "$STAGE/"
 cp "$ROOT/installer/linux/install.sh" "$STAGE/install.sh"
+# For the Flathub package, which repackages this archive (docs/Distribution.md).
+mkdir -p "$STAGE/flatpak"
+cp "$ROOT/packaging/flatpak/io.github.GabrielVergara.MasterSafeAuthenticator.desktop" \
+   "$ROOT/packaging/flatpak/io.github.GabrielVergara.MasterSafeAuthenticator.metainfo.xml" \
+   "$ROOT/packaging/flatpak/mastersafe.sh" "$ROOT/src/MasterSafe.App/Assets/logo.svg" "$STAGE/flatpak/"
 chmod +x "$STAGE/install.sh" "$STAGE/app/MasterSafe.App"
 
 tar -C "$ROOT/artifacts" -czf "$ROOT/artifacts/$NAME.tar.gz" "$NAME"

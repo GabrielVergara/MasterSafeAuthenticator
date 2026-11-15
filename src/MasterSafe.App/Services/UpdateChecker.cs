@@ -186,7 +186,7 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
             return new UpdateDownload(false, null, $"The download failed: {ex.Message}");
         }
 
-        if (!ReleaseSigner.IsSupported)
+        if (!ReleaseSigner.CanVerify)
         {
             Cleanup(target);
             return new UpdateDownload(false, null, "This system cannot check the signature, so the download was deleted.");

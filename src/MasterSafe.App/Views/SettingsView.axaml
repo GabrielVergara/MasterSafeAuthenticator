@@ -104,9 +104,10 @@
       <Border Classes="card">
         <StackPanel Spacing="12">
           <TextBlock Text="Updates" Classes="h2" />
-          <TextBlock Classes="hint" TextWrapping="Wrap"
+          <TextBlock TextWrapping="Wrap" Text="{Binding Updates.StoreText}" IsVisible="{Binding !Updates.UpdatesItself}" />
+          <TextBlock Classes="hint" TextWrapping="Wrap" IsVisible="{Binding Updates.UpdatesItself}"
                      Text="Updates are never installed automatically. A download is checked against the project's signature before it is offered, and you run the installer yourself. Your vault is not touched." />
-          <StackPanel Orientation="Horizontal" Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Updates.UpdatesItself}">
             <Button Content="Check for updates" Command="{Binding Updates.CheckCommand}" />
             <Button Classes="accent" Content="Download and verify" Command="{Binding Updates.DownloadCommand}" IsVisible="{Binding Updates.HasUpdate}" />
             <Button Content="Show the file" Command="{Binding Updates.ShowFileCommand}" IsVisible="{Binding Updates.HasVerifiedDownload}" />
@@ -115,7 +116,7 @@
           <TextBlock Text="{Binding Updates.Status}" TextWrapping="Wrap"
                      IsVisible="{Binding Updates.Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
           <CheckBox Content="Look for a new version once after I unlock (contacts github.com)"
-                    IsChecked="{Binding CheckForUpdatesOnStart, Mode=TwoWay}" />
+                    IsChecked="{Binding CheckForUpdatesOnStart, Mode=TwoWay}" IsVisible="{Binding Updates.UpdatesItself}" />
         </StackPanel>
       </Border>
 

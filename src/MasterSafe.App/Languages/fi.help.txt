@@ -276,6 +276,8 @@ Asetuksissa on Päivitykset-osio.
 - "Lataa ja varmenna" tallentaa järjestelmällesi sopivan asennusohjelman ja tarkistaa sen ML-DSA-65-allekirjoituksen ja SHA-256-tarkistussumman projektin allekirjoitusavainta vastaan, joka on rakennettu sovellukseen. Lataus, joka ei täsmää, poistetaan. Sen jälkeen suljet MasterSafen ja ajat asennusohjelman itse. Päivityksiä ei koskaan asenneta automaattisesti, eikä holviisi kosketa.
 - Sinusta tai holvistasi ei lähetetä mitään. Vain julkiset julkaisutiedot pyydetään.
 
+Asensitko wingetillä? "winget upgrade mastersafe" päivittää myös sen. Asensitko Flathubista? Silloin Flathub päivittää sen ohjelmistokeskuksen tai komennon "flatpak update" kautta, ja Päivitykset-osio vain kertoo sen: Flathub ei salli sovellusten päivittää itseään.
+
 Voit myös varmentaa minkä tahansa latauksen käsin MasterSafen komentorivityökalulla. Avaimen sormenjälki on julkaistu projektin README-tiedostossa ja SECURITY.md:ssä.
 
 Julkaisussa on myös allekirjoitettu luettelo sen tiedostoista ja versiosta. MasterSafe kieltäytyy päivityksestä, jonka allekirjoitettu versio eroaa tarjotusta tai ei ole sinun versiotasi uudempi.

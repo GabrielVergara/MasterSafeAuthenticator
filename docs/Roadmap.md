@@ -15,10 +15,16 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
 - 1.6.0: one running copy, security settings in the vault, network shares refused until confirmed, older vault copies noticed, version bound into the release signature; letter and website icons, hidden codes, your own order and groups, more health checks and expiry dates; notes, cards, identities, extra fields and a tag filter; full encrypted backups, KeePass export, imports from Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator; sync through your own folder or WebDAV server; a printed emergency sheet; a review pack in [SecurityReview.md](SecurityReview.md).
+- 1.7.1: signatures checked on Linux without OpenSSL 3.5 (Mint 22, Ubuntu 24.04), install refused while running, a Linux uninstaller, winget and Flathub packages, licence 1.2.
 - 1.7.0: a new data key with every new master password, spare security keys, security events, a pause after many quick copies, KeePass databases opened directly, a countdown ring.
 - 1.6.2: the logo draws itself on the start screen; licence 1.1 (not open source); a Support MasterSafe button.
 - 1.6.1: changing the kind of a new item changes its fields; the About window fits its content and follows the text size; the sign-in screen shows the version.
 - 1.5.1: attacker-style review: trusted recovery key kept in the vault, stronger password protection kept when the password changes, every lock and Exit clears a copied secret, process memory protection on Windows and Linux. Linux tests can also run in Docker.
+
+## Now: stores
+
+winget (`winget install mastersafe`) and Flathub (`io.github.GabrielVergara.MasterSafeAuthenticator`), from the signed release
+files, with licence 1.2. Prepared in `packaging/`; submission steps in [Distribution.md](Distribution.md).
 
 ## Next (1.8): deep protection
 

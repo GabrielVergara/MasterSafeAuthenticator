@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream data for software centres and Flathub. See docs/Distribution.md. -->
+<component type="desktop-application">
+  <id>io.github.GabrielVergara.MasterSafeAuthenticator</id>
+  <name>MasterSafe Authenticator</name>
+  <summary>Two-factor codes and passwords in one encrypted vault</summary>
+  <developer id="io.github.gabrielvergara">
+    <name>Gabriel Vergara Ezcurdia</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary=https://github.com/GabrielVergara/MasterSafeAuthenticator/blob/main/LICENSE</project_license>
+  <description>
+    <p>
+      MasterSafe Authenticator keeps your two-factor codes and your passwords in one encrypted vault on your own computer.
+      Nothing leaves it unless you choose a backup or sync folder.
+    </p>
+    <ul>
+      <li>TOTP and HOTP codes, added from a QR code image, an otpauth link or by hand</li>
+      <li>Passwords, notes, cards and identities, with folders, tags, attachments and history</li>
+      <li>AES-256-GCM encryption with a key derived from your master password by Argon2id</li>
+      <li>Imports from KeePass databases (.kdbx), Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator</li>
+      <li>Encrypted backups and sync through your own folder or WebDAV server</li>
+      <li>A recovery key, a security events list and a password health report</li>
+      <li>Screen reader support, high contrast and larger text; English, Spanish and Finnish</li>
+    </ul>
+    <p>
+      Free for personal, non-commercial use. The source code is published for review; it is not open source.
+      Windows Hello and FIDO2 security keys unlock the vault only on Windows.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.GabrielVergara.MasterSafeAuthenticator.desktop</launchable>
+  <icon type="remote" width="256" height="256">https://raw.githubusercontent.com/GabrielVergara/MasterSafeAuthenticator/main/src/MasterSafe.App/Assets/logo-256.png</icon>
+  <url type="homepage">https://www.gabriel-vergara.com/articles/mastersafe-authenticator/</url>
+  <url type="bugtracker">https://github.com/GabrielVergara/MasterSafeAuthenticator/issues</url>
+  <url type="help">https://github.com/GabrielVergara/MasterSafeAuthenticator/blob/main/docs/Documentation.md</url>
+  <url type="donation">https://www.gabriel-vergara.com/support-mastersafe/</url>
+  <url type="vcs-browser">https://github.com/GabrielVergara/MasterSafeAuthenticator</url>
+  <categories>
+    <category>Utility</category>
+    <category>Security</category>
+  </categories>
+  <keywords>
+    <keyword>2FA</keyword>
+    <keyword>TOTP</keyword>
+    <keyword>authenticator</keyword>
+    <keyword>password manager</keyword>
+    <keyword>KeePass</keyword>
+  </keywords>
+  <branding>
+    <color type="primary" scheme_preference="light">#F2B33D</color>
+    <color type="primary" scheme_preference="dark">#5C3A00</color>
+  </branding>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Codes with a countdown ring</caption>
+      <image>https://raw.githubusercontent.com/GabrielVergara/MasterSafeAuthenticator/main/docs/screenshots/codes.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Passwords in folders</caption>
+      <image>https://raw.githubusercontent.com/GabrielVergara/MasterSafeAuthenticator/main/docs/screenshots/passwords.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Settings</caption>
+      <image>https://raw.githubusercontent.com/GabrielVergara/MasterSafeAuthenticator/main/docs/screenshots/settings.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+  <releases>
+    <release version="1.7.1" date="2026-11-15">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.7.1</url>
+      <description>
+        <p>Fixes for Linux and the first store packages.</p>
+        <ul>
+          <li>Release signatures are checked on systems without OpenSSL 3.5, such as Linux Mint 22 and Ubuntu 24.04</li>
+          <li>Inside Flatpak, Flathub provides the updates</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.7.0" date="2026-11-15">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.7.0</url>
+      <description>
+        <p>Deeper protection and an easier move from KeePass.</p>
+        <ul>
+          <li>A new encryption key with every new master password</li>
+          <li>Spare security keys and a list of security events</li>
+          <li>A pause after many quick copies</li>
+          <li>KeePass databases (.kdbx) opened directly</li>
+          <li>A countdown ring for each code</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

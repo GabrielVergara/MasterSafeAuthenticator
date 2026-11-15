@@ -448,6 +448,10 @@ public static class HelpContent
               are never installed automatically, and your vault is not touched.
             - Nothing about you or your vault is sent. Only the public release information is requested.
 
+            Installed with winget? "winget upgrade mastersafe" also updates it. Installed from Flathub? Then
+            Flathub updates it, through your software centre or "flatpak update", and the Updates section only
+            says so: Flathub does not allow apps to update themselves.
+
             You can also verify any download by hand with the MasterSafe command-line tool. The key's
             fingerprint is published in the README and in SECURITY.md of the project.
 

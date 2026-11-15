@@ -21,9 +21,11 @@ if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-rele
 
 static int RunSigningCommand(string[] args)
 {
-    if (!ReleaseSigner.IsSupported)
+    // Verifying works everywhere (a managed ML-DSA is used when the system has none); creating keys and signing need the
+    // operating system's ML-DSA.
+    if (!ReleaseSigner.IsSupported && args[0] is "keygen" or "sign")
     {
-        Console.Error.WriteLine("This operating system does not provide ML-DSA, which these commands need.");
+        Console.Error.WriteLine("This operating system does not provide ML-DSA, which signing needs. Verifying works.");
         return 2;
     }
 

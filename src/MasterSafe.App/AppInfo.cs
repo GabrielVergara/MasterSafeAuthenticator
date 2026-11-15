@@ -43,6 +43,15 @@ public static class AppInfo
     /// <summary>The author's web site.</summary>
     public const string WebsiteUrl = "https://www.gabriel-vergara.com/";
 
+    /// <summary>
+    /// The store that installs and updates this copy, or null when MasterSafe updates itself. Inside a Flatpak
+    /// (the <c>FLATPAK_ID</c> variable is set) updates come from Flathub, whose rules forbid an app updating itself.
+    /// </summary>
+    public static string? UpdatedBy { get; } = StoreFor(Environment.GetEnvironmentVariable("FLATPAK_ID"));
+
+    /// <summary>The store for a given <c>FLATPAK_ID</c> value. Public for tests.</summary>
+    public static string? StoreFor(string? flatpakId) => string.IsNullOrWhiteSpace(flatpakId) ? null : "Flathub";
+
     /// <summary>Author of the application.</summary>
     public const string Author = "Gabriel Vergara Ezcurdia";
 

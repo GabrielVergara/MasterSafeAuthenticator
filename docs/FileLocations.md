@@ -9,6 +9,7 @@ files. The Vaults page in the app shows these locations too.
 | --- | --- |
 | Windows | `%LocalAppData%\MasterSafe` (for example `C:\Users\you\AppData\Local\MasterSafe`) |
 | Linux | `~/.local/share/MasterSafe` (or `$XDG_DATA_HOME/MasterSafe` when that variable is set) |
+| Linux, Flatpak from Flathub | `~/.var/app/io.github.GabrielVergara.MasterSafeAuthenticator/data/MasterSafe` (the second folder below is `.../config/MasterSafe`) |
 
 | File | What it is | Secret? |
 | --- | --- | --- |
@@ -48,7 +49,7 @@ passphrase of your recovery key.
 | --- | --- |
 | Windows installer (default, current user) | `%LocalAppData%\Programs\MasterSafe Authenticator` |
 | Windows installer (all users, if you choose it) | `C:\Program Files\MasterSafe Authenticator` |
-| Linux `install.sh` | `~/.local/opt/masterSafe-authenticator`, launcher `~/.local/bin/masterSafe-authenticator`, menu entry `~/.local/share/applications/masterSafe-authenticator.desktop`, icon `~/.local/share/icons/hicolor/256x256/apps/masterSafe-authenticator.png` |
+| Linux `install.sh` | `~/.local/opt/masterSafe-authenticator`, launcher `~/.local/bin/masterSafe-authenticator`, uninstaller `~/.local/bin/masterSafe-authenticator-uninstall` (and `uninstall.sh` in the program folder), menu entry `~/.local/share/applications/masterSafe-authenticator.desktop`, icon `~/.local/share/icons/hicolor/256x256/apps/masterSafe-authenticator.png` |
 
 Windows also records the install in the registry (the Uninstall list) and creates a Start Menu shortcut.
 **Uninstalling never deletes your vault or settings.** Delete the data folder yourself if you want to remove everything.

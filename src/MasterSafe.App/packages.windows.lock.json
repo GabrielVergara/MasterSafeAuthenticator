@@ -136,6 +136,11 @@
           "Avalonia.Skia": "12.1.6"
         }
       },
+      "BouncyCastle.Cryptography": {
+        "type": "Transitive",
+        "resolved": "2.7.0",
+        "contentHash": "U+12df8UEWHgBi04YVf/Lgi2dy3SItlIYvHjjEVa/BngCQIzDCDRBk50DDByCfDvSbe5pRNFr3b7UrVK2kMcLw=="
+      },
       "HarfBuzzSharp": {
         "type": "Transitive",
         "resolved": "8.3.1.3",
@@ -218,9 +223,9 @@
       "mastersafe.backup": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Core": "[1.6.2, )",
-          "MasterSafe.Crypto": "[1.6.2, )",
-          "MasterSafe.PostQuantum": "[1.6.2, )"
+          "MasterSafe.Core": "[1.7.1, )",
+          "MasterSafe.Crypto": "[1.7.1, )",
+          "MasterSafe.PostQuantum": "[1.7.1, )"
         }
       },
       "mastersafe.core": {
@@ -230,23 +235,26 @@
         "type": "Project",
         "dependencies": {
           "Konscious.Security.Cryptography.Argon2": "[1.3.1, )",
-          "MasterSafe.Core": "[1.6.2, )"
+          "MasterSafe.Core": "[1.7.1, )"
         }
       },
       "mastersafe.platform": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Crypto": "[1.6.2, )",
+          "MasterSafe.Crypto": "[1.7.1, )",
           "Microsoft.Win32.SystemEvents": "[10.0.0, )"
         }
       },
       "mastersafe.postquantum": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "[2.7.0, )"
+        }
       },
       "mastersafe.qr": {
         "type": "Project",
         "dependencies": {
-          "MasterSafe.Core": "[1.6.2, )",
+          "MasterSafe.Core": "[1.7.1, )",
           "SkiaSharp": "[4.156.0, )",
           "SkiaSharp.NativeAssets.Linux": "[4.156.0, )",
           "ZXing.Net": "[0.16.11, )"
