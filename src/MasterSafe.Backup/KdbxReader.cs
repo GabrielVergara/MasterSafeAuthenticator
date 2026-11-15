@@ -209,6 +209,9 @@ public static class KdbxReader
             throw new KeePassImportException("The database asks for more time to open than MasterSafe allows.");
         }
 
+        // ECB is what the KDBX format defines for its AES key derivation: the composite key is encrypted block by block with
+        // the seed, N times, and the result is hashed. It stretches a key and never protects data, so the replay and pattern
+        // weaknesses of ECB do not apply. It cannot change without breaking every KeePass database (CodeQL cs/ecb-encryption).
         using var aes = Aes.Create();
         aes.Key = seed;
         aes.Mode = CipherMode.ECB;
