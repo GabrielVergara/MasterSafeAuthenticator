@@ -3,7 +3,7 @@
 title: Tervetuloa ja ensimmäiset askeleet
 summary: Luo holvisi ja ota se käyttöön muutamassa minuutissa.
 body:
-MasterSafe Authenticator säilyttää kertakäyttösalasanatilisi (kaksivaiheisen kirjautumisen 6-numeroiset koodit) ja salasanasi yhdessä salatussa holvissa tietokoneellasi. Mitään ei lähetetä minnekään, ellet valitse toimintoa, joka tarvitsee verkkoa, ja jokainen sellainen kuvataan tässä ohjeessa.
+MasterSafe Authenticator säilyttää kertakäyttökoodit ja salasanasi yhdessä salatussa holvissa tietokoneellasi. Mitään ei lähetetä minnekään, ellet käytä toimintoa, joka tarvitsee verkkoyhteyttä. Kaikki tällaiset toiminnot selitetään tässä ohjeessa.
 
 Ensimmäiset askeleet:
 
@@ -23,10 +23,10 @@ Todennuskoodit-sivu luettelee jokaisen tilin ja sen nykyisen koodin.
 - TOTP-koodit vaihtuvat kiinteän aikataulun mukaan, yleensä 30 sekunnin välein. Palkki ja lähtölaskenta näyttävät, milloin seuraava tulee. HOTP-koodit etenevät laskurilla, eikä niillä ole lähtölaskentaa.
 - Kopioi koodi laittaa koodin leikepöydälle. Se poistetaan sieltä Asetuksissa valitun ajan kuluttua (aluksi 2 minuuttia), ja toisen salaisuuden kopiointi aloittaa odotuksen alusta.
 - Kun tilejä on yli kolme, näkyviin tulevat hakukenttä ja järjestysvalinta. Haku vertaa myöntäjää (esimerkiksi GitHub) ja nimikettä (yleensä käyttäjätunnuksesi). Järjestys muistetaan.
-- Nimeä uudelleen muuttaa vain myöntäjän ja nimikkeen. Salaisuus ja koodit pysyvät samoina.
+- Nimeä uudelleen muuttaa vain myöntäjän ja nimikkeen. Salainen avain ja koodit pysyvät samoina.
 - Poista poistaa tilin heti vahvistuksen jälkeen. Varmista ensin, että pääset kyseiseen palveluun muullakin tavalla: ilman salaisuutta koodeja ei voi saada takaisin muuten kuin varmuuskopiosta.
 
-Jokaisella tilillä on värillinen ruutu ja sen ensimmäinen kirjain, joten tili on helppo löytää. Tätä varten ei ladata mitään.
+Jokaisella tilillä on värillinen ruutu ja sen ensimmäinen kirjain, jotta löydät tilin helposti. Tätä varten ei ladata mitään verkosta.
 
 Kun Oma järjestys on valittuna, Ylös ja Alas siirtävät tiliä. Nimeä uudelleen asettaa myös ryhmän, kuten Työ; kun ryhmiä on, koodien yläpuolella oleva luettelo näyttää yhden ryhmän kerrallaan.
 
