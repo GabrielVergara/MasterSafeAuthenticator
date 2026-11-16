@@ -16,7 +16,7 @@ What is automatic and what is done by hand. Nothing here costs money, and nothin
   | `MASTODON_URL` | The instance, for example `https://mastodon.social` |
   | `MASTODON_TOKEN` | A token with only the `write:statuses` scope (Preferences, Development, New application) |
 
-  Try it without posting: Actions, announce, Run workflow, a version, "Only print the posts" ticked. Untick it to post for real.
+  Try it without posting: Actions, announce, Run workflow, a version, "Only print the posts" ticked. Untick it to post for real. "services" chooses where, so a new account can be tried without repeating a post elsewhere.
 - **winget** (see [Distribution.md](Distribution.md)): once accepted, `winget install mastersafe` and a daily check that proposes new
   releases.
 - **Search engines.** The repository has a description and topics, and the web site has articles about the app.

@@ -10,6 +10,11 @@ on:
       version:
         description: 'Version to announce, for example 1.7.2'
         required: true
+      services:
+        description: 'Where to post when run by hand: all, bluesky or mastodon'
+        type: choice
+        options: [all, bluesky, mastodon]
+        default: all
       dry_run:
         description: 'Only print the posts'
         type: boolean
@@ -29,6 +34,7 @@ jobs:
           INPUT: ${{ github.event.inputs.version }}
           TAG: ${{ github.event.release.tag_name }}
           DRY: ${{ github.event.inputs.dry_run }}
+          SERVICES: ${{ github.event.inputs.services }}
           MASTODON_URL: ${{ secrets.MASTODON_URL }}
           MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
           BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
@@ -36,4 +42,4 @@ jobs:
         run: |
           version="${INPUT:-${TAG#v}}"
           if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "Not a version: $version"; exit 1; fi
-          if [ "$DRY" = "true" ]; then python3 scripts/announce.py "$version" --dry-run; else python3 scripts/announce.py "$version"; fi
+          if [ "$DRY" = "true" ]; then python3 scripts/announce.py "$version" --dry-run --only "${SERVICES:-all}"; else python3 scripts/announce.py "$version" --only "${SERVICES:-all}"; fi

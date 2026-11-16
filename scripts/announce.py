@@ -5,7 +5,7 @@
 # License: See LICENSE
 #
 # Announces a published release on Mastodon and Bluesky. Used by .github/workflows/announce.yml; see docs/Promotion.md.
-#   announce.py <version> [--dry-run]
+#   announce.py <version> [--dry-run] [--only all|bluesky|mastodon]
 # A service is skipped when its secrets are missing. Secrets (environment): MASTODON_URL (for example https://mastodon.social),
 # MASTODON_TOKEN (scope write:statuses), BLUESKY_HANDLE, BLUESKY_APP_PASSWORD (an app password, never the account password).
 import json
@@ -75,13 +75,21 @@ def bluesky(text, dry):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if len(args) != 1:
-        sys.exit("usage: announce.py <version> [--dry-run]")
-    version, dry = args[0].lstrip("v"), "--dry-run" in sys.argv
+    argv = sys.argv[1:]
+    only = "all"
+    if "--only" in argv:
+        index = argv.index("--only")
+        only = argv[index + 1] if index + 1 < len(argv) else ""
+        del argv[index:index + 2]
+    args = [a for a in argv if not a.startswith("--")]
+    if len(args) != 1 or only not in ("all", "bluesky", "mastodon"):
+        sys.exit("usage: announce.py <version> [--dry-run] [--only all|bluesky|mastodon]")
+    version, dry = args[0].lstrip("v"), "--dry-run" in argv
     text, _ = message(version)
-    mastodon(text, dry)
-    bluesky(text, dry)
+    if only in ("all", "mastodon"):
+        mastodon(text, dry)
+    if only in ("all", "bluesky"):
+        bluesky(text, dry)
 
 
 if __name__ == "__main__":
