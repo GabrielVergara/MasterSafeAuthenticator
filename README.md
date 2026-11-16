@@ -67,6 +67,7 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 | System | File | How |
 | --- | --- | --- |
 | Windows 10/11 (x64) | `MasterSafe-Authenticator-<version>-win-x64-setup.exe` | Run it. Installs for your user, no administrator needed |
+| Windows, Scoop | `scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator` then `scoop install mastersafe` | Installs for your user, no administrator. `scoop update mastersafe` updates it |
 | Linux x64 / arm64, Debian, Ubuntu, Mint | `mastersafe-authenticator_<version>_<amd64 or arm64>.deb` | Double click, or `sudo apt install ./<file>.deb`. To remove it: `sudo apt remove mastersafe-authenticator` (your vault is kept) |
 | Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`). To remove it: `masterSafe-authenticator-uninstall` (your vault is kept) |
 

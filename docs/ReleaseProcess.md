@@ -31,6 +31,8 @@ verification.
    the pull request that Flathub's data checker opens after checking it points at the signed release. See
    [Distribution.md](Distribution.md).
 
+**Scoop:** after publishing, run `.\scripts\update-scoop.ps1 -Version X.Y.Z`, test it with `scoop install .\bucket\mastersafe.json` and commit `bucket/mastersafe.json` (a test fails if it is stale). See [Distribution.md](Distribution.md).
+
 ## Why there is a signed manifest
 
 A signature on an installer proves the file is genuine, but not which version it is. Someone who took over the GitHub release

@@ -62,6 +62,19 @@ public sealed partial class DistributionTests
     }
 
     [Fact]
+    public void TheScoopManifest_OffersThisVersion()
+    {
+        var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "bucket", "mastersafe.json"))).RootElement;
+        var url = manifest.GetProperty("architecture").GetProperty("64bit").GetProperty("url").GetString()!;
+        var hash = manifest.GetProperty("architecture").GetProperty("64bit").GetProperty("hash").GetString()!;
+
+        manifest.GetProperty("version").GetString().Should().Be(Version(), "run scripts/update-scoop.ps1 after publishing a release");
+        url.Should().EndWith($"/v{Version()}/MasterSafe-Authenticator-{Version()}-win-x64-setup.exe");
+        hash.Should().MatchRegex("^[0-9a-f]{64}$");
+        manifest.GetProperty("innosetup").GetBoolean().Should().BeTrue();
+    }
+
+    [Fact]
     public void TheFlathubData_DescribesThisVersion()
     {
         var folder = Path.Combine(Root(), "packaging", "flatpak");

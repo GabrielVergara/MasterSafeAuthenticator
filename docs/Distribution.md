@@ -41,6 +41,23 @@ winget installs for the current user by default, like the installer; `--scope ma
 in-app update check keeps working, and `winget upgrade mastersafe` updates too. `ProductCode` in the manifest is the
 installer's AppId, so winget also recognises copies installed from the GitHub download.
 
+## Scoop
+
+`bucket/mastersafe.json` is a Scoop manifest, kept in this repository so the repository itself is the bucket. Nobody
+reviews it, so it is live as soon as it is pushed. Scoop downloads the signed installer from the GitHub release, checks its
+SHA-256 and unpacks it (`"innosetup": true`) into `~\scoop\apps\mastersafe`, without running the installer. It adds a Start
+menu shortcut. Your vault in `%LocalAppData%\MasterSafe` is separate and `scoop uninstall mastersafe` never touches it.
+
+```
+scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator
+scoop install mastersafe
+```
+
+**Each release:** after publishing, run `.\scripts\update-scoop.ps1 -Version X.Y.Z` (it reads the checksum from the release),
+test with `scoop install .\bucket\mastersafe.json` and commit the file. A test fails if the manifest is not on the current
+version. `scoop update mastersafe` then updates users; the in-app update check also keeps working. A copy from Scoop and a
+copy from the installer share the same vault, so install only one of them.
+
 ## Flathub
 
 **Flathub's Generative AI policy** (https://docs.flathub.org/docs/for-app-authors/requirements#generative-ai-policy):
