@@ -4,10 +4,16 @@ name: winget
 # (microsoft/winget-pkgs) with Komac. The first version was submitted by hand from packaging/winget; see
 # docs/Distribution.md. Needs the secret WINGET_TOKEN: a classic token of the maintainer's account with the public_repo
 # scope, so Komac can update the fork of winget-pkgs and open the pull request. Without it the job only says so.
+#
+# It also runs once a day. While the first pull request is still waiting for a moderator it does nothing. As soon as the
+# package exists in winget-pkgs it proposes the newest signed release if winget does not have it yet and no pull request for it
+# is open, and opens an issue here saying so. That is how a release made while the first review was pending gets submitted.
 
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '17 6 * * *'
   workflow_dispatch:
     inputs:
       version:
@@ -16,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   PACKAGE_ID: GabrielVergara.MasterSafeAuthenticator
@@ -25,19 +32,49 @@ env:
 jobs:
   submit:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    if: github.event_name != 'release' || !github.event.release.prerelease
     steps:
       - name: Work out the version
         id: v
         env:
           INPUT: ${{ github.event.inputs.version }}
           TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           version="${INPUT:-${TAG#v}}"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            # The newest published release that is not a prerelease (the "latest" one).
+            version="$(gh release view -R "$GITHUB_REPOSITORY" --json tagName -q .tagName)"
+            version="${version#v}"
+          fi
           if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "Not a version: $version"; exit 1; fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      - name: Is there something to submit?
+        id: need
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          [ "$GITHUB_EVENT_NAME" = "schedule" ] || exit 0
+          path="manifests/${PACKAGE_ID:0:1,,}/${PACKAGE_ID//.//}"
+          if ! gh api "repos/microsoft/winget-pkgs/contents/$path" >/dev/null 2>&1; then
+            echo "The package is not in winget-pkgs yet, so there is nothing to update."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if gh api "repos/microsoft/winget-pkgs/contents/$path/$VERSION" >/dev/null 2>&1; then
+            echo "winget-pkgs already has $VERSION."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          open="$(gh pr list -R microsoft/winget-pkgs --author "$GITHUB_REPOSITORY_OWNER" --state open --search "$PACKAGE_ID $VERSION in:title" --json number -q 'length')"
+          if [ "${open:-0}" != "0" ]; then
+            echo "A pull request for $VERSION is already open."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
       - name: Check that the release is signed
+        if: steps.need.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.v.outputs.version }}
@@ -48,6 +85,7 @@ jobs:
           grep -qx "MasterSafe-release-manifest.json.sig" assets.txt
 
       - name: Install Komac
+        if: steps.need.outputs.skip != 'true'
         run: |
           curl -fsSL -o komac.tar.gz "https://github.com/russellbanks/Komac/releases/download/v$KOMAC_VERSION/komac-$KOMAC_VERSION-x86_64-unknown-linux-gnu.tar.gz"
           echo "$KOMAC_SHA256  komac.tar.gz" | sha256sum -c -
@@ -57,6 +95,7 @@ jobs:
           dirname "$bin" >> "$GITHUB_PATH"
 
       - name: Submit to winget-pkgs
+        if: steps.need.outputs.skip != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
           VERSION: ${{ steps.v.outputs.version }}
@@ -72,3 +111,11 @@ jobs:
           fi
           url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/MasterSafe-Authenticator-$VERSION-win-x64-setup.exe"
           komac update "$PACKAGE_ID" --version "$VERSION" --urls "$url" --submit
+
+      - name: Tell the maintainer (scheduled runs)
+        if: github.event_name == 'schedule' && steps.need.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          gh issue create -R "$GITHUB_REPOSITORY"             --title "winget: version $VERSION was proposed"             --body "winget-pkgs now has the package, so the daily check proposed $VERSION with Komac. Look for the pull request at https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+author%3A$GITHUB_REPOSITORY_OWNER and update the README and the web articles (docs/Distribution.md)."

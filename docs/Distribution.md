@@ -31,6 +31,12 @@ the repository secret `WINGET_TOKEN`: a classic GitHub token of the maintainer's
 (Settings, Developer settings, Personal access tokens). Without it the workflow only prints a warning. It can also be
 run by hand ("Run workflow", with a version).
 
+The workflow also runs every day at 06:17 UTC and decides by itself: it does nothing while the package is not yet in
+winget-pkgs (the first pull request is still waiting for a moderator), or when winget-pkgs already has the newest release,
+or when a pull request for it is open. Once the first pull request is merged, the next daily run proposes the newest signed
+release (for example a version released in the meantime) and opens an issue in this repository to tell the maintainer, who
+then changes the README and the web articles from "coming soon" to `winget install mastersafe`.
+
 winget installs for the current user by default, like the installer; `--scope machine` installs for all users. The
 in-app update check keeps working, and `winget upgrade mastersafe` updates too. `ProductCode` in the manifest is the
 installer's AppId, so winget also recognises copies installed from the GitHub download.

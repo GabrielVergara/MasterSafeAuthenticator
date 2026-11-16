@@ -5,6 +5,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Maintenance
+- **The winget workflow checks every day.** Once the first package is accepted it proposes the newest signed release by
+  itself (if winget lacks it and no pull request is open) and opens an issue to say so.
 - **SkiaSharp 4.156.1** (drawing and QR codes) and its Linux native library. They must change together, so the two
   separate Dependabot updates failed; the lock files are refreshed. Tests pass on Windows and Linux.
 
