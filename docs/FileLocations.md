@@ -17,9 +17,14 @@ files. The Vaults page in the app shows these locations too.
 | `vault.sauth.bak` | The version before the last save, kept so a crash cannot destroy your vault | Encrypted |
 | `vault.sauth.tmp` | Exists for a moment during a save, then replaces `vault.sauth`. If you ever see it, a save was interrupted; the real vault is intact | Encrypted |
 | `settings.json` | Theme, tray, locking, clipboard and privacy choices, the sign-in pause counter, the list of other vault files you opened, the folder for automatic recovery backups, and the recovery **public** key | No secrets |
+| `snapshots\vault-<yyyymmdd>.sauth` | A copy of the vault made before the first save of each day (UTC date), so the file for a day holds the vault as it was the day before. The last 7 are kept. Only for the vault in this folder, not for one opened from elsewhere. Deleted when the master password changes or an unlock method is removed | Encrypted |
 | `archive\vault-<date>-<time>.sauth` | Old vaults moved aside, for example after a forgotten master password (plus their `.bak` files) | Encrypted |
 
 | `instance.lock` | Held open while the program runs, so only one copy can run. It is empty | No |
+
+### Restoring a snapshot
+
+There is no restore button. Choose Exit in the tray menu, rename `vault.sauth` (for example to `vault.sauth.before-restore`), copy the snapshot you want to `vault.sauth` (copy, do not move) and start MasterSafe. Sign in with the master password; the codes page will say the vault is an older copy, which is expected. Anything saved after that snapshot is not in it. Snapshots sit on the same disk as the vault, so they are not a backup: use the Backup page for that. Step by step, with commands for Windows and Linux: the article "MasterSafe snapshots" on the author's web site.
 
 A second folder holds one file, kept apart from the vault on purpose: `%AppData%\MasterSafe` on Windows and
 `~/.config/MasterSafe` on Linux.

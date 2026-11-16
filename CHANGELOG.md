@@ -5,6 +5,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Maintenance
+- **Documentation:** the `snapshots` folder (7 daily copies of the vault) is now listed in `docs/FileLocations.md`, with how to restore one.
 - **Install with Scoop** (Windows): `scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator`, then
   `scoop install mastersafe`. The manifest is in `bucket/`; `scripts/update-scoop.ps1` points it at each new release.
 - **Release announcements** on Bluesky and Mastodon through a workflow that does nothing until its secrets exist, a social preview
