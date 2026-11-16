@@ -16,9 +16,37 @@ using MasterSafe.Crypto;
 // The real app blocks screen capture, so the store screenshots are drawn here instead: the real windows and pages,
 // rendered by Skia without a screen, from a demo vault that exists only in a temporary folder. The user's vault is
 // never opened.
-var output = Path.GetFullPath(args.Length > 0 ? args[0] : "docs/screenshots");
+//   dotnet run --project tools/MasterSafe.Screenshots -- <output folder> [--scene store|snapshots] [--data-folder <new folder>]
+// "store" draws the store screenshots. "snapshots" draws the pages of the snapshots article and also does the restore
+// described there with real file copies. --data-folder shows that path on the Vaults page (for example a Linux home
+// folder in a container); it must not exist yet, because the tool deletes it at the end.
+string? outputArgument = null, dataFolderArgument = null;
+var scene = "store";
+for (var i = 0; i < args.Length; i++)
+{
+    switch (args[i])
+    {
+        case "--scene" when i + 1 < args.Length:
+            scene = args[++i];
+            break;
+        case "--data-folder" when i + 1 < args.Length:
+            dataFolderArgument = Path.GetFullPath(args[++i]);
+            break;
+        default:
+            outputArgument ??= args[i];
+            break;
+    }
+}
+
+if (scene is not ("store" or "snapshots") || (dataFolderArgument is not null && Directory.Exists(dataFolderArgument)))
+{
+    Console.Error.WriteLine("Unknown scene, or the data folder already exists (it is deleted at the end, so it must be new).");
+    return 1;
+}
+
+var output = Path.GetFullPath(outputArgument ?? "docs/screenshots");
 Directory.CreateDirectory(output);
-var root = Path.Combine(Path.GetTempPath(), "ms-shots-" + Guid.NewGuid().ToString("N"));
+var root = dataFolderArgument ?? Path.Combine(Path.GetTempPath(), "ms-shots-" + Guid.NewGuid().ToString("N"));
 
 AppBuilder.Configure<MasterSafe.App.App>()
     .UseSkia()
@@ -28,7 +56,7 @@ AppBuilder.Configure<MasterSafe.App.App>()
 
 try
 {
-    var task = Dispatcher.UIThread.InvokeAsync(() => DrawAsync(output, root));
+    var task = Dispatcher.UIThread.InvokeAsync(() => DrawAsync(output, root, dataFolderArgument is not null, scene));
     while (!task.IsCompleted)
     {
         Dispatcher.UIThread.RunJobs();
@@ -50,9 +78,9 @@ finally
 
 return 0;
 
-static async Task DrawAsync(string output, string root)
+static async Task DrawAsync(string output, string root, bool rootIsDataFolder, string scene)
 {
-    var paths = new AppPaths(Path.Combine(root, "data"));
+    var paths = new AppPaths(rootIsDataFolder ? root : Path.Combine(root, "data"));
     Directory.CreateDirectory(paths.DataFolder);
     var settings = new SettingsStore(paths.SettingsPath);
     var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);
@@ -76,9 +104,55 @@ static async Task DrawAsync(string output, string root)
     var window = new MainWindow { DataContext = shell, Width = 1280, Height = 800 };
     window.Show();
 
-    await Shoot(window, shell, shell.Dashboard, Path.Combine(output, "codes.png"));
-    await Shoot(window, shell, shell.Passwords, Path.Combine(output, "passwords.png"));
-    await Shoot(window, shell, shell.Settings, Path.Combine(output, "settings.png"));
+    if (scene == "store")
+    {
+        await Shoot(window, shell, shell.Dashboard, Path.Combine(output, "codes.png"));
+        await Shoot(window, shell, shell.Passwords, Path.Combine(output, "passwords.png"));
+        await Shoot(window, shell, shell.Settings, Path.Combine(output, "settings.png"));
+        window.Close();
+        return;
+    }
+
+    await Shoot(window, shell, shell.Vaults, Path.Combine(output, "snapshots-vaults.png"));
+    await Shoot(window, shell, shell.Backup, Path.Combine(output, "snapshots-backup.png"));
+    window.Close();
+    await RestoreAsync(output, paths, services, vault, password);
+}
+
+// The restore of the snapshots article, with real files: copy the vault as a snapshot, make a "mistake" (delete an
+// account), then rename vault.sauth, copy the snapshot over it and open it. The save counter kept away from the vault is
+// raised as a later save would have done, which is what makes the app say the vault is an older copy.
+static async Task RestoreAsync(string output, AppPaths paths, AppServices services, VaultService vault, string password)
+{
+    var snapshots = Path.Combine(paths.DataFolder, "snapshots");
+    Directory.CreateDirectory(snapshots);
+    var snapshot = Path.Combine(snapshots, $"vault-{DateTime.UtcNow.AddDays(-1):yyyyMMdd}.sauth");
+    File.Copy(paths.DefaultVaultPath, snapshot);
+
+    var contents = await vault.OpenContentsAsync(password);
+    await vault.SaveContentsAsync(password, contents with { Accounts = contents.Accounts.Skip(1).ToList() });
+    var id = await vault.GetVaultIdAsync() ?? throw new InvalidOperationException("No vault id.");
+    var counters = new SaveCounterStore(paths.SaveCounterPath);
+    counters.Set(id, Math.Max(counters.Get(id), contents.SaveCounter) + 8);
+
+    File.Move(paths.DefaultVaultPath, paths.DefaultVaultPath + ".before-restore");
+    File.Copy(snapshot, paths.DefaultVaultPath);
+
+    var shell = new MainWindowViewModel(vault, services: services);
+    await shell.UnlockVaultAsync(password);
+    shell.Settings.ShowReminders = false;
+    shell.RefreshNotices();
+    var restored = shell.Dashboard.Accounts.Count;
+    var notice = shell.Dashboard.Notices.Any(n => n.Key == "older-copy");
+    Console.WriteLine($"Restore check: unlocked={shell.IsUnlocked}, accounts={restored} (the snapshot had {contents.Accounts.Count}), older-copy notice={notice}");
+    if (!shell.IsUnlocked || restored != contents.Accounts.Count || !notice)
+    {
+        throw new InvalidOperationException("The restore did not behave as the article says.");
+    }
+
+    var window = new MainWindow { DataContext = shell, Width = 1280, Height = 800 };
+    window.Show();
+    await Shoot(window, shell, shell.Dashboard, Path.Combine(output, "snapshots-restored.png"));
     window.Close();
 }
 
