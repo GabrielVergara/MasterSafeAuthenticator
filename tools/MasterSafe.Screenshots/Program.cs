@@ -16,9 +16,9 @@ using MasterSafe.Crypto;
 // The real app blocks screen capture, so the store screenshots are drawn here instead: the real windows and pages,
 // rendered by Skia without a screen, from a demo vault that exists only in a temporary folder. The user's vault is
 // never opened.
-//   dotnet run --project tools/MasterSafe.Screenshots -- <output folder> [--scene store|snapshots] [--data-folder <new folder>]
-// "store" draws the store screenshots. "snapshots" draws the pages of the snapshots article and also does the restore
-// described there with real file copies. --data-folder shows that path on the Vaults page (for example a Linux home
+//   dotnet run --project tools/MasterSafe.Screenshots -- <output folder> [--scene store|tour|snapshots] [--data-folder <new folder>]
+// "store" draws the store screenshots. "tour" draws the pages of the getting-started article. "snapshots" draws the pages
+// of the snapshots article and also does the restore described there with real file copies. --data-folder shows that path on the Vaults page (for example a Linux home
 // folder in a container); it must not exist yet, because the tool deletes it at the end.
 string? outputArgument = null, dataFolderArgument = null;
 var scene = "store";
@@ -38,7 +38,7 @@ for (var i = 0; i < args.Length; i++)
     }
 }
 
-if (scene is not ("store" or "snapshots") || (dataFolderArgument is not null && Directory.Exists(dataFolderArgument)))
+if (scene is not ("store" or "tour" or "snapshots") || (dataFolderArgument is not null && Directory.Exists(dataFolderArgument)))
 {
     Console.Error.WriteLine("Unknown scene, or the data folder already exists (it is deleted at the end, so it must be new).");
     return 1;
@@ -80,6 +80,12 @@ return 0;
 
 static async Task DrawAsync(string output, string root, bool rootIsDataFolder, string scene)
 {
+    if (scene == "tour")
+    {
+        await TourAsync(output, root, rootIsDataFolder);
+        return;
+    }
+
     var paths = new AppPaths(rootIsDataFolder ? root : Path.Combine(root, "data"));
     Directory.CreateDirectory(paths.DataFolder);
     var settings = new SettingsStore(paths.SettingsPath);
@@ -117,6 +123,73 @@ static async Task DrawAsync(string output, string root, bool rootIsDataFolder, s
     await Shoot(window, shell, shell.Backup, Path.Combine(output, "snapshots-backup.png"));
     window.Close();
     await RestoreAsync(output, paths, services, vault, password);
+}
+
+static (AppPaths Paths, AppServices Services, VaultService Vault) Build(string dataFolder)
+{
+    var paths = new AppPaths(dataFolder);
+    Directory.CreateDirectory(paths.DataFolder);
+    var settings = new SettingsStore(paths.SettingsPath);
+    var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);
+    var fast = new Argon2Parameters { MemorySizeKib = 8192, Iterations = 1, DegreeOfParallelism = 1, KeyLength = 32 };
+    var hybrid = MasterSafe.PostQuantum.PostQuantumProviderFactory.CreateHybrid();
+    var services = new AppServices(
+        paths, new VaultCatalog(paths, repository, settings), settings, new NoDialogs(),
+        new RecoveryKeyService(new AesGcmEncryptionService(), new MasterPasswordService(), hybrid, fast),
+        new RecipientBackupService(new AesGcmEncryptionService(), hybrid));
+    return (paths, services, new VaultService(repository, new AesGcmEncryptionService(), new MasterPasswordService(), fast));
+}
+
+// The pages of the getting-started article, in the order a new user meets them. Nothing is typed into a real vault: the
+// first-start screen belongs to a vault that does not exist yet, and the rest use the demo vault.
+static async Task TourAsync(string output, string root, bool rootIsDataFolder)
+{
+    // 1. The very first start: no vault yet, so the app asks for a master password twice.
+    var first = Build(Path.Combine(root, "first-run"));
+    var firstShell = new MainWindowViewModel(first.Vault, services: first.Services);
+    var typed = PasswordGenerator.Generate(24);
+    firstShell.Login.IsCreateMode = true;
+    firstShell.Login.MasterPassword = typed;
+    firstShell.Login.ConfirmPassword = typed;
+    var firstWindow = new MainWindow { DataContext = firstShell, Width = 1280, Height = 800 };
+    firstWindow.Show();
+    await Shoot(firstWindow, firstShell, firstShell.Login, Path.Combine(output, "tour-1-create.png"));
+    firstWindow.Close();
+
+    // 2. Every later start: the same screen asks for the password once.
+    var main = Build(rootIsDataFolder ? root : Path.Combine(root, "data"));
+    const string password = "demo master password for screenshots";
+    await main.Vault.CreateAsync(password);
+    await main.Vault.SaveContentsAsync(password, Demo.Contents());
+    var signIn = new MainWindowViewModel(main.Vault, services: main.Services);
+    signIn.Login.IsCreateMode = false;
+    signIn.Login.MasterPassword = typed;
+    var signInWindow = new MainWindow { DataContext = signIn, Width = 1280, Height = 800 };
+    signInWindow.Show();
+    await Shoot(signInWindow, signIn, signIn.Login, Path.Combine(output, "tour-2-signin.png"));
+    signInWindow.Close();
+
+    // 3. Unlocked.
+    var shell = new MainWindowViewModel(main.Vault, services: main.Services);
+    await shell.UnlockVaultAsync(password);
+    shell.Dashboard.ResetNotices();
+    shell.Dashboard.SetNotices([]);
+    var window = new MainWindow { DataContext = shell, Width = 1280, Height = 800 };
+    window.Show();
+
+    shell.AccountEditor.Issuer = "Example Cloud";
+    shell.AccountEditor.Label = "alex@example.com";
+    shell.AccountEditor.Secret = Demo.NewKey();
+    await Shoot(window, shell, shell.AccountEditor, Path.Combine(output, "tour-3-add-account.png"));
+    await Shoot(window, shell, shell.Import, Path.Combine(output, "tour-4-import.png"));
+    await Shoot(window, shell, shell.Dashboard, Path.Combine(output, "tour-5-codes.png"));
+
+    shell.Passwords.Title = "Example Cloud";
+    shell.Passwords.UserName = "alex@example.com";
+    shell.Passwords.Password = PasswordGenerator.Generate(20);
+    shell.Passwords.Url = "https://cloud.example.com";
+    await Shoot(window, shell, shell.Passwords, Path.Combine(output, "tour-6-add-password.png"));
+    window.Close();
 }
 
 // The restore of the snapshots article, with real files: copy the vault as a snapshot, make a "mistake" (delete an
@@ -179,6 +252,8 @@ internal static class Demo
     private static string Key(int n) => Base32.Encode(System.Text.Encoding.ASCII.GetBytes($"demo-account-{n:D2}"));
 
     private static string Phrase(int n) => PasswordGenerator.Generate(16 + n);
+
+    public static string NewKey() => Key(9);
 
     public static VaultContents Contents() => new()
     {

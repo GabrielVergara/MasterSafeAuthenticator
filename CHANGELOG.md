@@ -5,7 +5,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Maintenance
-- **The screenshot tool** has a `snapshots` scene that draws the Vaults, Backup and "older copy" pages, and performs the snapshot restore with
+- **The screenshot tool** has a `tour` scene (first start, sign-in, add account, import, codes, add password) and a `snapshots` scene that draws the Vaults, Backup and "older copy" pages, and performs the snapshot restore with
   real file copies as a check. A `--data-folder` option shows a made-up path instead of a temporary folder.
 - **Documentation:** the `snapshots` folder (7 daily copies of the vault) is now listed in `docs/FileLocations.md`, with how to restore one.
 - **Install with Scoop** (Windows): `scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator`, then

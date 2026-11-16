@@ -101,7 +101,7 @@ names of the `.tar.gz` install. Removing it keeps `~/.local/share/MasterSafe`.
    tray icon, lock, a backup to a folder chosen in the file dialog.
 2. The screenshots in `docs/screenshots/` are drawn by `tools/MasterSafe.Screenshots` (the app itself blocks screen
    capture): `dotnet run --project tools/MasterSafe.Screenshots -- docs/screenshots`. It renders the real pages without
-   a screen from a demo vault in a temporary folder; your vault is never opened. `--scene snapshots` draws the pages of the
+   a screen from a demo vault in a temporary folder; your vault is never opened. `--scene tour` draws the first-start, sign-in, add-account, import, codes and add-password pages for the getting-started article. `--scene snapshots` draws the pages of the
    web article about snapshots and also does the restore it describes with real file copies, failing if it does not behave as
    written. `--data-folder <new folder>` shows that path on the Vaults page (for example in a Linux container with
    `HOME=/home/alex`, so no real user name appears); the folder must not exist, because the tool deletes it at the end. Push them: the metainfo links to them
