@@ -5,6 +5,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Maintenance
+- **README with pictures:** an animated six-step tour and four screenshots, a corrected "Planned" line and links to the guided tour,
+  the snapshots article and the authenticator guide on the author's site. The roadmap now shows winget in review, Scoop and the `.deb` done, and Flathub on hold.
 - **The screenshot tool** has a `tour` scene (first start, sign-in, add account, import, codes, add password) and a `snapshots` scene that draws the Vaults, Backup and "older copy" pages, and performs the snapshot restore with
   real file copies as a check. A `--data-folder` option shows a made-up path instead of a temporary folder.
 - **Documentation:** the `snapshots` folder (7 daily copies of the vault) is now listed in `docs/FileLocations.md`, with how to restore one.

@@ -182,6 +182,9 @@ static async Task TourAsync(string output, string root, bool rootIsDataFolder)
     shell.AccountEditor.Secret = Demo.NewKey();
     await Shoot(window, shell, shell.AccountEditor, Path.Combine(output, "tour-3-add-account.png"));
     await Shoot(window, shell, shell.Import, Path.Combine(output, "tour-4-import.png"));
+    // A real first-day vault would show reminders here; the tour is about the codes.
+    shell.Settings.ShowReminders = false;
+    shell.RefreshNotices();
     await Shoot(window, shell, shell.Dashboard, Path.Combine(output, "tour-5-codes.png"));
 
     shell.Passwords.Title = "Example Cloud";

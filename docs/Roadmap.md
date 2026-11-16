@@ -24,8 +24,13 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 
 ## Now: stores
 
-winget (`winget install mastersafe`) and Flathub (`io.github.GabrielVergara.MasterSafeAuthenticator`), from the signed release
-files, with licence 1.2. Prepared in `packaging/`; submission steps in [Distribution.md](Distribution.md).
+- **winget** (`winget install mastersafe`): submitted and validated, waiting for a community moderator
+  (microsoft/winget-pkgs#480815). A daily workflow proposes later releases once the package is accepted.
+- **Scoop** and a **`.deb`** for Debian, Ubuntu and Mint: available since 1.7.2.
+- **Flathub: on hold.** It asks for a build from source, a longer history, a manifest written by hand and a licence that allows
+  its own builds. See [Distribution.md](Distribution.md).
+- **Promotion without money:** release announcements on Bluesky and Mastodon, articles and a feed on the author's site. See
+  [Promotion.md](Promotion.md).
 
 ## Next (1.8): deep protection
 
@@ -47,7 +52,8 @@ The last three change how a vault is opened, so they come last and need migratio
 | Item | Notes |
 | --- | --- |
 | Android test version | First the codes only: open the synced vault, show and copy codes, unlock with a fingerprint. Then passwords. Same vault format and sync |
-| winget and Flathub | Free, and easier to find than a GitHub download |
+| Restore a snapshot from the app | A button on the Vaults page that restores one of the 7 daily copies, so no file copying is needed |
+| Flathub | When the points in [Distribution.md](Distribution.md) are met: a source build, more history and licence 1.3 |
 | Linux hardware unlock | FIDO2 through libfido2 |
 | Ignore simulated input for copying (optional) | On Windows, input made by another program is marked. MasterSafe could refuse copies started that way. Off by default, because voice control and other assistive tools work like that |
 

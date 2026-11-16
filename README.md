@@ -8,6 +8,22 @@ by Gabriel Vergara Ezcurdia
 
 See the [changelog](CHANGELOG.md) for what changed in each version.
 
+![A tour of MasterSafe Authenticator in six steps: create a vault, sign in, add an account, import, copy a code and keep passwords](docs/screenshots/tour.gif)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/tour-5-codes.png" alt="Authenticator codes: accounts with six-digit codes, Copy code buttons and countdown rings"><br><sub>Codes: copy one when a website asks for it.</sub></td>
+<td width="50%"><img src="docs/screenshots/tour-6-add-password.png" alt="Passwords: a list of logins and the form for a new entry with a strength meter and a password generator"><br><sub>Passwords, in the same encrypted vault.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/tour-3-add-account.png" alt="Add account: issuer, account label and secret key"><br><sub>Add an account by typing the key, or import it from a link, a QR picture or another app.</sub></td>
+<td width="50%"><img src="docs/screenshots/tour-2-signin.png" alt="Unlock your vault: one master password box"><br><sub>Sign in with your master password (Windows Hello and security keys too, on Windows).</sub></td>
+</tr>
+</table>
+
+The pictures use made-up data. The app keeps itself out of screenshots, so they are drawn by
+[tools/MasterSafe.Screenshots](tools/MasterSafe.Screenshots/) from the real pages.
+
 ## Features
 
 **Authenticator and passwords in one encrypted vault**
@@ -51,11 +67,14 @@ See the [changelog](CHANGELOG.md) for what changed in each version.
 - Reminders for the steps you have not done, a task-based in-app Help with search, a light/dark theme and a system tray
   icon. On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
-**More to read**: the article about MasterSafe Authenticator on the author's site,
-<https://www.gabriel-vergara.com/articles/mastersafe-authenticator/>.
+**More to read** on the author's site: the article about MasterSafe Authenticator,
+<https://www.gabriel-vergara.com/articles/mastersafe-authenticator/>; a step-by-step
+[guided tour](https://www.gabriel-vergara.com/articles/mastersafe-getting-started/) with pictures; the
+[daily snapshots and how to restore one](https://www.gabriel-vergara.com/articles/mastersafe-snapshots/); and
+[how to choose an authenticator app](https://www.gabriel-vergara.com/articles/choosing-an-authenticator-app/).
 
-Planned: opening `.kdbx` files directly, more than one security key per vault, hardware unlock (Hello, security keys) on Linux, and
-a mobile app. See [docs/Roadmap.md](docs/Roadmap.md), the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md) and [how MasterSafe compares with other apps](docs/Comparison.md).
+Planned: hardware unlock (security keys) on Linux, deeper protection (a check of the installed files, an optional key file, a
+split recovery key) and a mobile app. See [docs/Roadmap.md](docs/Roadmap.md), the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md) and [how MasterSafe compares with other apps](docs/Comparison.md).
 
 ## Download and install
 
