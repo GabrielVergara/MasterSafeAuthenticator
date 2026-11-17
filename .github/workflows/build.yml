@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # Started by dependabot-lock-files.yml after it refreshes the lock files of a Dependabot NuGet pull request.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,6 +13,8 @@ permissions:
 jobs:
   build-test:
     name: build-test (${{ matrix.os }})
+    # Dependabot NuGet pull requests are built by the run that dependabot-lock-files.yml starts, after the lock files match.
+    if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]' || !startsWith(github.head_ref, 'dependabot/nuget/')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

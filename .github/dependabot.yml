@@ -9,14 +9,11 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    # One pull request a week for every NuGet update: separate pull requests all touch the same lock files and conflict
+    # once one is merged. dependabot-lock-files.yml refreshes the lock files on it and starts the build.
     groups:
-      avalonia:
-        patterns: ["Avalonia*"]
-      testing:
-        patterns: ["xunit*", "FluentAssertions", "Moq", "coverlet*", "Microsoft.NET.Test.Sdk"]
-      # These must move together: Entity Framework with its SQLite packages, and the SQLitePCLRaw set.
-      data:
-        patterns: ["Microsoft.EntityFrameworkCore*", "Microsoft.Data.Sqlite*", "SQLitePCLRaw*"]
+      nuget:
+        patterns: ["*"]
     commit-message:
       prefix: "deps"
 

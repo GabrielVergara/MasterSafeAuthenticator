@@ -169,7 +169,7 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 | Verify a whole downloaded release folder | `MasterSafe-Cli-<v>-win-x64.exe verify-release <folder> masterSafe-release.pub` | `./MasterSafe-Cli-<v>-linux-x64 verify-release <folder> masterSafe-release.pub` |
 | Verify one file | `MasterSafe.Cli verify <file> <pubkey>` | same command |
 | Show a public key fingerprint | `MasterSafe.Cli fingerprint <pubkey>` | same command |
-| Package lock files | after changing a package: `pwsh scripts/update-lock-files.ps1` and commit the `packages.*.lock.json` files. CI restores in locked mode, so a Dependabot package update fails until they are refreshed | same |
+| Package lock files | after changing a package: `pwsh scripts/update-lock-files.ps1` and commit the `packages.*.lock.json` files. CI restores in locked mode. On Dependabot NuGet pull requests (one a week, all packages together) the `dependabot lock files` workflow refreshes them, commits them to the branch and starts the build; nothing to do by hand | same |
 | Fuzzing | `dotnet test --filter Category=Fuzz`; `MASTERSAFE_FUZZ_ITERATIONS` sets the rounds, `MASTERSAFE_FUZZ_SEED` repeats a failed run. `.github/workflows/fuzz.yml` runs 2 million rounds per reader each week | same |
 | winget manifests | `winget validate --manifest packaging\winget\<v>`; later versions go out through `.github/workflows/winget.yml` (see [Distribution.md](Distribution.md)) | n/a |
 | Flatpak | n/a | `cd packaging/flatpak && flatpak-builder --user --install --force-clean build io.github.GabrielVergara.MasterSafeAuthenticator.yml` |

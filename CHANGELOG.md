@@ -5,6 +5,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 ## Unreleased
 
 ### Maintenance
+- **Dependencies:** Entity Framework Core 10.0.15 and coverlet 10.1.1. Dependabot now opens one NuGet pull request a week, and a
+  workflow refreshes its lock files and starts the build, so these updates no longer fail in CI.
 - **Finnish reviewed by a native speaker:** corrections to the secret key wording, the language, zoom and recovery messages and the
   help text. Rewording only; no key or placeholder changed.
 - **README with pictures:** an animated six-step tour and four screenshots, a corrected "Planned" line and links to the guided tour,
