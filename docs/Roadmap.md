@@ -176,7 +176,7 @@ This is how the project keeps itself patched. The detailed checklist is in [Owas
 | What | How | Cadence |
 | --- | --- | --- |
 | Known vulnerable packages | The build itself fails (NuGet audit, direct and transitive); CI runs `scripts/check-vulnerabilities.sh`; release builds run it first | Every build, plus weekly |
-| Updates | Dependabot for NuGet and GitHub Actions; security updates open pull requests as soon as an advisory exists | Weekly, and on advisory |
+| Updates | Dependabot for NuGet (one grouped pull request, lock files refreshed by a workflow) and GitHub Actions; security updates open pull requests as soon as an advisory exists | Weekly, and on advisory |
 | Code scanning | CodeQL, secret scanning (Gitleaks), dependency review on pull requests | Every push, weekly |
 | .NET runtime | Releases are self-contained, so each release bundles the newest patched .NET 10 runtime available at build time. After every Microsoft security release, a new build is published | Monthly, or sooner for a critical fix |
 | Response targets | Critical: fix or mitigation within 2 days. High: 7 days. Medium: 30 days. Low: next release | Best effort for a one-person project |

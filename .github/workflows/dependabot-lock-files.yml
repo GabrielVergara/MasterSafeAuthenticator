@@ -1,0 +1,52 @@
+# Dependabot changes package versions but not the lock files, so the build (restore in locked mode) fails on its NuGet pull
+# requests. This refreshes packages.windows.lock.json and packages.linux.lock.json on the Dependabot branch with
+# scripts/update-lock-files.ps1, commits them, and then starts the build for the new commit (a push made with GITHUB_TOKEN
+# does not start workflows by itself; a workflow_dispatch does). build.yml skips these pull requests and waits for that run.
+name: dependabot lock files
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lock-files:
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/nuget/') && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Refresh the lock files
+        shell: pwsh
+        run: ./scripts/update-lock-files.ps1
+
+      - name: Commit them to the pull request
+        shell: bash
+        run: |
+          if git diff --quiet -- '*.lock.json'; then
+            echo "The lock files already match."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.lock.json'
+          git commit -m "deps: refresh the lock files"
+          git push origin "HEAD:${{ github.head_ref }}"
+
+      - name: Start the build for the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh workflow run build.yml -R "$GITHUB_REPOSITORY" --ref "${{ github.head_ref }}"
