@@ -75,18 +75,47 @@ public sealed partial class VaultsViewModel : ViewModelBase
     /// <summary>Raised after the active vault changed or was deleted. The shell locks and reloads the login screen.</summary>
     public Func<Task>? ActiveVaultChanged { get; set; }
 
+    /// <summary>Called before the vault file is replaced. The shell waits for any save to finish and locks.</summary>
+    public Func<Task>? BeforeVaultReplaced { get; set; }
+
+    /// <summary>Daily copies of the main vault, newest first.</summary>
+    public ObservableCollection<SnapshotRowViewModel> Snapshots { get; } = [];
+
+    /// <summary>True when the main vault is in use, the only one that gets daily copies.</summary>
+    public bool ShowsSnapshots => _services is not null && string.Equals(
+        Path.GetFullPath(ActivePath), Path.GetFullPath(_services.Paths.DefaultVaultPath),
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+    /// <summary>True when the main vault is in use but has no daily copy yet.</summary>
+    public bool HasNoSnapshots => ShowsSnapshots && Snapshots.Count == 0;
+
     /// <summary>Reloads the list from disk.</summary>
     public void Refresh()
     {
         Vaults.Clear();
+        Snapshots.Clear();
         if (_services is not null)
         {
             foreach (var entry in _services.Catalog.List())
             {
                 Vaults.Add(new VaultRowViewModel(entry));
             }
+
+            try
+            {
+                foreach (var snapshot in _services.Catalog.ListSnapshots())
+                {
+                    Snapshots.Add(new SnapshotRowViewModel(snapshot));
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // The list of copies is extra information; the page still works without it.
+            }
         }
 
+        OnPropertyChanged(nameof(ShowsSnapshots));
+        OnPropertyChanged(nameof(HasNoSnapshots));
         OnPropertyChanged(nameof(ActivePath));
         OnPropertyChanged(nameof(IsAvailable));
         OnPropertyChanged(nameof(DataFolder));
@@ -210,6 +239,53 @@ public sealed partial class VaultsViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private void RequestRestore(SnapshotRowViewModel? row)
+    {
+        foreach (var other in Snapshots)
+        {
+            other.IsConfirmingRestore = ReferenceEquals(other, row);
+        }
+    }
+
+    [RelayCommand]
+    private static void CancelRestore(SnapshotRowViewModel? row)
+    {
+        if (row is not null)
+        {
+            row.IsConfirmingRestore = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ConfirmRestoreAsync(SnapshotRowViewModel? row)
+    {
+        if (row is null || _services is null)
+        {
+            return;
+        }
+
+        row.IsConfirmingRestore = false;
+        try
+        {
+            if (BeforeVaultReplaced is not null)
+            {
+                await BeforeVaultReplaced();
+            }
+
+            var kept = await _services.Catalog.RestoreSnapshotAsync(row.Path);
+            Status = kept is null
+                ? $"Restored the copy saved {row.Saved}. Sign in with the master password it had."
+                : $"Restored the copy saved {row.Saved}. The vault you had before is kept in the archive as {Path.GetFileName(kept)}. Sign in with the master password the copy had.";
+            await NotifyChangedAsync();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or InvalidDataException)
+        {
+            Status = $"Could not restore it: {ex.Message}";
+            Refresh();
+        }
+    }
+
     private async Task SwitchToAsync(string path)
     {
         if (_services is null)
@@ -242,26 +318,66 @@ public sealed partial class VaultsViewModel : ViewModelBase
         }
     }
 
-    // Windows Hello credentials belong to the vault's slots. When a vault is deleted its credentials are removed too.
+    // Windows Hello credentials belong to the vault's slots. When a vault is deleted its credentials are removed too,
+    // except those another listed vault still uses: a copy kept before a restore has the same slots as the vault in use.
     private async Task RemoveHardwareCredentialsAsync(string path)
+    {
+        if (_providers.Count == 0)
+        {
+            return;
+        }
+
+        var slots = await ReadSlotsAsync(path);
+        if (slots.Count == 0)
+        {
+            return;
+        }
+
+        var inUseElsewhere = new HashSet<string>(StringComparer.Ordinal);
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        foreach (var other in Vaults.Where(v => !string.Equals(v.Path, path, comparison)))
+        {
+            inUseElsewhere.UnionWith((await ReadSlotsAsync(other.Path)).Select(s => s.Id));
+        }
+
+        foreach (var slot in slots.Where(s => !inUseElsewhere.Contains(s.Id)))
+        {
+            var provider = _providers.FirstOrDefault(p => p.SlotType == slot.Type);
+            if (provider is not null)
+            {
+                await provider.RemoveAsync(slot.Id);
+            }
+        }
+    }
+
+    private static async Task<IReadOnlyList<KeySlot>> ReadSlotsAsync(string path)
     {
         try
         {
-            var vault = await new FileVaultRepository(path).LoadAsync();
-            foreach (var slot in vault?.Slots ?? [])
-            {
-                var provider = _providers.FirstOrDefault(p => p.SlotType == slot.Type);
-                if (provider is not null)
-                {
-                    await provider.RemoveAsync(slot.Id);
-                }
-            }
+            return (await new FileVaultRepository(path).LoadAsync())?.Slots ?? [];
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)
         {
-            // The file is unreadable, so there is nothing to clean up.
+            // An unreadable file has no slots to clean up or to protect.
+            return [];
         }
     }
+}
+
+/// <summary>One daily copy in the list.</summary>
+public sealed partial class SnapshotRowViewModel(SnapshotEntry entry) : ObservableObject
+{
+    [ObservableProperty]
+    private bool _isConfirmingRestore;
+
+    /// <summary>Full path of the copy.</summary>
+    public string Path { get; } = entry.Path;
+
+    /// <summary>When the vault in this copy was last saved, local time.</summary>
+    public string Saved { get; } = entry.Saved.LocalDateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+
+    /// <summary>Size in kilobytes, for display.</summary>
+    public string Size { get; } = $"{Math.Max(1, entry.Size / 1024)} KB";
 }
 
 /// <summary>One vault file in the list.</summary>

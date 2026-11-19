@@ -30,6 +30,9 @@ public sealed class NetworkVaultException(string path) : Exception("That vault f
 /// <summary>A vault file the app knows about.</summary>
 public sealed record VaultEntry(string Path, string Name, VaultKind Kind, DateTimeOffset Modified, long Size, bool IsActive);
 
+/// <summary>A daily copy of the main vault. <paramref name="Saved"/> is when the vault in it was last saved.</summary>
+public sealed record SnapshotEntry(string Path, DateTimeOffset Saved, long Size);
+
 /// <summary>
 /// Knows which vault files exist and which one is in use. It can move an old vault into the archive (for example
 /// after the master password was lost), switch to another vault file, and delete archived vaults. Nothing is
@@ -136,7 +139,7 @@ public sealed class VaultCatalog
             return null;
         }
 
-        Directory.CreateDirectory(_paths.ArchiveFolder);
+        CreatePrivateDirectory(_paths.ArchiveFolder);
         var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
         var target = Path.Combine(_paths.ArchiveFolder, $"vault-{stamp}.sauth");
         for (var n = 2; File.Exists(target); n++)
@@ -252,6 +255,97 @@ public sealed class VaultCatalog
         }
 
         Forget(full);
+    }
+
+    /// <summary>Where the daily copies of the main vault are kept.</summary>
+    public string SnapshotFolder => Path.Combine(_paths.DataFolder, "snapshots");
+
+    /// <summary>The daily copies of the main vault, newest first. Empty when another vault file is in use.</summary>
+    public IReadOnlyList<SnapshotEntry> ListSnapshots()
+    {
+        if (!Same(ActivePath, _paths.DefaultVaultPath) || !Directory.Exists(SnapshotFolder))
+        {
+            return [];
+        }
+
+        return Directory.EnumerateFiles(SnapshotFolder, "*.sauth")
+            .Where(f => FileVaultRepository.IsSnapshotOf(_paths.DefaultVaultPath, f))
+            .Select(f => new FileInfo(f))
+            .Where(i => i.LinkTarget is null)
+            .OrderByDescending(i => i.Name, StringComparer.Ordinal)
+            .Select(i => new SnapshotEntry(i.FullName, i.LastWriteTimeUtc, i.Length))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Puts a daily copy back as the main vault. The vault in use is first copied to the archive, so the restore can be
+    /// undone by opening that copy. The snapshot is checked to be a readable vault before anything is replaced, and the
+    /// swap is atomic, as in a normal save. The caller must lock the vault first, so no save can overwrite the result.
+    /// </summary>
+    /// <returns>The archive path of the vault that was in use, or null when there was none.</returns>
+    /// <exception cref="InvalidOperationException">The file is not a daily copy of the main vault, or another vault is in use.</exception>
+    /// <exception cref="InvalidDataException">The copy is damaged or too large.</exception>
+    public async Task<string?> RestoreSnapshotAsync(string snapshotPath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(snapshotPath);
+
+        var vault = _paths.DefaultVaultPath;
+        var full = Path.GetFullPath(snapshotPath);
+        var info = new FileInfo(full);
+
+        // Only a real file straight inside the snapshot folder, named after the main vault, is accepted. A link could
+        // point anywhere, and a path from elsewhere is not something the user picked from the list.
+        if (!Same(ActivePath, vault) || !Same(info.DirectoryName, SnapshotFolder)
+            || !FileVaultRepository.IsSnapshotOf(vault, full) || !info.Exists || info.LinkTarget is not null)
+        {
+            throw new InvalidOperationException("That file is not a daily copy of this vault.");
+        }
+
+        // Throws InvalidDataException when the copy is too large or damaged; then nothing has been touched.
+        if (await new FileVaultRepository(full).LoadAsync().ConfigureAwait(false) is null)
+        {
+            throw new InvalidDataException("The daily copy could not be read.");
+        }
+
+        string? kept = null;
+        if (File.Exists(vault))
+        {
+            CreatePrivateDirectory(_paths.ArchiveFolder);
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
+            kept = Path.Combine(_paths.ArchiveFolder, $"vault-{stamp}-before-restore.sauth");
+            for (var n = 2; File.Exists(kept); n++)
+            {
+                kept = Path.Combine(_paths.ArchiveFolder, $"vault-{stamp}-before-restore-{n}.sauth");
+            }
+
+            File.Copy(vault, kept);
+        }
+
+        var temp = vault + ".tmp";
+        File.Copy(full, temp, overwrite: true);
+        if (File.Exists(vault))
+        {
+            File.Replace(temp, vault, vault + ".bak", ignoreMetadataErrors: true);
+        }
+        else
+        {
+            File.Move(temp, vault);
+        }
+
+        Activate(vault);
+        return kept;
+    }
+
+    private static void CreatePrivateDirectory(string directory)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Directory.CreateDirectory(directory);
+        }
+        else
+        {
+            Directory.CreateDirectory(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     private void Activate(string path)

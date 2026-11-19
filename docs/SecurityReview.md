@@ -112,3 +112,6 @@ Full detail is in [CHANGELOG.md](../CHANGELOG.md).
 | 1.6.0 | Attacker-style review | A hostile counter file could wrap the save counter around | Impossible values are ignored |
 | 1.6.0 | Repeated test runs | A wrong last letter of a sync code could decode to the same key | Only the exact code is accepted |
 | 1.6.0 | Linux check in Docker | On Linux the data folder could depend on the folder the program was started from | Always the standard folder; a test checks it |
+| 1.8.0 | Self-review | Deleting a vault removed hardware-unlock credentials that another vault (a copy kept before a restore) still used | Credentials still used by a listed vault are kept; a test checks it |
+| 1.8.0 | Self-review | Snapshot restore could be pointed at any file, a link, or a damaged copy, or race a save | Only real files in the snapshot folder named after the main vault; read as a vault first; saves finish and the vault locks before the swap |
+| 1.8.0 | Self-review | On Linux the archive folder took the default permissions | Created readable by its owner only |

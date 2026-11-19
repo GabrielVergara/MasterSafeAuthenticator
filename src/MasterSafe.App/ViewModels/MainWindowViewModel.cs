@@ -355,6 +355,19 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             CurrentPage = Dashboard;
         };
         Vaults.ActiveVaultChanged = OnActiveVaultChangedAsync;
+        Vaults.BeforeVaultReplaced = async () =>
+        {
+            // A save still running would write over the restored file, so wait for it, then lock.
+            await _saveLock.WaitAsync();
+            try
+            {
+                Lock();
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
+        };
         Login.Forgot.ActiveVaultChanged = OnActiveVaultChangedAsync;
         Login.Forgot.Restored = async password =>
         {

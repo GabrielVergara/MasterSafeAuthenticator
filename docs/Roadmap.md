@@ -32,15 +32,26 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - **Promotion without money:** release announcements on Bluesky and Mastodon, articles and a feed on the author's site. See
   [Promotion.md](Promotion.md).
 
-## Next (1.8): deep protection
+The .NET version stays on .NET 10 (LTS, supported until November 2028). .NET 11 is a short-term release that ends at about
+the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10 patches are picked up by every build.
+
+## Next (1.8): recovery you can see, low risk
 
 | Item | Why |
 | --- | --- |
+| Restore a snapshot from the app | A button on the Vaults page that restores one of the 7 daily copies. The vault in use is copied to the archive first, so nothing is lost. No file copying by hand |
+| Printable large-print recovery sheet | A recovery copy that does not depend on a file |
+| Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
 | Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed |
 | Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |
+
+## Then (1.9): deep protection
+
+These change how a vault is opened or how secrets sit in memory, so they need migration, rollback and longer tests.
+
+| Item | Why |
+| --- | --- |
 | Keep secrets out of .NET strings | Hold decrypted passwords as wipeable buffers and decrypt only while copying. A large internal change that touches every screen |
-| Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
-| Printable large-print recovery sheet | A recovery copy that does not depend on a file |
 | Key file (optional) | A small file needed alongside the master password, so a stolen vault cannot be guessed without it. Easier to move between computers than binding to one |
 | Bind the vault to this computer (optional) | A second key protected by the TPM or Windows DPAPI is needed besides the master password, so a copied vault file cannot be guessed offline from another machine. One extra recovery step when moving computers; losing the TPM means the recovery key is needed. Linux uses Secret Service |
 | Hardware-only unlock (optional) | Allow turning off master-password sign-in once a security key and a recovery key exist. The recovery key becomes essential |
@@ -52,7 +63,6 @@ The last three change how a vault is opened, so they come last and need migratio
 | Item | Notes |
 | --- | --- |
 | Android test version | First the codes only: open the synced vault, show and copy codes, unlock with a fingerprint. Then passwords. Same vault format and sync |
-| Restore a snapshot from the app | A button on the Vaults page that restores one of the 7 daily copies, so no file copying is needed |
 | Flathub | When the points in [Distribution.md](Distribution.md) are met: a source build, more history and licence 1.3 |
 | Linux hardware unlock | FIDO2 through libfido2 |
 | Ignore simulated input for copying (optional) | On Windows, input made by another program is marked. MasterSafe could refuse copies started that way. Off by default, because voice control and other assistive tools work like that |

@@ -96,6 +96,45 @@
         </StackPanel>
       </Border>
 
+      <Border Classes="card" IsVisible="{Binding ShowsSnapshots}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Daily copies" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="MasterSafe keeps a copy of the main vault from each of the last 7 days it changed. Restoring one replaces the vault in use, which is first copied to the archive, so you can open it again later." />
+          <TextBlock Classes="hint" IsVisible="{Binding HasNoSnapshots}"
+                     Text="No daily copies yet. The first one is made when the vault changes on another day." />
+          <ItemsControl ItemsSource="{Binding Snapshots}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SnapshotRowViewModel">
+                <StackPanel Spacing="6" Margin="0,0,0,10">
+                  <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                    <TextBlock Tag="data" Text="{Binding Saved}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding Size}" Classes="hint" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Content="Restore..." IsVisible="{Binding !IsConfirmingRestore}"
+                            Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).RequestRestoreCommand}"
+                            CommandParameter="{Binding}" />
+                  </Grid>
+                  <Border Classes="card" BorderBrush="{DynamicResource DangerBrush}" IsVisible="{Binding IsConfirmingRestore}">
+                    <StackPanel Spacing="8">
+                      <TextBlock TextWrapping="Wrap"
+                                 Text="Restore this copy? Changes made after it was saved are not in it. The vault in use is copied to the archive first, and the vault locks. Sign in with the master password the copy had." />
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="accent" Content="Yes, restore it"
+                                Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).ConfirmRestoreCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Content="Cancel"
+                                Command="{Binding $parent[ItemsControl].((vm:VaultsViewModel)DataContext).CancelRestoreCommand}"
+                                CommandParameter="{Binding}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <Border Classes="card" IsVisible="{Binding IsAvailable}">
         <StackPanel Spacing="10">
           <TextBlock Text="Open or start over" Classes="h2" />
