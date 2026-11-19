@@ -115,3 +115,4 @@ Full detail is in [CHANGELOG.md](../CHANGELOG.md).
 | 1.8.0 | Self-review | Deleting a vault removed hardware-unlock credentials that another vault (a copy kept before a restore) still used | Credentials still used by a listed vault are kept; a test checks it |
 | 1.8.0 | Self-review | Snapshot restore could be pointed at any file, a link, or a damaged copy, or race a save | Only real files in the snapshot folder named after the main vault; read as a vault first; saves finish and the vault locks before the swap |
 | 1.8.0 | Self-review | On Linux the archive folder took the default permissions | Created readable by its owner only |
+| 1.8.0 | Self-review | A printed recovery key and the text read back from photos | Only the passphrase-locked key file is printed, never the passphrase; the page loads nothing; read-back text, its decompression and the photos are size-limited; each piece and the whole key are checked |

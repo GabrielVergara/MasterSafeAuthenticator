@@ -9,6 +9,10 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   **Restore...** button. Restoring waits for any save, locks, copies the vault in use to the archive (`...-before-restore.sauth`)
   and swaps the copy in atomically. A copy is checked to be a readable vault first, and only real files in the snapshots
   folder named after the main vault are accepted.
+- **Recovery key on paper.** On the Recovery page, **Print the recovery key...** saves a page with the recovery key file as
+  4 QR codes and as text in short groups. The key stays locked with its passphrase, which is never printed. To restore,
+  **Read a printed key...** on the "Forgot your master password?" panel reads photos or scans of the pages; a code that
+  cannot be read can be typed in, and each piece has a check that says which piece has a typing mistake.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

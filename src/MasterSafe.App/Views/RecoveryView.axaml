@@ -109,6 +109,15 @@
         </StackPanel>
       </Border>
 
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Recovery key on paper" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Prints the recovery key file as QR codes and text, so a lost or broken USB stick does not take it with it. The key stays locked with its passphrase, which is not printed. To use it, choose Read a printed key... when you restore." />
+          <Button Content="Print the recovery key..." HorizontalAlignment="Left" Command="{Binding CreateKeySheetCommand}" />
+        </StackPanel>
+      </Border>
+
       <TextBlock AutomationProperties.LiveSetting="Polite" Text="{Binding Status}" TextWrapping="Wrap" IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>
