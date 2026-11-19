@@ -4,6 +4,17 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ## Unreleased
 
+### Added
+- **Restore a daily copy from the app.** The Vaults page lists the 7 daily copies of the main vault, each with a
+  **Restore...** button. Restoring waits for any save, locks, copies the vault in use to the archive (`...-before-restore.sauth`)
+  and swaps the copy in atomically. A copy is checked to be a readable vault first, and only real files in the snapshots
+  folder named after the main vault are accepted.
+
+### Security
+- Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for
+  example the copy kept before a restore).
+- On Linux the archive folder is created readable by its owner only, like the snapshots folder.
+
 ### Maintenance
 - **Dependencies:** Entity Framework Core 10.0.15 and coverlet 10.1.1. Dependabot now opens one NuGet pull request a week, and a
   workflow refreshes its lock files and starts the build, so these updates no longer fail in CI.

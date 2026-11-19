@@ -471,6 +471,8 @@ public static class HelpContent
             - Start a new vault: moves the current vault into the archive and creates an empty one.
             - Open an archived vault again, show a file in its folder, or delete an old vault. Deleting asks
               for confirmation and cannot be undone.
+            - Restore a daily copy: puts back the main vault as it was on one of the last 7 days it changed. The
+              vault in use is copied to the archive first, so the restore can be undone by opening that copy.
 
             To move to another computer, copy vault.sauth there, install MasterSafe and choose "I already have
             a vault file". Uninstalling never removes your vault. Saving is crash-safe, and the previous

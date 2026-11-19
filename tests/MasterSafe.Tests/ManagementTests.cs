@@ -208,6 +208,46 @@ public sealed class ManagementTests : IDisposable
     }
 
     [Fact]
+    public async Task VaultsPage_RestoresADailyCopy_AfterLocking_AndKeepsHelloForTheRestoredVault()
+    {
+        var hello = new FakeSecretProvider();
+        await _vault.SaveContentsAsync(OldPassword, Sample);
+        await _vault.AddSlotAsync(await _vault.DeriveKeyAsync(OldPassword), hello, "Hello");
+        var snapshot = Path.Combine(_paths.DataFolder, "snapshots", "vault-20261118.sauth");
+        Directory.CreateDirectory(Path.GetDirectoryName(snapshot)!);
+        File.Copy(_paths.DefaultVaultPath, snapshot);
+        await _vault.SaveContentsAsync(OldPassword, new VaultContents());
+
+        var steps = new List<string>();
+        var page = new VaultsViewModel(_services, [hello])
+        {
+            BeforeVaultReplaced = () =>
+            {
+                steps.Add("locked:" + File.ReadAllText(_paths.DefaultVaultPath).Length);
+                return Task.CompletedTask;
+            },
+            ActiveVaultChanged = () => { steps.Add("changed"); return Task.CompletedTask; },
+        };
+        page.ShowsSnapshots.Should().BeTrue();
+        var row = page.Snapshots.Should().ContainSingle(s => s.Path == snapshot).Subject;
+
+        page.RequestRestoreCommand.Execute(row);
+        row.IsConfirmingRestore.Should().BeTrue();
+        await page.ConfirmRestoreCommand.ExecuteAsync(row);
+
+        steps.Should().HaveCount(2);
+        steps[0].Should().StartWith("locked:", "the vault is locked before its file is replaced");
+        steps[1].Should().Be("changed");
+        (await _vault.OpenContentsAsync(OldPassword)).Passwords.Should().HaveCount(1);
+        var kept = page.Vaults.Should().ContainSingle(v => v.Name.EndsWith("-before-restore.sauth", StringComparison.Ordinal)).Subject;
+
+        // The kept copy has the same Windows Hello slot as the restored vault, so deleting it must not remove that credential.
+        await page.ConfirmDeleteCommand.ExecuteAsync(kept);
+        File.Exists(kept.Path).Should().BeFalse();
+        hello.Removed.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task VaultsPage_OpenFile_UsesTheChosenFileInPlace()
     {
         var external = Path.Combine(_root, "usb", "friend.sauth");

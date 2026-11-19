@@ -42,6 +42,96 @@ public sealed class VaultCatalogTests : IDisposable
         File.WriteAllText(path, content);
     }
 
+    private string Snapshot(string day) => Path.Combine(_paths.DataFolder, "snapshots", $"vault-{day}.sauth");
+
+    [Fact]
+    public void ListSnapshots_ShowsOnlyCopiesOfTheMainVault_NewestFirst()
+    {
+        WriteVault(_paths.DefaultVaultPath);
+        WriteVault(Snapshot("20261117"));
+        WriteVault(Snapshot("20261118"));
+        WriteVault(Path.Combine(_paths.DataFolder, "snapshots", "other-20261118.sauth"));
+        WriteVault(Path.Combine(_paths.DataFolder, "snapshots", "vault-notes.txt"));
+
+        NewCatalog().ListSnapshots().Select(s => Path.GetFileName(s.Path))
+            .Should().Equal("vault-20261118.sauth", "vault-20261117.sauth");
+    }
+
+    [Fact]
+    public void ListSnapshots_IsEmpty_WhenAnotherVaultIsInUse()
+    {
+        WriteVault(Snapshot("20261118"));
+        var external = Path.Combine(_root, "usb", "mine.sauth");
+        WriteVault(external);
+        var catalog = NewCatalog();
+        catalog.SetActive(external);
+
+        catalog.ListSnapshots().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RestoreSnapshot_KeepsTheCurrentVaultInTheArchive_AndPutsTheCopyBack()
+    {
+        WriteVault(_paths.DefaultVaultPath, """{"Version":2}""");
+        WriteVault(Snapshot("20261118"), """{"Version":1}""");
+        var catalog = NewCatalog();
+
+        var kept = await catalog.RestoreSnapshotAsync(Snapshot("20261118"));
+
+        File.ReadAllText(_paths.DefaultVaultPath).Should().Be("""{"Version":1}""");
+        kept.Should().NotBeNull().And.EndWith("-before-restore.sauth");
+        Path.GetDirectoryName(kept).Should().Be(_paths.ArchiveFolder);
+        File.ReadAllText(kept!).Should().Be("""{"Version":2}""");
+        File.Exists(Snapshot("20261118")).Should().BeTrue("the copy itself stays, so it can be restored again");
+        File.Exists(_paths.DefaultVaultPath + ".tmp").Should().BeFalse();
+        catalog.ActivePath.Should().Be(_paths.DefaultVaultPath);
+    }
+
+    [Fact]
+    public async Task RestoreSnapshot_RefusesAFileThatIsNotADailyCopy()
+    {
+        WriteVault(_paths.DefaultVaultPath, "{}");
+        var outside = Path.Combine(_root, "elsewhere", "vault-20261118.sauth");
+        WriteVault(outside);
+        var other = Path.Combine(_paths.DataFolder, "snapshots", "other-20261118.sauth");
+        WriteVault(other);
+        var catalog = NewCatalog();
+
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(outside)).Should().ThrowAsync<InvalidOperationException>();
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(other)).Should().ThrowAsync<InvalidOperationException>();
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(Snapshot("20261119"))).Should().ThrowAsync<InvalidOperationException>();
+        var traversal = Path.Combine(_paths.DataFolder, "snapshots", "..", "snapshots", "..", "vault-20261118.sauth");
+        WriteVault(Path.GetFullPath(traversal));
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(traversal)).Should().ThrowAsync<InvalidOperationException>();
+        File.ReadAllText(_paths.DefaultVaultPath).Should().Be("{}");
+    }
+
+    [Fact]
+    public async Task RestoreSnapshot_LeavesEverythingAlone_WhenTheCopyIsDamaged()
+    {
+        WriteVault(_paths.DefaultVaultPath, "{}");
+        WriteVault(Snapshot("20261118"), "not a vault");
+        var catalog = NewCatalog();
+
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(Snapshot("20261118"))).Should().ThrowAsync<InvalidDataException>();
+
+        File.ReadAllText(_paths.DefaultVaultPath).Should().Be("{}");
+        Directory.Exists(_paths.ArchiveFolder).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task RestoreSnapshot_IsRefused_WhileAnotherVaultIsInUse()
+    {
+        WriteVault(_paths.DefaultVaultPath, "{}");
+        WriteVault(Snapshot("20261118"));
+        var external = Path.Combine(_root, "usb", "mine.sauth");
+        WriteVault(external, "{}");
+        var catalog = NewCatalog();
+        catalog.SetActive(external);
+
+        await catalog.Invoking(c => c.RestoreSnapshotAsync(Snapshot("20261118"))).Should().ThrowAsync<InvalidOperationException>();
+    }
+
     [Fact]
     public void Paths_AreUnderTheDataFolder()
     {

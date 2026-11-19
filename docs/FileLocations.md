@@ -24,7 +24,12 @@ files. The Vaults page in the app shows these locations too.
 
 ### Restoring a snapshot
 
-There is no restore button. Choose Exit in the tray menu, rename `vault.sauth` (for example to `vault.sauth.before-restore`), copy the snapshot you want to `vault.sauth` (copy, do not move) and start MasterSafe. Sign in with the master password; the codes page will say the vault is an older copy, which is expected. Anything saved after that snapshot is not in it. Snapshots sit on the same disk as the vault, so they are not a backup: use the Backup page for that. Step by step, with commands for Windows and Linux: the article "MasterSafe snapshots" on the author's web site.
+On the **Vaults** page, under **Daily copies**, choose **Restore...** next to the day you want. MasterSafe waits for any
+save to finish, locks, copies the vault in use to `archive\vault-<date>-<time>-before-restore.sauth` and puts the copy back
+as `vault.sauth`. The copy itself stays in `snapshots`. Sign in with the master password the copy had; the codes page will
+say the vault is an older copy, which is expected. To undo, open the `before-restore` file from the same page.
+
+By hand, for example when the app cannot start: choose Exit in the tray menu, rename `vault.sauth` (for example to `vault.sauth.before-restore`), copy the snapshot you want to `vault.sauth` (copy, do not move) and start MasterSafe. Sign in with the master password; the codes page will say the vault is an older copy, which is expected. Anything saved after that snapshot is not in it. Snapshots sit on the same disk as the vault, so they are not a backup: use the Backup page for that. Step by step, with commands for Windows and Linux: the article "MasterSafe snapshots" on the author's web site.
 
 A second folder holds one file, kept apart from the vault on purpose: `%AppData%\MasterSafe` on Windows and
 `~/.config/MasterSafe` on Linux.
