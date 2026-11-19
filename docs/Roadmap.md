@@ -39,8 +39,8 @@ the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10
 
 | Item | Why |
 | --- | --- |
-| Restore a snapshot from the app | A button on the Vaults page that restores one of the 7 daily copies. The vault in use is copied to the archive first, so nothing is lost. No file copying by hand |
-| Printable large-print recovery sheet | A recovery copy that does not depend on a file |
+| Restore a snapshot from the app (**done**) | A button on the Vaults page that restores one of the 7 daily copies. The vault in use is copied to the archive first, so nothing is lost. No file copying by hand |
+| Recovery key on paper (**done**) | The recovery key printed as QR codes and text, read back from photos, so it does not depend on a USB stick |
 | Recovery key split (any 2 of 3) | So one lost or stolen share is not enough |
 | Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed |
 | Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |

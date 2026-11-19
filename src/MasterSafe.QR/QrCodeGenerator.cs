@@ -40,6 +40,27 @@ public sealed class QrCodeGenerator
         return data.ToArray();
     }
 
+    /// <summary>
+    /// Renders text meant for paper: medium error correction, so a crease or a smudge still reads, and no character set
+    /// hint, so text of capitals, digits and <c>/</c> is stored compactly. One pixel per module; scale it when printing.
+    /// </summary>
+    public byte[] GeneratePrintPng(string text)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(text);
+
+        var hints = new Dictionary<EncodeHintType, object>
+        {
+            [EncodeHintType.MARGIN] = 4,
+            [EncodeHintType.ERROR_CORRECTION] = ZXing.QrCode.Internal.ErrorCorrectionLevel.M,
+        };
+
+        var matrix = new QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, 0, 0, hints);
+        using var bitmap = ToBitmap(matrix);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
+    }
+
     private static SKBitmap ToBitmap(BitMatrix matrix)
     {
         var width = matrix.Width;

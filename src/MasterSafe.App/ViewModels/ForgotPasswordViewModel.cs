@@ -52,6 +52,62 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isBusy;
 
+    /// <summary>Pieces of a printed recovery key read from photos so far.</summary>
+    private readonly HashSet<string> _paperPieces = new(StringComparer.Ordinal);
+
+    /// <summary>Pieces typed by hand, for codes that could not be read.</summary>
+    [ObservableProperty]
+    private string _paperKeyText = string.Empty;
+
+    /// <summary>True once the user started reading a printed key.</summary>
+    [ObservableProperty]
+    private bool _showPaperKey;
+
+    /// <summary>What was read from the printed key so far.</summary>
+    [ObservableProperty]
+    private string? _paperKeyStatus;
+
+    /// <summary>Reads QR codes from images. Replaced in tests.</summary>
+    public Func<string, IReadOnlyList<string>> ReadCodes { get; set; } = path => new MasterSafe.QR.QrCodeImporter().DecodeAllTexts(path);
+
+    private bool HasPaperKey => _paperPieces.Count > 0 || !string.IsNullOrWhiteSpace(PaperKeyText);
+
+    private byte[] PaperKeyBytes() => PaperKey.Join(_paperPieces.Concat([PaperKeyText]));
+
+    [RelayCommand]
+    private async Task ReadPaperKeyAsync()
+    {
+        if (_services is null)
+        {
+            return;
+        }
+
+        ShowPaperKey = true;
+        var path = await _services.Dialogs.OpenFileAsync("Choose a photo or scan of the printed key", "Images", "*.png", "*.jpg", "*.jpeg", "*.bmp");
+        if (path is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var found = ReadCodes(path).Where(t => t.StartsWith(PaperKey.Prefix, StringComparison.Ordinal)).ToList();
+            _paperPieces.UnionWith(found);
+            PaperKeyBytes();
+            PaperKeyStatus = "The whole recovery key was read.";
+        }
+        catch (InvalidDataException ex)
+        {
+            PaperKeyStatus = _paperPieces.Count == 0
+                ? "No code of a printed recovery key was found in that picture. Try a sharper photo with the whole page in it, or type the text below."
+                : string.Join(' ', Loc.T($"{_paperPieces.Count} codes read so far."), Loc.T(ex.Message), Loc.T("Add a photo of another page, or type the missing text below."));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or MasterSafe.QR.QrImportException)
+        {
+            PaperKeyStatus = $"That picture could not be read: {ex.Message}";
+        }
+    }
+
     /// <summary>Creates the panel. With no services only the explanation is shown.</summary>
     public ForgotPasswordViewModel(AppServices? services = null, IVaultService? vault = null)
     {
@@ -74,7 +130,10 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
         IsOpen = false;
         ShowRestore = false;
         ConfirmingNew = false;
-        BackupFilePath = KeyFilePath = KeyPassphrase = NewPassword = ConfirmPassword = string.Empty;
+        BackupFilePath = KeyFilePath = KeyPassphrase = NewPassword = ConfirmPassword = PaperKeyText = string.Empty;
+        _paperPieces.Clear();
+        ShowPaperKey = false;
+        PaperKeyStatus = null;
         Status = null;
     }
 
@@ -172,9 +231,9 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(BackupFilePath) || string.IsNullOrWhiteSpace(KeyFilePath) || KeyPassphrase.Length == 0)
+        if (string.IsNullOrWhiteSpace(BackupFilePath) || (string.IsNullOrWhiteSpace(KeyFilePath) && !HasPaperKey) || KeyPassphrase.Length == 0)
         {
-            Status = "Choose the recovery backup and the recovery key file, and enter the key's passphrase.";
+            Status = "Choose the recovery backup and the recovery key file (or read a printed key), and enter the key's passphrase.";
             return;
         }
 
@@ -195,7 +254,8 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
         byte[]? privateKey = null;
         try
         {
-            privateKey = _services.RecoveryKeys.OpenPrivateKey(await File.ReadAllBytesAsync(BackupFileGuard(KeyFilePath)), KeyPassphrase);
+            var keyFile = string.IsNullOrWhiteSpace(KeyFilePath) ? PaperKeyBytes() : await File.ReadAllBytesAsync(BackupFileGuard(KeyFilePath));
+            privateKey = _services.RecoveryKeys.OpenPrivateKey(keyFile, KeyPassphrase);
 
             var folder = Path.GetDirectoryName(Path.GetFullPath(BackupFilePath))!;
             var contents = await _services.RecoveryBackups.ImportContentsAsync(

@@ -354,6 +354,45 @@ public sealed class ManagementTests : IDisposable
     }
 
     [Fact]
+    public async Task ForgotPassword_RestoresWithAPrintedKey_ReadFromTwoPhotosAndOneTypedPiece()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        await _vault.SaveContentsAsync(OldPassword, Sample);
+        var created = _services.RecoveryKeys.Create(KeyPassphrase);
+        var backupPath = await _services.RecoveryBackups.ExportContentsAsync(Sample, created.PublicKey, new LocalFolderBackupProvider(Path.Combine(_root, "backups")));
+        var pieces = PaperKey.Split(created.FileBytes);
+        pieces.Count.Should().BeGreaterThan(2);
+
+        var shell = NewShell();
+        await Task.Delay(50);
+        var forgot = shell.Login.Forgot;
+        forgot.IsOpen = true;
+
+        // Photo 1 has the first piece and something else; photo 2 the second; the rest is typed by hand.
+        var photos = new Queue<IReadOnlyList<string>>([[pieces[0], "otpauth://totp/x?secret=ABC"], [pieces[1]]]);
+        forgot.ReadCodes = _ => photos.Dequeue();
+        _dialogs.OpenResult = Path.Combine(_root, "photo.jpg");
+        await forgot.ReadPaperKeyCommand.ExecuteAsync(null);
+        forgot.PaperKeyStatus.Should().Contain("Missing pieces");
+        await forgot.ReadPaperKeyCommand.ExecuteAsync(null);
+        forgot.PaperKeyText = string.Join("\n", pieces.Skip(2).Select(RecoveryKeySheet.FormatPiece));
+
+        forgot.BackupFilePath = backupPath;
+        forgot.KeyPassphrase = KeyPassphrase;
+        forgot.NewPassword = NewPassword;
+        forgot.ConfirmPassword = NewPassword;
+        await forgot.RestoreCommand.ExecuteAsync(null);
+
+        shell.IsUnlocked.Should().BeTrue();
+        (await _vault.OpenContentsAsync(NewPassword)).Passwords.Should().HaveCount(1);
+        forgot.PaperKeyText.Should().BeEmpty("the panel forgets what was typed");
+    }
+
+    [Fact]
     public async Task ForgotPassword_WrongKeyPassphrase_ChangesNothing()
     {
         if (!MLKem.IsSupported)
