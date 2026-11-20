@@ -16,6 +16,9 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - On Linux the archive folder is created readable by its owner only, like the snapshots folder.
 
 ### Maintenance
+- **Patch watch.** The release workflow fails unless the bundled .NET 10 runtime is the newest one
+  (`scripts/check-dotnet-patch.sh`). A daily `patch-watch` workflow opens an issue when Microsoft publishes a newer .NET 10
+  security release, or a package of the published release gets a known vulnerability, so a rebuild is never missed.
 - **Dependencies:** Entity Framework Core 10.0.15 and coverlet 10.1.1. Dependabot now opens one NuGet pull request a week, and a
   workflow refreshes its lock files and starts the build, so these updates no longer fail in CI.
 - **Finnish reviewed by a native speaker:** corrections to the secret key wording, the language, zoom and recovery messages and the

@@ -26,6 +26,10 @@ jobs:
         shell: bash
         run: bash scripts/check-vulnerabilities.sh
 
+      - name: Fail on an unpatched .NET runtime
+        shell: bash
+        run: bash scripts/check-dotnet-patch.sh
+
       - name: Test
         run: dotnet test MasterSafe.slnx --configuration Release
 
@@ -59,6 +63,9 @@ jobs:
 
       - name: Fail on known vulnerable packages
         run: bash scripts/check-vulnerabilities.sh
+
+      - name: Fail on an unpatched .NET runtime
+        run: bash scripts/check-dotnet-patch.sh
 
       - name: Test
         run: dotnet test MasterSafe.slnx --configuration Release

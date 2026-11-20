@@ -1,0 +1,71 @@
+name: patch-watch
+
+# Every day, looks at the release people download and opens an issue when it needs a new build:
+# - a newer .NET 10 security release came out after it was built (its runtime is inside the installer), or
+# - one of its packages, as pinned in its lock files, has a newly published vulnerability.
+# An issue with the same title is never opened twice. Nothing is built or published here.
+on:
+  schedule:
+    - cron: '41 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Find the latest release
+        id: rel
+        run: |
+          gh release view -R "$GITHUB_REPOSITORY" --json tagName,publishedAt \
+            --jq '"tag=\(.tagName)\npublished=\(.publishedAt)"' >> "$GITHUB_OUTPUT"
+
+      - name: Is there a newer .NET security release?
+        env:
+          TAG: ${{ steps.rel.outputs.tag }}
+          PUBLISHED: ${{ steps.rel.outputs.published }}
+        run: |
+          json=$(curl -fsS --retry 3 https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json)
+          # The newest security release published after our release was built.
+          newer=$(jq -r --arg p "${PUBLISHED:0:10}" \
+            '[.releases[] | select(.security == true and ."release-date" > $p)] | first | ."release-version" // empty' <<<"$json")
+          if [ -z "$newer" ]; then
+            echo "$TAG already has the newest .NET 10 security release."
+            exit 0
+          fi
+          title="Security: rebuild $TAG with .NET $newer"
+          if gh issue list -R "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "Issue already open: $title"
+            exit 0
+          fi
+          gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body \
+            ".NET $newer is a security release and came out after $TAG was built, so the installer and the Linux packages carry an older runtime. Release a patch version (docs/ReleaseProcess.md); the release workflow checks the runtime is the newest."
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.rel.outputs.tag }}
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Do the packages of the latest release have known vulnerabilities?
+        env:
+          TAG: ${{ steps.rel.outputs.tag }}
+        run: |
+          if bash scripts/check-vulnerabilities.sh > report.txt 2>&1; then
+            cat report.txt
+            exit 0
+          fi
+          cat report.txt
+          title="Security: a package in $TAG has a known vulnerability"
+          if gh issue list -R "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "Issue already open: $title"
+            exit 0
+          fi
+          { echo "The daily check found a known vulnerability in a package that $TAG ships. Update it on main (Dependabot may already have a pull request) and release a patch version."; echo; echo '```'; tail -60 report.txt; echo '```'; } > body.md
+          gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body-file body.md
