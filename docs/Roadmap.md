@@ -76,6 +76,7 @@ The last three change how a vault is opened, so they come last and need migratio
 | Mobile app (Android and iOS) | Shares the Core, Crypto and Backup libraries. Recovery backups already work across devices |
 | Independent security review | The largest gap against the audited apps in [Comparison.md](Comparison.md). Needs funding or a volunteer reviewer, and free audit programmes may expect an open-source license |
 | Reproducible builds | So a download can be checked against the source. Build attestations are already in place |
+| Tests on xunit v3 | xunit 2.9.3 is marked as legacy (not vulnerable). Version 3 needs the whole test run moved to Microsoft Testing Platform: `global.json` test runner, coverage through Microsoft.Testing.Extensions.CodeCoverage instead of coverlet, and new filter options in CI. One focused change, not mixed with features |
 | Authenticode signing and Store packaging | **Postponed: costs money and is not critical for now.** Reduces the SmartScreen "unsafe download" warning, which depends on signing and on download reputation over time. Options: a standard (OV) code-signing certificate, Azure Artifact Signing (organisations in the EU, individuals only in the USA and Canada), or publishing through the Microsoft Store, where Microsoft signs the package (the app would need MSIX packaging and a plan for where the vault is kept) |
 
 ## Icons plan
