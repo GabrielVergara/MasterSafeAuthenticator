@@ -125,21 +125,13 @@ public sealed partial class RecoveryViewModel : ViewModelBase
             return;
         }
 
-        var keyPath = await _services.Dialogs.OpenFileAsync("Choose your recovery key file", "Recovery key files", "*.msrk");
-        if (keyPath is null)
-        {
-            return;
-        }
-
         try
         {
-            var full = Path.GetFullPath(keyPath);
-            if (new FileInfo(full).Length > 64 * 1024)
+            if (await ChooseKeyFileAsync() is not { } bytes)
             {
-                throw new InvalidDataException("That file is too large to be a recovery key.");
+                return;
             }
 
-            var bytes = await File.ReadAllBytesAsync(full);
             var (publicKey, keyId, _) = _services.RecoveryKeys.ReadPublicInfo(bytes);
             var html = RecoveryKeySheet.BuildHtml(bytes, keyId, DateTimeOffset.Now);
 
@@ -160,6 +152,67 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         {
             Status = $"The sheet could not be made: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// Splits the recovery key file into 3 part files, any 2 of which rebuild it. The key stays locked with its passphrase.
+    /// </summary>
+    [RelayCommand]
+    private async Task SplitKeyAsync()
+    {
+        if (_services is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (await ChooseKeyFileAsync() is not { } bytes)
+            {
+                return;
+            }
+
+            var (_, keyId, _) = _services.RecoveryKeys.ReadPublicInfo(bytes);
+            var folder = await _services.Dialogs.PickFolderAsync("Choose where to save the 3 key parts");
+            if (folder is null)
+            {
+                return;
+            }
+
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
+            var parts = KeySplitter.Split(bytes);
+            for (var i = 0; i < parts.Count; i++)
+            {
+                var path = Path.Combine(folder, $"MasterSafe-recovery-key-{stamp}-part-{i + 1}-of-{parts.Count}.msrkpart");
+                await using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+                await stream.WriteAsync(parts[i]);
+            }
+
+            Status = $"Saved 3 key parts for key {ShortId(keyId)}. Keep each part in a different place: any 2 of them, with the passphrase, rebuild the key. Move them out of this folder now.";
+            _services.Dialogs.ShowInFolder(folder);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
+        {
+            Status = $"The key could not be split: {ex.Message}";
+        }
+    }
+
+    // Asks for a recovery key file and reads it, refusing anything too large to be one. Null when nothing was chosen.
+    private async Task<byte[]?> ChooseKeyFileAsync()
+    {
+        var keyPath = await _services!.Dialogs.OpenFileAsync("Choose your recovery key file", "Recovery key files", "*.msrk");
+        if (keyPath is null)
+        {
+            return null;
+        }
+
+        var full = Path.GetFullPath(keyPath);
+        if (new FileInfo(full).Length > 64 * 1024)
+        {
+            throw new InvalidDataException("That file is too large to be a recovery key.");
+        }
+
+        return await File.ReadAllBytesAsync(full);
     }
 
     /// <summary>The fingerprint of the recovery key the open vault trusts; null until it has one.</summary>

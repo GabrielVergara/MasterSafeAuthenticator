@@ -361,6 +361,10 @@ public static class HelpContent
             survives a lost USB stick. The key on it is still locked with its passphrase, which is not printed;
             keep the two apart. To use it, choose Read a printed key... when you restore, and pick a photo or scan
             of each page. A code that cannot be read can be typed in from the text pages.
+
+            Split the recovery key... makes 3 part files: any 2 rebuild the key, and 1 alone tells nothing about
+            it. Keep them in different places, for example a USB stick, a family member and a safe. The key still
+            needs its passphrase. To use them, choose Add a key part... twice when you restore.
             """),
         new(
             "Unlock methods",

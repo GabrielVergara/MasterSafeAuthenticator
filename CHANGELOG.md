@@ -13,6 +13,10 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   4 QR codes and as text in short groups. The key stays locked with its passphrase, which is never printed. To restore,
   **Read a printed key...** on the "Forgot your master password?" panel reads photos or scans of the pages; a code that
   cannot be read can be typed in, and each piece has a check that says which piece has a typing mistake.
+- **Recovery key in 3 parts.** **Split the recovery key...** on the Recovery page saves 3 `.msrkpart` files: any 2
+  rebuild the key file, 1 alone tells nothing about it (Shamir's secret sharing, 2 of 3). The key still needs its
+  passphrase. **Add a key part...** on the "Forgot your master password?" panel takes them; a damaged part or parts of
+  different keys are named.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

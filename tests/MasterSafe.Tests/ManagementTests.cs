@@ -393,6 +393,46 @@ public sealed class ManagementTests : IDisposable
     }
 
     [Fact]
+    public async Task ForgotPassword_RestoresWithTwoOfTheThreeKeyParts()
+    {
+        if (!MLKem.IsSupported)
+        {
+            return;
+        }
+
+        await _vault.SaveContentsAsync(OldPassword, Sample);
+        var created = _services.RecoveryKeys.Create(KeyPassphrase);
+        var backupPath = await _services.RecoveryBackups.ExportContentsAsync(Sample, created.PublicKey, new LocalFolderBackupProvider(Path.Combine(_root, "backups")));
+        var folder = Path.Combine(_root, "parts");
+        Directory.CreateDirectory(folder);
+        var parts = KeySplitter.Split(created.FileBytes);
+        var files = new[] { 1, 3 }.Select(n => Path.Combine(folder, $"part-{n}.msrkpart")).ToList();
+        await File.WriteAllBytesAsync(files[0], parts[0]);
+        await File.WriteAllBytesAsync(files[1], parts[2]);
+
+        var shell = NewShell();
+        await Task.Delay(50);
+        var forgot = shell.Login.Forgot;
+        forgot.IsOpen = true;
+
+        _dialogs.OpenResult = files[0];
+        await forgot.AddKeyPartCommand.ExecuteAsync(null);
+        forgot.KeyPartsStatus.Should().StartWith("Add one more key part");
+        _dialogs.OpenResult = files[1];
+        await forgot.AddKeyPartCommand.ExecuteAsync(null);
+        forgot.KeyPartsStatus.Should().Be("The recovery key was rebuilt from its parts.");
+
+        forgot.BackupFilePath = backupPath;
+        forgot.KeyPassphrase = KeyPassphrase;
+        forgot.NewPassword = NewPassword;
+        forgot.ConfirmPassword = NewPassword;
+        await forgot.RestoreCommand.ExecuteAsync(null);
+
+        shell.IsUnlocked.Should().BeTrue();
+        (await _vault.OpenContentsAsync(NewPassword)).Passwords.Should().HaveCount(1);
+    }
+
+    [Fact]
     public async Task ForgotPassword_WrongKeyPassphrase_ChangesNothing()
     {
         if (!MLKem.IsSupported)
