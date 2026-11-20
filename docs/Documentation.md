@@ -177,7 +177,9 @@ Where every file is kept: [FileLocations.md](FileLocations.md).
 
 Continuous integration (`.github/workflows/build.yml`) builds and tests on Ubuntu and Windows for every push and pull
 request, and checks packages for known vulnerabilities. CodeQL, SBOM generation and release signing are separate
-workflows. Other targets (macOS, mobile) are not built yet; the core libraries are plain `net10.0` and the
+workflows. `patch-watch` runs daily on the published release: it opens an issue when a newer .NET 10 security release
+or a newly known package vulnerability means it should be rebuilt. Before building a release on your own computer, run
+`bash scripts/check-dotnet-patch.sh` to check the SDK carries the newest .NET 10 runtime. Other targets (macOS, mobile) are not built yet; the core libraries are plain `net10.0` and the
 Windows-only code is isolated in `MasterSafe.Platform`.
 
 ## 8. Manual hardware checks

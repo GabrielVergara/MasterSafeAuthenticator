@@ -185,10 +185,10 @@ This is how the project keeps itself patched. The detailed checklist is in [Owas
 
 | What | How | Cadence |
 | --- | --- | --- |
-| Known vulnerable packages | The build itself fails (NuGet audit, direct and transitive); CI runs `scripts/check-vulnerabilities.sh`; release builds run it first | Every build, plus weekly |
+| Known vulnerable packages | The build itself fails (NuGet audit, direct and transitive); CI runs `scripts/check-vulnerabilities.sh`; release builds run it first. `patch-watch` checks the packages of the published release every day and opens an issue when a new vulnerability is found | Every build, plus daily for the published release |
 | Updates | Dependabot for NuGet (one grouped pull request, lock files refreshed by a workflow) and GitHub Actions; security updates open pull requests as soon as an advisory exists | Weekly, and on advisory |
 | Code scanning | CodeQL, secret scanning (Gitleaks), dependency review on pull requests | Every push, weekly |
-| .NET runtime | Releases are self-contained, so each release bundles the newest patched .NET 10 runtime available at build time. After every Microsoft security release, a new build is published | Monthly, or sooner for a critical fix |
+| .NET runtime | Releases are self-contained, so each release bundles the .NET 10 runtime. The release workflow fails unless it is the newest one (`scripts/check-dotnet-patch.sh`), and `patch-watch` opens an issue the day Microsoft publishes a security release newer than the published build | Monthly, or sooner for a critical fix |
 | Response targets | Critical: fix or mitigation within 2 days. High: 7 days. Medium: 30 days. Low: next release | Best effort for a one-person project |
 | Transparency | CycloneDX SBOM attached to every release, advisories listed in [SBOM.md](SBOM.md) | Every release |
 | Review | OWASP ASVS self-assessment re-read before each minor release | Each minor release |
