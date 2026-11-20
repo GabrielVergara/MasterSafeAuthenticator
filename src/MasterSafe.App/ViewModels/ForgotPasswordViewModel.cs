@@ -74,6 +74,49 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
 
     private byte[] PaperKeyBytes() => PaperKey.Join(_paperPieces.Concat([PaperKeyText]));
 
+    /// <summary>Key part files added so far, by path, so the same file added twice counts once.</summary>
+    private readonly Dictionary<string, byte[]> _keyParts = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>What was added from key parts so far.</summary>
+    [ObservableProperty]
+    private string? _keyPartsStatus;
+
+    [RelayCommand]
+    private async Task AddKeyPartAsync()
+    {
+        if (_services is null)
+        {
+            return;
+        }
+
+        var path = await _services.Dialogs.OpenFileAsync("Choose a part of your recovery key", "Recovery key parts", "*.msrkpart");
+        if (path is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var full = Path.GetFullPath(path);
+            if (new FileInfo(full).Length > 256 * 1024)
+            {
+                throw new InvalidDataException("This is not a MasterSafe recovery key part.");
+            }
+
+            _keyParts[full] = await File.ReadAllBytesAsync(full);
+            KeySplitter.Combine(_keyParts.Values);
+            KeyPartsStatus = "The recovery key was rebuilt from its parts.";
+        }
+        catch (InvalidDataException ex)
+        {
+            KeyPartsStatus = Loc.T(ex.Message);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            KeyPartsStatus = $"That file could not be read: {ex.Message}";
+        }
+    }
+
     [RelayCommand]
     private async Task ReadPaperKeyAsync()
     {
@@ -132,6 +175,8 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
         ConfirmingNew = false;
         BackupFilePath = KeyFilePath = KeyPassphrase = NewPassword = ConfirmPassword = PaperKeyText = string.Empty;
         _paperPieces.Clear();
+        _keyParts.Clear();
+        KeyPartsStatus = null;
         ShowPaperKey = false;
         PaperKeyStatus = null;
         Status = null;
@@ -231,9 +276,9 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(BackupFilePath) || (string.IsNullOrWhiteSpace(KeyFilePath) && !HasPaperKey) || KeyPassphrase.Length == 0)
+        if (string.IsNullOrWhiteSpace(BackupFilePath) || (string.IsNullOrWhiteSpace(KeyFilePath) && !HasPaperKey && _keyParts.Count == 0) || KeyPassphrase.Length == 0)
         {
-            Status = "Choose the recovery backup and the recovery key file (or read a printed key), and enter the key's passphrase.";
+            Status = "Choose the recovery backup and the recovery key file (or read a printed key, or add its parts), and enter the key's passphrase.";
             return;
         }
 
@@ -254,7 +299,9 @@ public sealed partial class ForgotPasswordViewModel : ViewModelBase
         byte[]? privateKey = null;
         try
         {
-            var keyFile = string.IsNullOrWhiteSpace(KeyFilePath) ? PaperKeyBytes() : await File.ReadAllBytesAsync(BackupFileGuard(KeyFilePath));
+            var keyFile = !string.IsNullOrWhiteSpace(KeyFilePath) ? await File.ReadAllBytesAsync(BackupFileGuard(KeyFilePath))
+                : HasPaperKey ? PaperKeyBytes()
+                : KeySplitter.Combine(_keyParts.Values);
             privateKey = _services.RecoveryKeys.OpenPrivateKey(keyFile, KeyPassphrase);
 
             var folder = Path.GetDirectoryName(Path.GetFullPath(BackupFilePath))!;

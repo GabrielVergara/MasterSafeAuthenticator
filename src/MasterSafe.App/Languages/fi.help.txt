@@ -222,6 +222,8 @@ Hätäarkki on isolla tekstillä tulostettava sivu säilytettäväksi paperilla.
 
 Tulosta palautusavain... tulostaa itse palautusavaintiedoston paperille QR-koodeina ja tekstinä, joten se säilyy, vaikka USB-tikku katoaisi. Avain on edelleen lukittu salalauseellaan, jota ei tulosteta; säilytä ne erillään. Käytä sitä valitsemalla palautuksessa Lue tulostettu avain... ja valitsemalla valokuva tai skannaus jokaisesta sivusta. Koodin, jota ei voi lukea, voi kirjoittaa tekstisivuilta.
 
+Jaa palautusavain... tekee kolme osatiedostoa: mitkä tahansa kaksi muodostavat avaimen uudelleen, eikä yksi osa yksin kerro siitä mitään. Säilytä ne eri paikoissa, esimerkiksi USB-tikulla, perheenjäsenellä ja kassakaapissa. Avain tarvitsee edelleen salalauseensa. Käytä osia valitsemalla palautuksessa kahdesti Lisää avaimen osa...
+
 ### Unlock methods
 title: Avaustavat
 summary: Windows Hello ja suojausavaimet.
