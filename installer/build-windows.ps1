@@ -59,7 +59,8 @@ if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
 
 $installer = Join-Path $artifacts "MasterSafe-Authenticator-$Version-win-x64-setup.exe"
 $hash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
-"$hash  $(Split-Path $installer -Leaf)" | Set-Content -Path "$installer.sha256" -Encoding ascii
+# LF, not CRLF, so `sha256sum -c` on Linux and macOS reads the file too.
+[IO.File]::WriteAllText("$installer.sha256", "$hash  $(Split-Path $installer -Leaf)`n")
 Write-Host "SHA-256: $hash"
 
 # A standalone copy of the command-line tool, so anyone can verify the download without installing .NET.
@@ -72,7 +73,7 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish of the command-line tool failed
 $cli = Join-Path $artifacts "MasterSafe-Cli-$Version-win-x64.exe"
 Copy-Item (Join-Path $cliDir "MasterSafe.Cli.exe") $cli -Force
 $cliHash = (Get-FileHash $cli -Algorithm SHA256).Hash.ToLowerInvariant()
-"$cliHash  $(Split-Path $cli -Leaf)" | Set-Content -Path "$cli.sha256" -Encoding ascii
+[IO.File]::WriteAllText("$cli.sha256", "$cliHash  $(Split-Path $cli -Leaf)`n")
 
 if ($SigningKey) {
     foreach ($file in @($installer, $cli)) {
