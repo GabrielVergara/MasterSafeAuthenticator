@@ -73,6 +73,12 @@
     <control>pointing</control>
   </supports>
   <releases>
+    <release version="1.8.0" date="2026-11-22">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.8.0</url>
+      <description>
+        <p>Restore a daily copy from the app, the recovery key on paper or in 3 parts, help on the sign-in screen, closable folders, a check of the installed program files, and a sign-in pause that ignores clock changes.</p>
+      </description>
+    </release>
     <release version="1.7.2" date="2026-11-15">
       <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.7.2</url>
       <description>

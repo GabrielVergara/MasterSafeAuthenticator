@@ -15,6 +15,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - KeePass import step 1: KeePass XML and KeePassXC CSV or XML exports, with a preview screen.
 - 1.5.0: accessibility foundation (screen readers, text size, high contrast, keyboard, easier reading), Spanish and Finnish, first-run guide, Security check-up, Argon2id tuned to the computer, quick lock (tray and Ctrl+Alt+L), auto-hide of revealed passwords, daily vault snapshots, process hardening and a private data folder, offline release signing with build attestations, pinned GitHub Actions, NuGet lock files, fuzzing in CI.
 - 1.6.0: one running copy, security settings in the vault, network shares refused until confirmed, older vault copies noticed, version bound into the release signature; letter and website icons, hidden codes, your own order and groups, more health checks and expiry dates; notes, cards, identities, extra fields and a tag filter; full encrypted backups, KeePass export, imports from Bitwarden, 1Password, Proton Pass, Aegis, 2FAS and Google Authenticator; sync through your own folder or WebDAV server; a printed emergency sheet; a review pack in [SecurityReview.md](SecurityReview.md).
+- 1.8.0: restore a daily copy from the app, the recovery key on paper (QR codes and text) or in 3 parts (any 2 rebuild it), help and About on the sign-in screen, a manual on the website, closable folders, pages that use the window width, a check of the installed program files against a signed list, a sign-in pause and automatic lock timed by the tick count, and a sign-in counter that notices being turned back.
 - 1.7.2: a `.deb` package for Debian, Ubuntu and Mint (x64 and arm64), a processor check in the Linux installer; Flathub on hold.
 - 1.7.1: signatures checked on Linux without OpenSSL 3.5 (Mint 22, Ubuntu 24.04), install refused while running, a Linux uninstaller, winget and Flathub packages, licence 1.2.
 - 1.7.0: a new data key with every new master password, spare security keys, security events, a pause after many quick copies, KeePass databases opened directly, a countdown ring.
@@ -35,7 +36,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 The .NET version stays on .NET 10 (LTS, supported until November 2028). .NET 11 is a short-term release that ends at about
 the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10 patches are picked up by every build.
 
-## Next (1.8): recovery you can see, low risk
+## Done in 1.8: recovery you can see, low risk
 
 | Item | Why |
 | --- | --- |
@@ -45,7 +46,7 @@ the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10
 | Installed-file check (**done**) | The build writes `installed-files.txt` (SHA-256 of every program file) into the program folder and as a release file, so the signed release manifest covers it. At start-up the app compares its files with the list; when it may look for updates, it compares the list with the signed release |
 | Tamper-evident sign-in counter and monotonic clock (**done**) | The sign-in pause and the automatic lock are timed by the tick count, so changing the clock does not end a pause or delay the lock; the vault remembers the count of wrong passwords per computer, so a counter turned back in the settings file is reported |
 
-## Then (1.9): deep protection
+## Next (1.9): deep protection
 
 These change how a vault is opened or how secrets sit in memory, so they need migration, rollback and longer tests.
 

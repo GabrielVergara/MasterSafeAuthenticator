@@ -15,10 +15,10 @@
   Keep this file out of the repository.
 
 .EXAMPLE
-  .\installer\build-windows.ps1 -Version 1.7.2 -SigningKey C:\keys\masterSafe-release.key
+  .\installer\build-windows.ps1 -Version 1.8.0 -SigningKey C:\keys\masterSafe-release.key
 #>
 param(
-    [string]$Version = "1.7.2",
+    [string]$Version = "1.8.0",
     [string]$SigningKey = ""
 )
 

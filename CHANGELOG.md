@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.8.0 (2026-11-22)
 
 ### Added
 - **Restore a daily copy from the app.** The Vaults page lists the 7 daily copies of the main vault, each with a
