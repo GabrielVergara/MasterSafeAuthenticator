@@ -5,7 +5,7 @@
              xmlns:svc="clr-namespace:MasterSafe.App.Services"
              x:DataType="vm:HealthViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="16" MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,14,0">
+    <StackPanel Spacing="16" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch" Margin="0,0,14,0">
       <StackPanel Spacing="2">
         <TextBlock Text="Password health and security check-up" Classes="h1" />
         <TextBlock Classes="hint" TextWrapping="Wrap"

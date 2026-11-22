@@ -872,3 +872,8 @@ Choose the recovery backup and the recovery key file (or read a printed key, or 
 First you choose the recovery key file (.msrk) you saved in step 1. => Valitse ensin vaiheessa 1 tallentamasi palautusavaintiedosto (.msrk).
 Open the recovery key file you saved (.msrk) => Avaa tallentamasi palautusavaintiedosto (.msrk)
 There is no recovery key yet. Create one first in step 1 above. => Palautusavainta ei ole vielä. Luo se ensin yllä vaiheessa 1.
+Hide => Piilota
+Hide the folder list to give the passwords more room => Piilottaa kansioluettelon, jotta salasanoille jää enemmän tilaa
+How to sign in, restore a vault and use MasterSafe. Works without unlocking. => Miten kirjaudutaan, palautetaan holvi ja käytetään MasterSafea. Toimii avaamatta holvia.
+Show folders => Näytä kansiot
+Show or hide the subfolders => Näytä tai piilota alikansiot

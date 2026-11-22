@@ -84,6 +84,18 @@ public sealed partial class LoginViewModel : ViewModelBase
     [RelayCommand]
     private void Exit() => ExitRequested?.Invoke();
 
+    /// <summary>Opens the help without unlocking. Set by the main view model.</summary>
+    public Action? HelpRequested { get; set; }
+
+    /// <summary>Shows the About window. Set by the main view model.</summary>
+    public Action? AboutRequested { get; set; }
+
+    [RelayCommand]
+    private void ShowHelp() => HelpRequested?.Invoke();
+
+    [RelayCommand]
+    private void ShowAbout() => AboutRequested?.Invoke();
+
     /// <summary>Guidance shown while a new master password is typed.</summary>
     public string PasswordHint
     {

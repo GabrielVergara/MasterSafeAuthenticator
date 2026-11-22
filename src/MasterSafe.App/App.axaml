@@ -9,6 +9,8 @@
 
   <Application.Resources>
     <ResourceDictionary>
+      <!-- Pages and their cards grow with the window up to this width; wider lines get hard to read. -->
+      <x:Double x:Key="PageMaxWidth">1200</x:Double>
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF" />
@@ -106,6 +108,20 @@
     </Style>
     <Style Selector="Button.danger /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Quiet text buttons, like the website menu: no frame, a soft highlight under the pointer. -->
+    <Style Selector="Button.link">
+      <Setter Property="Padding" Value="12,6" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.link /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
     </Style>
 
     <!-- Sidebar navigation -->

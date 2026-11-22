@@ -56,6 +56,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             guide.Refresh();
         }
 
+        OnPropertyChanged(nameof(IsLockedHelp));
         ActiveSection = value switch
         {
             DashboardViewModel => "Dashboard",
@@ -113,7 +114,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void Exit() => ExitRequested?.Invoke();
 
-    /// <summary>Opens the help (shortcut F1) when the vault is unlocked.</summary>
+    /// <summary>
+    /// Opens the help (shortcut F1). While the vault is locked the help can be read from the sign-in screen too: it holds
+    /// no vault data, and F1 again goes back to sign in.
+    /// </summary>
     [RelayCommand]
     private void HelpShortcut()
     {
@@ -121,7 +125,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             CurrentPage = Help;
         }
+        else
+        {
+            CurrentPage = CurrentPage is LoginViewModel ? Help : Login;
+        }
     }
+
+    /// <summary>True while the help is read from the sign-in screen, so it shows a way back.</summary>
+    public bool IsLockedHelp => !IsUnlocked && CurrentPage is HelpViewModel;
+
+    /// <summary>Leaves the help opened from the sign-in screen.</summary>
+    [RelayCommand]
+    private void BackToSignIn()
+    {
+        if (!IsUnlocked)
+        {
+            CurrentPage = Login;
+        }
+    }
+
+    partial void OnIsUnlockedChanged(bool value) => OnPropertyChanged(nameof(IsLockedHelp));
 
     /// <summary>Makes the text and the window larger (Ctrl and plus).</summary>
     [RelayCommand]
@@ -256,6 +279,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Recovery.Clock = _clock;
         Recovery.SheetData = services is null ? null : () => SheetData(services);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
+        Login.HelpRequested = () => HelpShortcut();
+        Login.AboutRequested = () => ShowAbout();
         _currentPage = Login;
 
         if (_vault is null)

@@ -874,3 +874,8 @@ Choose the recovery backup and the recovery key file (or read a printed key, or 
 First you choose the recovery key file (.msrk) you saved in step 1. => Primero se elige el archivo de la clave de recuperación (.msrk) que guardó en el paso 1.
 Open the recovery key file you saved (.msrk) => Abra el archivo de la clave de recuperación que guardó (.msrk)
 There is no recovery key yet. Create one first in step 1 above. => Todavía no hay clave de recuperación. Cree una primero en el paso 1, más arriba.
+Hide => Ocultar
+Hide the folder list to give the passwords more room => Oculta la lista de carpetas para dar más espacio a las contraseñas
+How to sign in, restore a vault and use MasterSafe. Works without unlocking. => Cómo entrar, restaurar una bóveda y usar MasterSafe. Funciona sin desbloquear.
+Show folders => Mostrar carpetas
+Show or hide the subfolders => Mostrar u ocultar las subcarpetas

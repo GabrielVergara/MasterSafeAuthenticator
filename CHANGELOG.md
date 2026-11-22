@@ -19,6 +19,14 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   different keys are named.
 - Printing or splitting the recovery key first asks to open the saved `.msrk` file; the picker now says so and starts
   in the folder where the key was saved.
+- **Help on the sign-in screen.** **Help (F1)** at the bottom left and **About** at the bottom right; F1 opens the help
+  without unlocking (it holds no vault data) and F1 again, or **Back to sign in**, returns.
+- **Folders can be closed.** An arrow in front of a folder with subfolders hides or shows them, and **Hide** / **Show folders**
+  gives the passwords the whole width.
+- **Pages use the window width.** Cards grow with the window up to a readable width (1200), instead of stopping at a
+  fixed narrow column.
+- "Forgot your master password?": the **Add a key part...** button wraps instead of being cut off, and a message about
+  restoring shows under **Restore my data**, where it is seen.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

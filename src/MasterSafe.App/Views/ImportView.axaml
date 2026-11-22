@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:MasterSafe.App.ViewModels"
              x:Class="MasterSafe.App.Views.ImportView"
              x:DataType="vm:ImportViewModel">
-  <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
+  <StackPanel Spacing="14" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch">
     <StackPanel Spacing="2">
       <TextBlock Text="Import" Classes="h1" />
       <TextBlock Classes="hint" Text="Add authenticator accounts from a link or a QR code image, or move your passwords over from another app." />
