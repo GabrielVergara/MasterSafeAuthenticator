@@ -58,6 +58,7 @@ public sealed partial class AboutViewModel : ViewModelBase
     public IReadOnlyList<AboutLink> Links { get; } =
     [
         new("Article", "Why MasterSafe exists and how it works, on the author's site", AppInfo.ArticleUrl),
+        new("Manual", "How to use every part of the app, with pictures", AppInfo.ManualUrl(Loc.Current)),
         new("Website", "Gabriel Vergara Ezcurdia", AppInfo.WebsiteUrl),
         new("Source code", "The project on GitHub", AppInfo.ProjectUrl),
         new("Releases", "Downloads, release notes and signatures", AppInfo.ReleasesUrl),
@@ -122,6 +123,15 @@ public sealed partial class AboutViewModel : ViewModelBase
         if (IsAllowedLink(url))
         {
             UrlOpener(url);
+        }
+    }
+
+    /// <summary>Opens a project or author address in the system browser; anything else is ignored.</summary>
+    public static void OpenAllowed(string url)
+    {
+        if (IsAllowedLink(url))
+        {
+            StartBrowser(url);
         }
     }
 

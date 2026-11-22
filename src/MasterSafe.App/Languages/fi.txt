@@ -877,3 +877,6 @@ Hide the folder list to give the passwords more room => Piilottaa kansioluettelo
 How to sign in, restore a vault and use MasterSafe. Works without unlocking. => Miten kirjaudutaan, palautetaan holvi ja käytetään MasterSafea. Toimii avaamatta holvia.
 Show folders => Näytä kansiot
 Show or hide the subfolders => Näytä tai piilota alikansiot
+Manual => Käyttöohje
+How to use every part of the app, with pictures => Miten sovelluksen eri osia käytetään, kuvien kanssa
+Open the manual with pictures => Avaa kuvitettu käyttöohje

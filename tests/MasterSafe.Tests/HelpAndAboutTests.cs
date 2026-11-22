@@ -91,6 +91,22 @@ public class HelpAndAboutTests
         about.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("en", "https://www.gabriel-vergara.com/mastersafe-manual/")]
+    [InlineData("es", "https://www.gabriel-vergara.com/es/mastersafe-manual/")]
+    [InlineData("fi", "https://www.gabriel-vergara.com/fi/mastersafe-manual/")]
+    [InlineData("xx", "https://www.gabriel-vergara.com/mastersafe-manual/")]
+    public void Manual_OpensInTheLanguageOfTheApp_FromHelp(string language, string expected)
+    {
+        AppInfo.ManualUrl(language).Should().Be(expected);
+        AboutViewModel.IsAllowedLink(expected).Should().BeTrue();
+
+        var opened = new List<string>();
+        var help = new HelpViewModel { UrlOpener = opened.Add };
+        help.OpenManualCommand.Execute(null);
+        opened.Should().ContainSingle().Which.Should().EndWith("/mastersafe-manual/");
+    }
+
     [Fact]
     public void TrayDefaultMenu_IncludesAbout()
     {

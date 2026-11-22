@@ -879,3 +879,6 @@ Hide the folder list to give the passwords more room => Oculta la lista de carpe
 How to sign in, restore a vault and use MasterSafe. Works without unlocking. => Cómo entrar, restaurar una bóveda y usar MasterSafe. Funciona sin desbloquear.
 Show folders => Mostrar carpetas
 Show or hide the subfolders => Mostrar u ocultar las subcarpetas
+Manual => Manual
+How to use every part of the app, with pictures => Cómo usar cada parte de la app, con imágenes
+Open the manual with pictures => Abrir el manual con imágenes
