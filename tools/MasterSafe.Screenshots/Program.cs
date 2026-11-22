@@ -16,8 +16,8 @@ using MasterSafe.Crypto;
 // The real app blocks screen capture, so the store screenshots are drawn here instead: the real windows and pages,
 // rendered by Skia without a screen, from a demo vault that exists only in a temporary folder. The user's vault is
 // never opened.
-//   dotnet run --project tools/MasterSafe.Screenshots -- <output folder> [--scene store|tour|snapshots] [--data-folder <new folder>]
-// "store" draws the store screenshots. "tour" draws the pages of the getting-started article. "snapshots" draws the pages
+//   dotnet run --project tools/MasterSafe.Screenshots -- <output folder> [--scene store|tour|snapshots|manual] [--data-folder <new folder>]
+// "manual" draws the pages of the user manual. "store" draws the store screenshots. "tour" draws the pages of the getting-started article. "snapshots" draws the pages
 // of the snapshots article and also does the restore described there with real file copies. --data-folder shows that path on the Vaults page (for example a Linux home
 // folder in a container); it must not exist yet, because the tool deletes it at the end.
 string? outputArgument = null, dataFolderArgument = null;
@@ -38,7 +38,7 @@ for (var i = 0; i < args.Length; i++)
     }
 }
 
-if (scene is not ("store" or "tour" or "snapshots") || (dataFolderArgument is not null && Directory.Exists(dataFolderArgument)))
+if (scene is not ("store" or "tour" or "snapshots" or "manual") || (dataFolderArgument is not null && Directory.Exists(dataFolderArgument)))
 {
     Console.Error.WriteLine("Unknown scene, or the data folder already exists (it is deleted at the end, so it must be new).");
     return 1;
@@ -86,6 +86,12 @@ static async Task DrawAsync(string output, string root, bool rootIsDataFolder, s
         return;
     }
 
+    if (scene == "manual")
+    {
+        await ManualAsync(output, root, rootIsDataFolder);
+        return;
+    }
+
     var paths = new AppPaths(rootIsDataFolder ? root : Path.Combine(root, "data"));
     Directory.CreateDirectory(paths.DataFolder);
     var settings = new SettingsStore(paths.SettingsPath);
@@ -125,7 +131,79 @@ static async Task DrawAsync(string output, string root, bool rootIsDataFolder, s
     await RestoreAsync(output, paths, services, vault, password);
 }
 
-static (AppPaths Paths, AppServices Services, VaultService Vault) Build(string dataFolder)
+// The pages of the user manual on the website: recovery, restoring, daily copies, folders and the help.
+static async Task ManualAsync(string output, string root, bool rootIsDataFolder)
+{
+    // Use --data-folder so the Vaults page shows a neutral path instead of the temporary folder of this computer.
+    var dataFolder = rootIsDataFolder ? root : Path.Combine(root, "data");
+    var dialogs = new SaveIntoFolder(Path.Combine(dataFolder, "saved"));
+    var main = Build(dataFolder, dialogs);
+    const string password = "demo master password for screenshots";
+    var contents = Demo.Contents();
+    contents = contents with
+    {
+        Passwords =
+        [
+            .. contents.Passwords,
+            new PasswordEntry { Title = "Team wiki", UserName = "alex", Password = PasswordGenerator.Generate(18), Folder = "Work/Projects" },
+            new PasswordEntry { Title = "Travel booking", UserName = "alex@example.org", Password = PasswordGenerator.Generate(18), Folder = "Work/Travel" },
+            new PasswordEntry { Title = "Old intranet", UserName = "alex", Password = PasswordGenerator.Generate(18), Folder = "Work/Archive/2024" },
+        ],
+    };
+    await main.Vault.CreateAsync(password);
+    await main.Vault.SaveContentsAsync(password, contents);
+
+    // Signed out: the sign-in screen, and the help opened from it with F1.
+    var locked = new MainWindowViewModel(main.Vault, services: main.Services);
+    locked.Login.IsCreateMode = false;
+    var lockedWindow = new MainWindow { DataContext = locked, Width = 1280, Height = 800 };
+    lockedWindow.Show();
+    await Shoot(lockedWindow, locked, locked.Login, Path.Combine(output, "manual-signin.png"));
+    locked.Help.SelectedTopic = locked.Help.Topics.FirstOrDefault(t => t.Title.Contains("forgot", StringComparison.OrdinalIgnoreCase)) ?? locked.Help.SelectedTopic;
+    await Shoot(lockedWindow, locked, locked.Help, Path.Combine(output, "manual-help.png"));
+
+    // "Forgot your master password?" with the backup chosen and the key rebuilt from two parts.
+    locked.Login.Forgot.IsOpen = true;
+    locked.Login.Forgot.ShowRestore = true;
+    locked.Login.Forgot.BackupFilePath = @"E:\MasterSafe\recovery-20261122-101500.sauth";
+    locked.Login.Forgot.KeyPartsStatus = "The recovery key was rebuilt from its parts.";
+    locked.Login.Forgot.KeyPassphrase = PasswordGenerator.Generate(28);
+    locked.Login.Forgot.NewPassword = locked.Login.Forgot.ConfirmPassword = PasswordGenerator.Generate(20);
+    lockedWindow.Height = 1180;
+    await Shoot(lockedWindow, locked, locked.Login, Path.Combine(output, "manual-restore.png"));
+    lockedWindow.Close();
+
+    // Unlocked: a recovery key is set up the way a user does it, so the page shows what comes after.
+    var shell = new MainWindowViewModel(main.Vault, services: main.Services);
+    await shell.UnlockVaultAsync(password);
+    shell.Settings.ShowReminders = false;
+    shell.RefreshNotices();
+    shell.Recovery.Passphrase = shell.Recovery.ConfirmPassphrase = PasswordGenerator.Generate(28);
+    await shell.Recovery.CreateKeyCommand.ExecuteAsync(null);
+    if (!shell.Recovery.HasKey)
+    {
+        throw new InvalidOperationException("The recovery key was not set up: " + shell.Recovery.Status);
+    }
+
+    shell.Recovery.Status = null;
+    var window = new MainWindow { DataContext = shell, Width = 1280, Height = 1220 };
+    window.Show();
+    await Shoot(window, shell, shell.Recovery, Path.Combine(output, "manual-recovery.png"));
+
+    shell.ShowVaultsCommand.Execute(null);
+    window.Height = 1000;
+    await Shoot(window, shell, shell.Vaults, Path.Combine(output, "manual-daily-copies.png"));
+
+    window.Height = 800;
+    shell.Passwords.ToggleFolderCommand.Execute(shell.Passwords.FolderNodes.Single(n => n.Path == "Work/Archive"));
+    await Shoot(window, shell, shell.Passwords, Path.Combine(output, "manual-folders.png"));
+
+    shell.ShowHealthCommand.Execute(null);
+    await Shoot(window, shell, shell.Health, Path.Combine(output, "manual-health.png"));
+    window.Close();
+}
+
+static (AppPaths Paths, AppServices Services, VaultService Vault) Build(string dataFolder, IFileDialogs? dialogs = null)
 {
     var paths = new AppPaths(dataFolder);
     Directory.CreateDirectory(paths.DataFolder);
@@ -134,7 +212,7 @@ static (AppPaths Paths, AppServices Services, VaultService Vault) Build(string d
     var fast = new Argon2Parameters { MemorySizeKib = 8192, Iterations = 1, DegreeOfParallelism = 1, KeyLength = 32 };
     var hybrid = MasterSafe.PostQuantum.PostQuantumProviderFactory.CreateHybrid();
     var services = new AppServices(
-        paths, new VaultCatalog(paths, repository, settings), settings, new NoDialogs(),
+        paths, new VaultCatalog(paths, repository, settings), settings, dialogs ?? new NoDialogs(),
         new RecoveryKeyService(new AesGcmEncryptionService(), new MasterPasswordService(), hybrid, fast),
         new RecipientBackupService(new AesGcmEncryptionService(), hybrid));
     return (paths, services, new VaultService(repository, new AesGcmEncryptionService(), new MasterPasswordService(), fast));
@@ -278,6 +356,24 @@ internal static class Demo
             new PasswordEntry { Title = "Example Shop", UserName = "alex@example.com", Password = Phrase(5), Url = "https://shop.example.com" },
         ],
     };
+}
+
+// Saves go into a folder of the run, which is deleted at the end; nothing is opened.
+internal sealed class SaveIntoFolder(string folder) : IFileDialogs
+{
+    public Task<string?> OpenFileAsync(string title, string description, params string[] patterns) => Task.FromResult<string?>(null);
+
+    public Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null)
+    {
+        Directory.CreateDirectory(folder);
+        return Task.FromResult<string?>(Path.Combine(folder, $"{suggestedName}.{extension}"));
+    }
+
+    public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(folder);
+
+    public void ShowInFolder(string path)
+    {
+    }
 }
 
 internal sealed class NoDialogs : IFileDialogs

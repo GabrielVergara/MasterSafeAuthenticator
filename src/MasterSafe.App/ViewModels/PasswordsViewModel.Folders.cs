@@ -18,7 +18,7 @@ public sealed record FolderNode(string? Path, string Name, int Depth, int Count,
     bool HasChildren = false, bool IsExpanded = true)
 {
     /// <summary>The arrow in front of a folder with subfolders: down when they are shown, right when they are hidden.</summary>
-    public string Arrow => HasChildren ? (IsExpanded ? "▾" : "▸") : string.Empty;
+    public Geometry Arrow => Geometry.Parse(IsExpanded ? "M0,2 L10,2 L5,8 Z" : "M2,0 L8,5 L2,10 Z");
 
     /// <summary>Text shown in the list.</summary>
     public string Display => $"{Name} ({Count})";
