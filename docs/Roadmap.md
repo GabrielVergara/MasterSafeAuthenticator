@@ -43,7 +43,7 @@ the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10
 | Recovery key on paper (**done**) | The recovery key printed as QR codes and text, read back from photos, so it does not depend on a USB stick |
 | Recovery key in 3 parts (**done**) | Any 2 of 3 part files rebuild the key, which still needs its passphrase, so one lost or stolen part is not enough |
 | Installed-file check | A signed list of the installed files, verified at start-up, so replaced files are noticed |
-| Tamper-evident sign-in counter and monotonic clock | The sign-in pause and the idle timer use the wall clock today |
+| Tamper-evident sign-in counter and monotonic clock (**done**) | The sign-in pause and the automatic lock are timed by the tick count, so changing the clock does not end a pause or delay the lock; the vault remembers the count of wrong passwords per computer, so a counter turned back in the settings file is reported |
 
 ## Then (1.9): deep protection
 

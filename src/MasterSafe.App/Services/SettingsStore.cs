@@ -28,6 +28,12 @@ public sealed class AppSettings
     /// <summary>Wrong master passwords in a row since the last correct one.</summary>
     public int UnlockFailures { get; set; }
 
+    /// <summary>Every wrong master password so far; it only goes up. The vault keeps the last value it saw.</summary>
+    public long UnlockFailuresTotal { get; set; }
+
+    /// <summary>A random name for this installation, so a synced vault keeps one sign-in count per computer.</summary>
+    public string? InstallId { get; set; }
+
     /// <summary>Until when sign-in with the master password is paused (ISO 8601, UTC), or empty.</summary>
     public string? UnlockBlockedUntilUtc { get; set; }
 

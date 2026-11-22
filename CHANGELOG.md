@@ -27,6 +27,11 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   fixed narrow column.
 - "Forgot your master password?": the **Add a key part...** button wraps instead of being cut off, and a message about
   restoring shows under **Restore my data**, where it is seen.
+- **Sign-in pause and automatic lock ignore clock changes.** Both are timed by the system tick count, so moving the clock
+  forward does not end a pause after wrong passwords and moving it back does not keep the vault open longer.
+- **A turned-back sign-in counter is noticed.** The vault keeps, per computer, how many wrong master passwords there were
+  when it was last opened. If the settings file shows fewer, the next sign-in says so and the security log records it;
+  wrong passwords are counted from that record, so resetting the visible counter no longer hides them.
 - **Buttons follow the theme.** Secondary buttons have the accent border and text (green) instead of plain grey, in
   light and dark; high contrast is unchanged.
 

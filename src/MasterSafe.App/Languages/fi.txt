@@ -880,3 +880,5 @@ Show or hide the subfolders => Näytä tai piilota alikansiot
 Manual => Käyttöohje
 How to use every part of the app, with pictures => Miten sovelluksen eri osia käytetään, kuvien kanssa
 Open the manual with pictures => Avaa kuvitettu käyttöohje
+The count of wrong master passwords on this computer was turned back outside MasterSafe. If you did not do that, someone may have tried to guess your password: change it. => Tämän tietokoneen väärien pääsalasanojen määrää pienennettiin MasterSafen ulkopuolella. Jos et tehnyt sitä itse, joku on ehkä yrittänyt arvata salasanasi: vaihda se.
+The count of wrong master passwords was turned back outside MasterSafe => Väärien pääsalasanojen määrää pienennettiin MasterSafen ulkopuolella

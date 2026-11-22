@@ -882,3 +882,5 @@ Show or hide the subfolders => Mostrar u ocultar las subcarpetas
 Manual => Manual
 How to use every part of the app, with pictures => Cómo usar cada parte de la app, con imágenes
 Open the manual with pictures => Abrir el manual con imágenes
+The count of wrong master passwords on this computer was turned back outside MasterSafe. If you did not do that, someone may have tried to guess your password: change it. => El recuento de contraseñas maestras incorrectas de este ordenador se rebajó fuera de MasterSafe. Si no lo hizo usted, alguien puede haber intentado adivinar su contraseña: cámbiela.
+The count of wrong master passwords was turned back outside MasterSafe => El recuento de contraseñas maestras incorrectas se rebajó fuera de MasterSafe

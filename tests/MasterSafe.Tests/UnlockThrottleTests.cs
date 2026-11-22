@@ -6,6 +6,7 @@
 using FluentAssertions;
 using MasterSafe.App.Services;
 using MasterSafe.App.ViewModels;
+using MasterSafe.Backup;
 using MasterSafe.Crypto;
 using Xunit;
 
@@ -252,6 +253,79 @@ public sealed class UnlockThrottleTests : IDisposable
     }
 
     [Fact]
+    public void ThePause_IsTimedByTheTickCount_SoMovingTheClockDoesNotEndIt()
+    {
+        long ticks = 0;
+        var throttle = new UnlockThrottle(Clock, null, new ElapsedClock(() => ticks));
+        Fail(throttle, 5);
+
+        _now += TimeSpan.FromHours(3);
+        throttle.IsBlocked.Should().BeTrue("the clock was moved forward, but no time passed");
+
+        ticks += 31_000;
+        throttle.IsBlocked.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ACounterTurnedBackInTheSettings_IsNoticedAtTheNextSignIn()
+    {
+        var paths = new AppPaths(Path.Combine(_folder, "data"));
+        Directory.CreateDirectory(paths.DataFolder);
+        var settings = new SettingsStore(paths.SettingsPath);
+        var repository = new SwitchableVaultRepository(paths.DefaultVaultPath);
+        var hybrid = MasterSafe.PostQuantum.PostQuantumProviderFactory.CreateHybrid();
+        var services = new AppServices(
+            paths, new VaultCatalog(paths, repository, settings), settings, new NoDialogs(),
+            new RecoveryKeyService(new AesGcmEncryptionService(), new MasterPasswordService(), hybrid, FastKdf),
+            new RecipientBackupService(new AesGcmEncryptionService(), hybrid));
+        var vault = new VaultService(repository, new AesGcmEncryptionService(), new MasterPasswordService(), FastKdf);
+        await vault.CreateAsync(Password);
+
+        // Three wrong passwords, then a correct one: the vault remembers 3 for this computer.
+        var first = new MainWindowViewModel(vault, clock: Clock, services: services);
+        for (var i = 0; i < 3; i++)
+        {
+            await first.UnlockVaultAsync("wrong password");
+        }
+
+        await first.UnlockVaultAsync(Password);
+        first.Dashboard.StatusMessage.Should().Contain("3 wrong passwords");
+        first.LockNow();
+
+        // Someone guesses twice more and then puts both counters back to 0 in the settings file.
+        var guesser = new MainWindowViewModel(vault, clock: Clock, services: services);
+        await guesser.UnlockVaultAsync("guess 1");
+        await guesser.UnlockVaultAsync("guess 2");
+        var edited = settings.Load();
+        edited.UnlockFailures = 0;
+        edited.UnlockFailuresTotal = 0;
+        settings.Save(edited);
+
+        var owner = new MainWindowViewModel(vault, clock: Clock, services: services);
+        await owner.UnlockVaultAsync(Password);
+
+        owner.IsUnlocked.Should().BeTrue();
+        owner.Dashboard.StatusMessage.Should().Contain("turned back outside MasterSafe");
+        owner.SecurityLog.Snapshot().Should().Contain(e => e.Kind == SecurityEventsViewModel.SignInCounterChanged);
+    }
+
+    [Fact]
+    public async Task ACounterOnlyResetInTheSettings_StillReportsTheGuesses()
+    {
+        var (shell, _) = await ShellAsync();
+        await shell.UnlockVaultAsync(Password);
+        shell.LockNow();
+
+        for (var i = 0; i < 2; i++)
+        {
+            await shell.UnlockVaultAsync("wrong password");
+        }
+
+        await shell.UnlockVaultAsync(Password);
+        shell.Dashboard.StatusMessage.Should().Contain("2 wrong passwords");
+    }
+
+    [Fact]
     public async Task ASuccessfulUnlockWithoutMistakes_SaysNothing()
     {
         var (shell, _) = await ShellAsync();
@@ -276,5 +350,18 @@ public sealed class UnlockThrottleTests : IDisposable
 
         shell.IsUnlocked.Should().BeFalse();
         shell.Passwords.Snapshot().Should().BeEmpty();
+    }
+}
+
+internal sealed class NoDialogs : IFileDialogs
+{
+    public Task<string?> OpenFileAsync(string title, string description, params string[] patterns) => Task.FromResult<string?>(null);
+
+    public Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null) => Task.FromResult<string?>(null);
+
+    public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);
+
+    public void ShowInFolder(string path)
+    {
     }
 }
