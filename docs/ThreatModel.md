@@ -33,6 +33,9 @@ flowchart TD
 | Walks up to a computer you left unlocked | Limited | The vault locks after inactivity, when Windows locks or sleeps, and optionally on minimize |
 | Records the screen, shares the screen or takes screenshots | No (Windows) | The window is kept out of captures while the setting is on |
 | Reads the Windows clipboard history or cloud clipboard | No | Secret copies carry the markers that exclude them; they are cleared after the chosen time |
+| Moves the computer's clock | Cannot end a sign-in pause or delay the automatic lock | Both are timed by the system tick count; the automatic lock also counts by the clock, whichever is longer |
+| Lowers the wrong-password counter in `settings.json` | It is noticed at the next sign-in | The vault keeps, per computer, the total it last saw. Putting back an exact earlier copy of the file is not noticed |
+| Replaces or plants a program file (for example a `.dll` next to the program) | It is noticed at start-up | The program folder holds a list of its files with SHA-256; when MasterSafe may go online the list is compared with the signed release. Malware that can rewrite the program can also change the code that checks |
 | Serves a fake update | No | Updates are never installed by the app; a download is checked against the built-in ML-DSA-65 key and deleted if it fails |
 | Reads old passwords from the recycle bin or history | Only with the unlocked vault | They are inside the encrypted vault; they are removed for good when you empty the bin or delete the entry |
 | Watches the network | No | Only ciphertext leaves the computer, and WebDAV needs https. A website icon request shows that this computer asked that site |
@@ -52,6 +55,8 @@ flowchart TD
 | --- | --- |
 | Someone finds your recovery key file | They also need its passphrase. The key file holds the private key encrypted with Argon2id and AES-256-GCM. Keep file and passphrase apart |
 | Someone finds a recovery backup | It is encrypted to the recovery public key (hybrid, post-quantum). Without the private key it is unreadable |
+| Someone photographs the printed recovery key | Same as finding the key file: they also need the passphrase, which is not printed |
+| Someone finds one of the 3 key parts | Nothing: one part tells nothing about the key. Two parts rebuild the key file, which still needs its passphrase |
 | Someone gets both the key file and its passphrase | They can read every recovery backup you made. Treat them like the master password |
 | An archived old vault | Still encrypted under its old password. It stays on disk until you delete it, so an old password that leaked still protects only that old data |
 | `settings.json` | Holds no secrets: theme, paths and the recovery **public** key. It is not protected, so nothing in it is trusted once a vault is open |
@@ -79,5 +84,4 @@ locks, and clears copied passwords from the clipboard after 30 seconds, 1 or 2 m
 
 - Linux has no hardware unlock method yet (Windows Hello and the FIDO2 integration use Windows APIs); the master
   password works everywhere. A Linux FIDO2 backend (libfido2) is planned.
-- Only one security key can be set up per vault. Adding a second key replaces the first.
 - A security key must support the CTAP2 `hmac-secret` extension. Older U2F-only keys do not.

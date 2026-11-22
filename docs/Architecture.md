@@ -42,13 +42,13 @@ flowchart LR
 | --- | --- | --- |
 | **MasterSafe.Core** | Pure OTP and account domain logic, no dependencies | net10.0 |
 | **MasterSafe.Crypto** | Argon2id, AES-256-GCM, vault format 3 and key slots, `ISecretProvider`, atomic repository, bounded GZip | net10.0 |
-| **MasterSafe.PostQuantum** | ML-KEM-768, hybrid ECDH-P384+ML-KEM-768, ML-DSA-65 signer | net10.0 |
-| **MasterSafe.Backup** | Password and recovery-key `.sauth` backups; local folder and WebDAV (https only) providers | net10.0 |
-| **MasterSafe.QR** | QR decode and generation | net10.0 |
+| **MasterSafe.PostQuantum** | ML-KEM-768, hybrid ECDH-P384+ML-KEM-768, ML-DSA-65 signer and verifier, the signed release manifest, the list of installed files (`InstalledFiles`) | net10.0 |
+| **MasterSafe.Backup** | Password and recovery-key `.sauth` backups; local folder and WebDAV (https only) providers; sync; KeePass export; the recovery key on paper (`PaperKey`) and in 3 parts (`KeySplitter`, Shamir 2 of 3) | net10.0 |
+| **MasterSafe.QR** | QR decode (several codes in one photo) and generation, including large print codes for the paper key | net10.0 |
 | **MasterSafe.Data** | EF Core SQLite persistence; not used by the app at present | net10.0 |
 | **MasterSafe.Platform** | Tray abstraction; `WindowsHelloProvider`, `Fido2HmacSecretProvider` (Windows WebAuthn) and `PlatformServices` | net10.0 (Linux) or net10.0-windows10.0.19041.0 (Windows) |
 | **MasterSafe.App** | Avalonia desktop app: sidebar, screens, splash, view models | same as Platform |
-| **MasterSafe.Cli** | Demo and release signing commands | net10.0 |
+| **MasterSafe.Cli** | Release tools: `verify-release`, `verify`, `fingerprint`, `check-installed`; for maintainers `keygen`, `sign`, `manifest`, `installed-files` | net10.0 |
 | **MasterSafe.Tests** | xUnit tests | same as Platform |
 
 The Windows target framework is selected by the `MasterSafeWindowsTarget` MSBuild property in
@@ -76,8 +76,37 @@ any host with `-p:MasterSafeTargetOs=linux`. Windows-only code sits behind `#if 
 | `IFileDialogs`, `WindowFileDialogs` | File and folder pickers behind an interface |
 | `AppServices` | The bundle passed to the view models; absent in design and test mode |
 | `RecoveryKeyService`, `RecipientBackupService` (Backup) | Recovery key files and recovery backups |
+| `PaperKey`, `RecoveryKeySheet` | The recovery key as QR codes and text pieces, and the printable page that holds them |
+| `KeySplitter` (Backup) | Splits the passphrase-locked key file into 3 parts, any 2 of which rebuild it |
+| `UnlockThrottle`, `ElapsedClock` | The pause after wrong master passwords, timed by the tick count, and a total that only goes up |
+| `CopyGuard` | Pauses copying after many secrets were copied in a short time |
+| `UpdateChecker`, `ReleaseKey` | The signed update check, and the comparison of the installed-files list with the signed release |
+| `ProgramFiles`, `InstalledFiles` (PostQuantum) | The start-up check of the program's own files |
 
-View models added for these: `VaultsViewModel`, `RecoveryViewModel`, `ForgotPasswordViewModel`, `SyncViewModel`.
+View models added for these: `VaultsViewModel` (with the daily copies), `RecoveryViewModel`, `ForgotPasswordViewModel` (key file, paper key or key parts), `SyncViewModel`, `SecurityEventsViewModel`, `UpdatesViewModel`.
+
+## Unlocking, step by step
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant L as Sign-in screen
+    participant T as UnlockThrottle
+    participant V as VaultService
+    participant S as Settings and vault
+    U->>L: master password
+    L->>T: paused?
+    T-->>L: no
+    L->>V: derive key (Argon2id) and open slot
+    alt wrong password
+        V-->>L: InvalidPassword
+        L->>T: record failure (counter and total)
+    else right password
+        V-->>L: data key, contents
+        L->>S: compare total with the vault's record for this computer
+        L-->>U: codes page, with a notice about wrong passwords or a turned-back counter
+    end
+```
 
 ## Principles
 
@@ -92,6 +121,6 @@ View models added for these: `VaultsViewModel`, `RecoveryViewModel`, `ForgotPass
 
 ## Packaging
 
-`installer/build-windows.ps1` publishes a self-contained win-x64 build and runs Inno Setup.
+`installer/build-windows.ps1` publishes a self-contained win-x64 build, writes `installed-files.txt` and runs Inno Setup.
 `installer/linux/build-linux.sh` publishes self-contained linux-x64 or linux-arm64 and creates a tar.gz with an
-install script. `.github/workflows/release.yml` builds both on a version tag. See [README.md](../README.md).
+install script, with `installed-files.txt` in the program folder; `installer/linux/build-deb.sh` turns that archive into a `.deb`. `.github/workflows/release.yml` builds everything on a version tag, and `scripts/sign-release.ps1` signs it offline. See [README.md](../README.md) and [ReleaseProcess.md](ReleaseProcess.md).

@@ -1,7 +1,8 @@
 # How MasterSafe compares
 
 This page helps you decide whether MasterSafe Authenticator suits you. It shows where other apps are ahead as well as where
-MasterSafe is. Checked on 2026-11-02 from each project's own pages where possible. Products change, so check the sources
+MasterSafe is. Checked on 2026-11-02 from each project's own pages where possible; the MasterSafe column was updated for
+version 1.8 on 2026-11-22. Products change, so check the sources
 below before you rely on a detail. If something here is wrong, please [open an issue](https://github.com/GabrielVergara/MasterSafeAuthenticator/issues).
 
 **In short:** MasterSafe keeps passwords and authenticator codes together in one encrypted file on your own computer, with
@@ -28,9 +29,11 @@ In the tables, **?** means we could not confirm it from the sources we used. It 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Independent security audit | **None yet** | Yes: 2023 audit, French ANSSI security visa in 2025 | Yes: several every year | Yes: lists a 2020 review, and ongoing penetration tests | Yes: Cure53, 2023 | Yes: Cure53, sponsored by CERN | None found |
 | Post-quantum protection | Recovery backups (ECDH-P384 with ML-KEM-768) and release signatures (ML-DSA-65). The vault itself uses AES-256 | ? | Was still evaluating, on an older page | Web app connections (2026), passkeys being added | None found for Pass | ? | ? |
-| Hardware key | Unlocks the vault with a FIDO2 key (Windows only) | YubiKey or OnlyKey strengthens the database key | Protects the account login | Protects the account login | Protects the account login | ? | None found |
+| Hardware key | Unlocks the vault with a FIDO2 key, with spare keys (Windows only) | YubiKey or OnlyKey strengthens the database key | Protects the account login | Protects the account login | Protects the account login | ? | None found |
 | Fingerprint or face | Windows Hello | Yes, Windows and macOS | Yes | Yes | Yes, Windows on paid plans | Yes, phone lock screen | Yes |
 | Emergency access for someone you trust | No, recovery key instead | ? | Yes, on Premium | ? | Yes, on Plus | Not applicable | Not applicable |
+| A way back after a forgotten master password | Recovery key: as a file, printed as QR codes and text, or split into 3 parts of which any 2 rebuild it; always with its passphrase | ? | ? | Account recovery by a family or team organiser | ? | ? | Not applicable |
+| Check of the installed program files | Yes, at start-up, against the list in the signed release | ? | ? | ? | ? | ? | ? |
 
 ## Everyday features
 
@@ -46,6 +49,7 @@ In the tables, **?** means we could not confirm it from the sources we used. It 
 | SSH agent | No | Yes | Yes | Yes | Yes, on paid plans except Essentials | Not applicable | Not applicable |
 | Hide codes until clicked | Yes, off until you turn it on | ? | ? | ? | ? | Yes | Yes |
 | Your own order and groups for codes | Yes | ? | ? | ? | ? | ? | Yes |
+| Undo yesterday's mistake | Yes, restore one of 7 daily copies of the vault | ? | ? | ? | ? | ? | ? |
 | Moves to KeePass format | Yes, `.kdbx` | Yes, it is the native format | ? | ? | ? | Not applicable | Not applicable |
 
 ## Where each kind of app fits
@@ -67,7 +71,7 @@ password manager can fully protect you from malware running on your computer whi
 
 - KeePassXC: [documentation](https://keepassxc.org/docs/), [user guide](https://keepassxc.org/docs/KeePassXC_UserGuide), [ANSSI visa](https://www.privacyguides.org/news/2025/11/25/keepassxc-awarded-anssi-security-visa/), [2023 audit](https://keepassxc.org/blog/2023-04-15-audit-report/), [passkeys](https://www.ghacks.net/?p=205232)
 - Bitwarden: [audits](https://bitwarden.com/help/is-bitwarden-audited/), [plans](https://bitwarden.com/pricing/), [encryption](https://bitwarden.com/help/what-encryption-is-used/), [emergency access](https://bitwarden.com/help/emergency-access/), [biometrics](https://bitwarden.com/help/biometrics/), [app settings and SSH agent](https://bitwarden.com/help/app-settings/), [security keys](https://bitwarden.com/help/setup-two-step-login-fido/)
-- 1Password: [assessments](https://support.1password.com/security-assessments/), [post-quantum web app](https://1password.com/blog/post-quantum-cryptography), [post-quantum passkeys](https://1password.com/blog/post-quantum-passkeys), [Watchtower](https://support.1password.com/watchtower/), [security keys](https://support.1password.com/security-key/), [files](https://support.1password.com/files/), [SSH agent](https://1password.com/developers/ssh)
+- 1Password: [account recovery](https://support.1password.com/forgot-master-password/), [assessments](https://support.1password.com/security-assessments/), [post-quantum web app](https://1password.com/blog/post-quantum-cryptography), [post-quantum passkeys](https://1password.com/blog/post-quantum-passkeys), [Watchtower](https://support.1password.com/watchtower/), [security keys](https://support.1password.com/security-key/), [files](https://support.1password.com/files/), [SSH agent](https://1password.com/developers/ssh)
 - Proton Pass: [plans](https://proton.me/pass/pricing), [audit](https://proton.me/blog/pass-open-source-security-audit), [Windows setup and biometrics](https://proton.me/support/how-to-set-up-proton-pass-for-windows), [SSH agent](https://proton.me/support/ssh-agent), [account security](https://proton.me/business/pass/security)
 - Ente Auth: [FAQ](https://ente.com/help/auth/faq/), [audit](https://ente.com/blog/cern-audit)
 - Aegis: [README](https://github.com/beemdevelopment/Aegis)

@@ -16,7 +16,7 @@ files. The Vaults page in the app shows these locations too.
 | `vault.sauth` | Your vault: accounts, passwords and notes, encrypted. This is the one file that matters | Encrypted |
 | `vault.sauth.bak` | The version before the last save, kept so a crash cannot destroy your vault | Encrypted |
 | `vault.sauth.tmp` | Exists for a moment during a save, then replaces `vault.sauth`. If you ever see it, a save was interrupted; the real vault is intact | Encrypted |
-| `settings.json` | Theme, tray, locking, clipboard and privacy choices, the sign-in pause counter, the list of other vault files you opened, the folder for automatic recovery backups, and the recovery **public** key | No secrets |
+| `settings.json` | Theme, tray, locking, clipboard and privacy choices, the sign-in pause counter and the total of wrong passwords, a random install id (only its hash goes into the vault), the list of other vault files you opened, the folder for automatic recovery backups, and the recovery **public** key | No secrets |
 | `snapshots\vault-<yyyymmdd>.sauth` | A copy of the vault made before the first save of each day (UTC date), so the file for a day holds the vault as it was the day before. The last 7 are kept. Only for the vault in this folder, not for one opened from elsewhere. Deleted when the master password changes or an unlock method is removed | Encrypted |
 | `archive\vault-<date>-<time>.sauth` | Old vaults moved aside, for example after a forgotten master password (plus their `.bak` files) | Encrypted |
 
@@ -50,6 +50,8 @@ passphrase of your recovery key.
 | Sync file `vault-<date>-<time>.sauth` | Backup page, Sync | Encrypted with the sync code. Goes to the folder or WebDAV server you chose. In a folder the newest 20 are kept; on a server nothing is ever deleted by the app |
 | KeePass export `*.kdbx` | Backup page | Protected by the password you typed. Opens in KeePass and KeePassXC |
 | Emergency sheet `*.html` | Recovery page | Holds no secrets. Delete it after printing |
+| Recovery key sheet `MasterSafe-recovery-key-sheet.html` | Recovery page, Print the recovery key | The key file as QR codes and text, still locked with its passphrase. Delete it after printing |
+| Key parts `MasterSafe-recovery-key-<date>-<time>-part-<n>-of-3.msrkpart` | Recovery page, Split the recovery key | Any 2 rebuild the key file; 1 alone tells nothing. Keep them in three places |
 | Password backup `vault-<date>-<time>.sauth` | Backup page | Encrypted with the password you chose. Saved to a folder you pick, or uploaded over https to a WebDAV server |
 | Other vault files | You | Use **Open a vault file** to use a vault from a USB stick or another folder. MasterSafe keeps it where it is and never moves or deletes it |
 
@@ -57,7 +59,7 @@ passphrase of your recovery key.
 
 | System | Folder |
 | --- | --- |
-| Windows installer (default, current user) | `%LocalAppData%\Programs\MasterSafe Authenticator` |
+| Windows installer (default, current user) | `%LocalAppData%\Programs\MasterSafe Authenticator`. Every installed program folder also holds `installed-files.txt`, the list the start-up check uses |
 | Windows installer (all users, if you choose it) | `C:\Program Files\MasterSafe Authenticator` |
 | Linux `install.sh` | `~/.local/opt/masterSafe-authenticator`, launcher `~/.local/bin/masterSafe-authenticator`, uninstaller `~/.local/bin/masterSafe-authenticator-uninstall` (and `uninstall.sh` in the program folder), menu entry `~/.local/share/applications/masterSafe-authenticator.desktop`, icon `~/.local/share/icons/hicolor/256x256/apps/masterSafe-authenticator.png` |
 
