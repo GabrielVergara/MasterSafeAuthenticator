@@ -145,6 +145,14 @@ Before running it, check that the file is genuine, as described in [How to verif
 If a check fails, do not run the file and please report it (see [SECURITY.md](SECURITY.md)).
 Windows code signing is on the [roadmap](docs/Roadmap.md); the warning fades as signed releases build reputation.
 
+**One scanner flags the installer.** On VirusTotal, Deep Instinct marks the 1.8.1 installer as malicious, and the other
+scanners find nothing (1 of 67). The same program files in the portable zip get 0 of 64, Deep Instinct included, so the
+detection comes from the Inno Setup installer wrapper, not from the app: it is a false positive. If you would rather
+avoid it, use the portable zip. Results:
+[installer](https://www.virustotal.com/gui/file/dfd37c5cbafc498684e9070772cfe1746e565c210543b69578a86a68b9468808),
+[portable zip](https://www.virustotal.com/gui/file/6b97f554e3f49c0a206deeffcdb7b50ff920ba2ec72bb2f8cfd65032a572b146),
+[verification tool](https://www.virustotal.com/gui/file/d76264fb5874d8062686065dad51904ddd58a9094d2cea5eeecbf82a3f987c84).
+
 Your vault is stored in `%LocalAppData%\MasterSafe\vault.sauth` on Windows and `~/.local/share/MasterSafe/vault.sauth`
 on Linux. Uninstalling never deletes it. [docs/FileLocations.md](docs/FileLocations.md) lists every file the app
 creates and where.
