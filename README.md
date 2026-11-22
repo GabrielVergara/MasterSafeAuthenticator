@@ -47,34 +47,41 @@ The pictures use made-up data. The app keeps itself out of screenshots, so they 
   header and key slots are authenticated; saves are atomic and keep a `.bak` copy.
 - Unlock with the master password, **Windows Hello** or a **FIDO2 security key** (tested with a Thales SafeNet key).
   Each method is a separate key slot, so changing the master password never re-encrypts the vault.
-- Sign-in pauses after repeated wrong passwords; the vault locks after inactivity, when Windows locks or sleeps, and
+- Sign-in pauses after repeated wrong passwords, timed so that changing the clock does not end it, and a counter turned back
+  in the settings is reported; the vault locks after inactivity, when Windows locks or sleeps, and
   optionally on minimize; locking wipes the key and decrypted data. Weak master passwords are refused.
 - Copied secrets are cleared from the clipboard (30 seconds, 1 or 2 minutes, your choice) and kept out of the Windows
   clipboard history and cloud clipboard; the window can be kept out of screenshots.
 - Security settings are kept inside the encrypted vault, one copy runs at a time, a vault on a network share is not opened
   until you agree, and an older copy of the vault is noticed.
 - **Recovery**: a recovery key and recovery backups (optionally automatic) let you get your data back if you forget the
-  master password. Recovery backups use a hybrid **ECDH-P384 + ML-KEM-768** (post-quantum) scheme.
+  master password. The key can also be printed as QR codes and text, or split into 3 parts of which any 2 rebuild it.
+  Recovery backups use a hybrid **ECDH-P384 + ML-KEM-768** (post-quantum) scheme.
 - **Signed releases** (ML-DSA-65) with checksums, a signed version manifest and an SBOM; a built-in update check verifies
-  them before it offers a download. Nothing updates automatically.
+  them before it offers a download. Nothing updates automatically. At start-up the app checks its own program files
+  against the list that came with the release.
 - Hostile-file hardening: sizes, key-derivation settings and counts of everything the app opens are limited and tested.
 - See the [OWASP self-assessment](docs/OwaspChecklist.md), the [threat model](docs/ThreatModel.md) and
   [SECURITY.md](SECURITY.md).
 
 **Everyday comfort**
 - Encrypted `.sauth` backups to a local folder or a WebDAV server (Nextcloud, ownCloud; https only).
-- A **Vaults** page that shows where your files are, opens any vault file and keeps old vaults in an archive.
-- Reminders for the steps you have not done, a task-based in-app Help with search, a light/dark theme and a system tray
+- A **Vaults** page that shows where your files are, opens any vault file, keeps old vaults in an archive and restores one
+  of the 7 daily copies.
+- Reminders for the steps you have not done, a task-based in-app Help with search (also on the sign-in screen, F1), folders
+  that open and close, a light/dark theme and a system tray
   icon. On Windows 11 a new tray icon starts under the ^ arrow; drag it onto the taskbar to keep it visible.
 
 **More to read** on the author's site: the article about MasterSafe Authenticator,
 <https://www.gabriel-vergara.com/articles/mastersafe-authenticator/>; a step-by-step
 [guided tour](https://www.gabriel-vergara.com/articles/mastersafe-getting-started/) with pictures; the
-[daily snapshots and how to restore one](https://www.gabriel-vergara.com/articles/mastersafe-snapshots/); and
+[daily snapshots and how to restore one](https://www.gabriel-vergara.com/articles/mastersafe-snapshots/); the
+[recovery key on paper and in 3 parts](https://www.gabriel-vergara.com/articles/mastersafe-recovery-key/); the
+[manual](https://www.gabriel-vergara.com/mastersafe-manual/) with pictures; and
 [how to choose an authenticator app](https://www.gabriel-vergara.com/articles/choosing-an-authenticator-app/).
 
-Planned: hardware unlock (security keys) on Linux, deeper protection (a check of the installed files, an optional key file, a
-split recovery key) and a mobile app. See [docs/Roadmap.md](docs/Roadmap.md), the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md) and [how MasterSafe compares with other apps](docs/Comparison.md).
+Planned: hardware unlock (security keys) on Linux, deeper protection (secrets kept out of .NET strings, an optional key
+file, binding the vault to one computer) and a mobile app. See [docs/Roadmap.md](docs/Roadmap.md), the known gaps in [docs/ThreatModel.md](docs/ThreatModel.md) and [how MasterSafe compares with other apps](docs/Comparison.md).
 
 ## Download and install
 
@@ -121,7 +128,8 @@ If any line says `FAIL`, do not install or run that file, and please report it (
 The tool cannot vouch for itself: a replaced tool could print anything. For the strongest check, build it from source
 (`dotnet run --project src/MasterSafe.Cli -c Release -- verify-release <folder> signing/masterSafe-release.pub`) and
 compare the fingerprint with the one printed here. Single files can also be checked with `verify <file> <pubkey>`, and
-a key with `fingerprint <pubkey>`.
+a key with `fingerprint <pubkey>`. After installing, `check-installed <program folder>` compares the installed files with
+the list that came with them.
 
 ### Windows or Edge says the download is unsafe
 
@@ -191,7 +199,7 @@ MasterSafe.slnx
 ├─ src/MasterSafe.Backup       # Encrypted .sauth backups (password or recovery key), local + WebDAV
 ├─ src/MasterSafe.Platform     # System tray abstraction, Windows Hello and FIDO2 security-key unlock providers
 ├─ src/MasterSafe.App          # Avalonia 12 MVVM desktop UI
-├─ src/MasterSafe.Cli          # Release tools: verify-release, verify, fingerprint, keygen, sign (also a demo)
+├─ src/MasterSafe.Cli          # Release tools: verify-release, verify, fingerprint, check-installed, keygen, sign, manifest
 ├─ tests/MasterSafe.Tests      # Unit tests (RFC vectors, vault security, view models)
 ├─ installer/                  # Windows (Inno Setup) and Linux (tar.gz) packaging
 ├─ packaging/                  # winget manifests and the Flathub (Flatpak) manifest and metainfo

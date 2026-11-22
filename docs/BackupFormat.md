@@ -97,6 +97,31 @@ The key id, algorithm and public key are authenticated data for the private key'
 public key into the file is detected and the file fails to open. The passphrase must be at least 12 characters.
 Argon2 parameters in the file are limited to safe ranges, and the file may not be larger than 64 KiB.
 
+### The recovery key on paper (from 1.8)
+
+The key file, without its `Note`, as compact JSON, compressed with gzip and written in Base32, is cut into equal pieces of
+at most 1,900 characters (usually 4). Each piece is printed as a QR code (alphanumeric mode, error correction M) and again
+as text in groups of five:
+
+```
+MSRK1/<n>/<count>/<set>/<check>/<data>
+```
+
+`<set>` is the first 4 Base32 characters of the SHA-256 of the whole data, so pieces of two different keys are not mixed;
+`<check>` is the first 4 of the SHA-256 of `n/count/set/data`, so a typing mistake is pinned to its piece. At most 20
+pieces and 64 KiB are accepted. The result is the passphrase-locked key file, so the paper alone opens nothing.
+
+### Key parts (`*.msrkpart`, from 1.8)
+
+```json
+{ "Version": 1, "Note": "...", "SetId": "<base64, 16 random bytes>", "Index": 1, "Threshold": 2, "Count": 3,
+  "KeyHash": "<base64 SHA-256 of the key file>", "Data": "<base64 share, as long as the key file>" }
+```
+
+Shamir's secret sharing over GF(2^8) (polynomial 0x11B): for each byte of the key file a line through that byte with a fresh
+random slope; part `x` holds the line at `x`. Any 2 parts rebuild the file; it must match `KeyHash`, and a third part must
+agree, or the damaged one is named. Parts of different splits (`SetId`) are refused. A part file may be at most 256 KiB.
+
 ## Vault file (`vault.sauth`)
 
 The live vault uses format 3 (see [Security.md](Security.md)): a random vault id, a list of unlock slots,
@@ -110,6 +135,8 @@ Before encryption the contents are compressed (GZip). They are one of two layout
 | --- | --- | --- |
 | Plain JSON | The vault has no attachments (always the case before 1.3.0) | `{"Accounts":[...],"Passwords":[...],"Folders":[...],"FolderIcons":{...}}` |
 | Container `MSV4` | At least one entry has an attached file | `"MSV4"`, length of the JSON (int32 little-endian), the same JSON, number of files (int32), then for each file: its 16-byte id, its length (int32) and its raw bytes |
+
+From 1.8 it can also hold `SignInFailuresSeen`: for each computer (a hash of its random install id) the total of wrong master passwords there when the vault was last opened.
 
 From 1.6 the JSON can also hold `Security`, `SaveCounter`, `Tombstones` and `Sync`, and entries can hold `Kind`, `Fields`,
 `ExpiresUtc`, `IconPng` and `StateChangedUtc`, and accounts `Group` and `ModifiedUtc`. All are optional, and an older version

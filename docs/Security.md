@@ -116,9 +116,20 @@ format 3 the next time the vault is unlocked with the master password.
 - **Website icon:** the fixed rules are in [Roadmap.md](Roadmap.md). The connection goes to an address checked at connection
   time, so a site cannot aim the app at this computer or the local network by changing its DNS answer.
 
+## Added in 1.8
+
+- **Recovery key on paper or in 3 parts:** the paper holds the key file locked with its passphrase, as QR codes and text
+  pieces, each with a check; the parts use Shamir's secret sharing over GF(2^8) with a fresh random line per byte, and the
+  rebuilt file is checked against its SHA-256. Both protect the passphrase-locked file, so the passphrase is always needed.
+- **Sign-in pause and automatic lock** are timed by `Environment.TickCount64`, so a changed clock does not shorten a pause or
+  keep the vault open. A wrong-password total that only goes up is checked against the value the vault keeps per computer
+  (a hash of a random install id), so a counter turned back in the settings file is reported.
+- **Program files:** `installed-files.txt` lists every program file with its SHA-256; it is compared with the folder at
+  start-up and, when the update check is allowed, with the copy in the signed release manifest. It warns, it never blocks.
+
 ## Recovery
 
-Recovery requires the master password, a set-up unlock method, or a recovery-key backup. There is no
+Recovery requires the master password, a set-up unlock method, or a recovery-key backup with the recovery key (as a file, on paper or from 2 of its 3 parts) and its passphrase. There is no
 backdoor. If you lose all of them, the vault cannot be decrypted. Keep an encrypted backup
 (see [BackupFormat.md](BackupFormat.md)).
 
