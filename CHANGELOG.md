@@ -2,7 +2,7 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
-## Unreleased
+## 1.8.1 (2026-11-22)
 
 ### Added
 - **Portable Windows copy:** `MasterSafe-Authenticator-<version>-win-x64-portable.zip`, the program folder without an
