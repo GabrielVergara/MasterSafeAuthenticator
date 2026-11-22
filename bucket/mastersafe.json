@@ -1,5 +1,5 @@
 {
-    "version": "1.8.1",
+    "version": "1.8.2",
     "description": "Privacy-first, offline-first authenticator and password vault with post-quantum encryption (TOTP codes, passwords, Windows Hello and FIDO2 unlock).",
     "homepage": "https://github.com/GabrielVergara/MasterSafeAuthenticator",
     "license": {
@@ -12,8 +12,8 @@
     ],
     "architecture": {
         "64bit": {
-            "url": "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.8.1/MasterSafe-Authenticator-1.8.1-win-x64-setup.exe",
-            "hash": "dfd37c5cbafc498684e9070772cfe1746e565c210543b69578a86a68b9468808"
+            "url": "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.8.2/MasterSafe-Authenticator-1.8.2-win-x64-setup.exe",
+            "hash": "2c359eb19c45f629169dd297b23283249bf49cf67d720a5da1a11ed39689561c"
         }
     },
     "innosetup": true,
