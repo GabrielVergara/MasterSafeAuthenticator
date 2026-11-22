@@ -114,7 +114,18 @@
           <TextBlock Text="Recovery key on paper" Classes="h2" />
           <TextBlock Classes="hint" TextWrapping="Wrap"
                      Text="Prints the recovery key file as QR codes and text, so a lost or broken USB stick does not take it with it. The key stays locked with its passphrase, which is not printed. To use it, choose Read a printed key... when you restore." />
+          <TextBlock Classes="hint" TextWrapping="Wrap" Text="First you choose the recovery key file (.msrk) you saved in step 1." />
           <Button Content="Print the recovery key..." HorizontalAlignment="Left" Command="{Binding CreateKeySheetCommand}" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Recovery key in 3 parts" Classes="h2" />
+          <TextBlock Classes="hint" TextWrapping="Wrap"
+                     Text="Splits the recovery key file into 3 parts, for example for a USB stick, a family member and a safe. Any 2 parts rebuild the key; 1 part alone tells nothing about it. The key still needs its passphrase. To use them, choose Add a key part... when you restore." />
+          <TextBlock Classes="hint" TextWrapping="Wrap" Text="First you choose the recovery key file (.msrk) you saved in step 1." />
+          <Button Content="Split the recovery key..." HorizontalAlignment="Left" Command="{Binding SplitKeyCommand}" />
         </StackPanel>
       </Border>
 

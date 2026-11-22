@@ -222,6 +222,8 @@ La hoja de emergencia es una página en letra grande para guardar en papel. Dice
 
 Imprimir la clave de recuperación... pone en papel el propio archivo de la clave de recuperación, como códigos QR y texto, para que sobreviva a una memoria USB perdida. La clave sigue protegida con su frase de contraseña, que no se imprime; guarde las dos por separado. Para usarla, elija Leer una clave impresa... al restaurar y escoja una foto o un escaneo de cada página. Un código que no se pueda leer se puede escribir a mano desde las páginas de texto.
 
+Dividir la clave de recuperación... crea 3 archivos de partes: 2 cualesquiera reconstruyen la clave y una sola no revela nada de ella. Guárdelas en sitios distintos, por ejemplo una memoria USB, un familiar y una caja fuerte. La clave sigue necesitando su frase de contraseña. Para usarlas, elija Añadir una parte de la clave... dos veces al restaurar.
+
 ### Unlock methods
 title: Métodos de desbloqueo
 summary: Windows Hello y llaves de seguridad.

@@ -103,6 +103,9 @@ public sealed class AppSettings
     /// <summary>When the recovery key was created (ISO 8601, UTC).</summary>
     public string? RecoveryKeyCreatedUtc { get; set; }
 
+    /// <summary>The folder the recovery key file was saved to or last opened from, so the next picker starts there.</summary>
+    public string? RecoveryKeyFolder { get; set; }
+
     /// <summary>When the last recovery backup was written (ISO 8601, UTC).</summary>
     public string? LastRecoveryBackupUtc { get; set; }
 }
