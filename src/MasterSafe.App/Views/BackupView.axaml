@@ -6,7 +6,7 @@
              x:Class="MasterSafe.App.Views.BackupView"
              x:DataType="vm:BackupViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
+    <StackPanel Spacing="14" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch">
       <StackPanel Spacing="2">
         <TextBlock Text="Backups and sync" Classes="h1" />
         <TextBlock Classes="hint" TextWrapping="Wrap" Text="A backup holds your accounts, passwords and attached files, encrypted with the password you type here before it leaves this computer (.sauth files)." />

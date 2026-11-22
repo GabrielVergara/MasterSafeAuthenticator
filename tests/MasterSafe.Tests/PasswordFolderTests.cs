@@ -25,6 +25,30 @@ public sealed class PasswordFolderTests
     private static void Select(PasswordsViewModel vm, string? path)
         => vm.SelectedNode = vm.FolderNodes.Single(n => n.Path == path && !n.IsBin);
 
+    [Fact]
+    public void Folders_CanBeClosedAndOpened_AndTheListHidden()
+    {
+        var vm = Vm(Entry("a", "Work/Mail"), Entry("b", "Work/Bank/Old"), Entry("c", "Home"));
+        var work = vm.FolderNodes.Single(n => n.Path == "Work");
+        work.HasChildren.Should().BeTrue();
+        vm.FolderNodes.Single(n => n.Path == "Home").HasChildren.Should().BeFalse();
+
+        Select(vm, "Work/Bank/Old");
+        vm.ToggleFolderCommand.Execute(work);
+
+        vm.FolderNodes.Select(n => n.Path).Should().NotContain(["Work/Mail", "Work/Bank", "Work/Bank/Old"]);
+        vm.FolderNodes.Single(n => n.Path == "Work").IsExpanded.Should().BeFalse();
+        vm.SelectedNode!.Path.Should().Be("Work", "a hidden folder gives the selection to the one closed");
+        vm.FolderChoices.Select(c => c.Path).Should().Contain("Work/Bank/Old", "every folder can still be chosen for an entry");
+
+        vm.ToggleFolderCommand.Execute(vm.FolderNodes.Single(n => n.Path == "Work"));
+        vm.FolderNodes.Select(n => n.Path).Should().Contain(["Work/Mail", "Work/Bank", "Work/Bank/Old"]);
+
+        vm.ShowFolders.Should().BeTrue();
+        vm.ToggleFolderListCommand.Execute(null);
+        vm.ShowFolders.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData("  Email / Work  ", "Email/Work")]
     [InlineData("A\\B\\C", "A/B/C")]

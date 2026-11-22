@@ -40,6 +40,13 @@ public static class AppInfo
     /// <summary>The page about donating to MasterSafe, on the author's site. It links on to PayPal.</summary>
     public const string SupportUrl = "https://www.gabriel-vergara.com/support-mastersafe/";
 
+    /// <summary>The user manual on the author's site, in the language the app shows (English for anything else).</summary>
+    public static string ManualUrl(string language) => language switch
+    {
+        "es" or "fi" => $"https://www.gabriel-vergara.com/{language}/mastersafe-manual/",
+        _ => "https://www.gabriel-vergara.com/mastersafe-manual/",
+    };
+
     /// <summary>The author's web site.</summary>
     public const string WebsiteUrl = "https://www.gabriel-vergara.com/";
 

@@ -20,7 +20,7 @@
     </Border>
 
     <ScrollViewer>
-      <StackPanel Margin="24,24,24,16" Spacing="16">
+      <StackPanel Margin="24,20,24,16" Spacing="12">
         <StackPanel Orientation="Horizontal" Spacing="16">
           <Image Source="/Assets/logo-256.png" Width="72" Height="72" />
           <StackPanel VerticalAlignment="Center" Spacing="2">
@@ -45,7 +45,7 @@
             <ItemsControl ItemsSource="{Binding Links}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:AboutLink">
-                  <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
                     <StackPanel VerticalAlignment="Center">
                       <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
                       <TextBlock Text="{Binding Description}" Opacity="0.7" FontSize="12" TextWrapping="Wrap" />
@@ -65,6 +65,7 @@
             <TextBlock Text="Check your download" FontWeight="SemiBold" FontSize="15" />
             <TextBlock TextWrapping="Wrap" Opacity="0.8"
                        Text="Every release is signed with the post-quantum signature ML-DSA-65. This is the SHA-256 fingerprint of the signing key. It must match the one in the project's README and security policy." />
+            <TextBlock Text="{Binding ProgramFilesText}" TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
             <TextBox Text="{Binding SigningKeyFingerprint, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                      FontFamily="Consolas, Menlo, monospace" FontSize="12" />
           </StackPanel>

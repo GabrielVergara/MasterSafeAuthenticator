@@ -202,6 +202,10 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Recovery, Print the recovery key..., open the page in a browser and print it | Instructions, a page of 4 QR codes and pages of text; no passphrase anywhere |
 | Forgot your master password, Restore, Read a printed key... with a phone photo of the codes page | "The whole recovery key was read"; with the passphrase and a backup the data returns |
 | Recovery, Split the recovery key..., then Forgot your master password, Add a key part... with 2 of the 3 files | 3 `.msrkpart` files are saved; with 2 of them, the passphrase and a backup the data returns |
+| Installed app: About | "Program files: unchanged..."; after a test copy of `version.dll` into the program folder, a notice names it |
+| Sign-in screen: Help (F1), About; F1 again | The help opens without unlocking; F1 or Back to sign in returns |
+| Five wrong passwords, then move the clock forward an hour | The pause keeps counting down; it does not end |
+| Passwords: arrow in front of a folder; Hide / Show folders | Subfolders close and open; the list hides and comes back |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
 | Settings, Clear the clipboard after, choose 30 seconds, then copy a password and wait | The clipboard is cleared after 30 seconds; the choice is still set after restarting the app |
 | Copy a password, then press Win+V (clipboard history) | The password is not listed in the history; after the wait it is also gone from the clipboard itself |

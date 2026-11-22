@@ -29,6 +29,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private readonly UnlockThrottle _throttle;
     private byte[]? _sessionKey;
     private DateTimeOffset _lastActivity;
+    private long _lastActivityTicks;
+    private readonly ElapsedClock _elapsed;
+
+    // The sign-in counts the open vault remembers, per computer, and this computer's key in that list.
+    private Dictionary<string, long> _failuresSeen = new(StringComparer.Ordinal);
+    private readonly string _computerKey;
 
     [ObservableProperty]
     private bool _isUnlocked;
@@ -56,6 +62,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             guide.Refresh();
         }
 
+        OnPropertyChanged(nameof(IsLockedHelp));
         ActiveSection = value switch
         {
             DashboardViewModel => "Dashboard",
@@ -113,7 +120,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void Exit() => ExitRequested?.Invoke();
 
-    /// <summary>Opens the help (shortcut F1) when the vault is unlocked.</summary>
+    /// <summary>
+    /// Opens the help (shortcut F1). While the vault is locked the help can be read from the sign-in screen too: it holds
+    /// no vault data, and F1 again goes back to sign in.
+    /// </summary>
     [RelayCommand]
     private void HelpShortcut()
     {
@@ -121,7 +131,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             CurrentPage = Help;
         }
+        else
+        {
+            CurrentPage = CurrentPage is LoginViewModel ? Help : Login;
+        }
     }
+
+    /// <summary>True while the help is read from the sign-in screen, so it shows a way back.</summary>
+    public bool IsLockedHelp => !IsUnlocked && CurrentPage is HelpViewModel;
+
+    /// <summary>Leaves the help opened from the sign-in screen.</summary>
+    [RelayCommand]
+    private void BackToSignIn()
+    {
+        if (!IsUnlocked)
+        {
+            CurrentPage = Login;
+        }
+    }
+
+    partial void OnIsUnlockedChanged(bool value) => OnPropertyChanged(nameof(IsLockedHelp));
 
     /// <summary>Makes the text and the window larger (Ctrl and plus).</summary>
     [RelayCommand]
@@ -197,10 +226,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         _vault = vault;
         _providers = providers?.ToList() ?? [];
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _elapsed = clock is null ? ElapsedClock.System : ElapsedClock.From(clock);
         _lastActivity = _clock();
+        _lastActivityTicks = _elapsed.Now();
         Dashboard = new DashboardViewModel();
         Settings = new SettingsViewModel(services?.SettingsStore);
-        _throttle = new UnlockThrottle(_clock, services?.SettingsStore);
+        _throttle = new UnlockThrottle(_clock, services?.SettingsStore, _elapsed);
+        _computerKey = ComputerKey(services?.SettingsStore);
         _counters = services is null ? null : new SaveCounterStore(services.Paths.SaveCounterPath);
         Settings.SecurityChanged += (_, _) => OnSecuritySettingChanged();
         Settings.SecurityApplied += (_, _) =>
@@ -256,6 +288,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Recovery.Clock = _clock;
         Recovery.SheetData = services is null ? null : () => SheetData(services);
         Login.Forgot = new ForgotPasswordViewModel(services, vault);
+        Login.HelpRequested = () => HelpShortcut();
+        Login.AboutRequested = () => ShowAbout();
         _currentPage = Login;
 
         if (_vault is null)
@@ -388,6 +422,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
             _lockoutTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _lockoutTimer.Tick += (_, _) => UpdateLockout();
+
+            // The program's own files are compared with their list in the background; a problem shows as a notice.
+            ProgramFiles.Changed += (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                if (IsUnlocked)
+                {
+                    RefreshNotices();
+                }
+            });
+            _programFilesCheck = Task.Run(() => ProgramFiles.CheckFolder(AppContext.BaseDirectory));
         }
 
         UpdateLockout();
@@ -434,7 +478,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         => secret.Replace(" ", string.Empty, StringComparison.Ordinal).Replace("-", string.Empty, StringComparison.Ordinal).ToUpperInvariant();
 
     /// <summary>Records user activity so the auto-lock countdown restarts.</summary>
-    public void NotifyActivity() => _lastActivity = _clock();
+    public void NotifyActivity()
+    {
+        _lastActivity = _clock();
+        _lastActivityTicks = _elapsed.Now();
+    }
 
     /// <summary>Locks the vault when there has been no activity for the configured time.</summary>
     public void LockIfIdle()
@@ -445,7 +493,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        var remaining = TimeSpan.FromMinutes(Math.Max(1, Settings.AutoLockMinutes)) - (_clock() - _lastActivity);
+        // The longer of the two: a clock turned back cannot keep the vault open, and a computer that slept (where the tick
+        // count may stop, on Linux) still locks by the clock.
+        var idle = _elapsed.Since(_lastActivityTicks);
+        var byClock = _clock() - _lastActivity;
+        var remaining = TimeSpan.FromMinutes(Math.Max(1, Settings.AutoLockMinutes)) - (byClock > idle ? byClock : idle);
         if (remaining <= TimeSpan.Zero)
         {
             LockWarningSeconds = null;
@@ -516,6 +568,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     private UpdateInfo? _newerRelease;
+    private Task? _programFilesCheck;
 
     /// <summary>Rebuilds the reminders at the top of the codes page.</summary>
     public void RefreshNotices()
@@ -594,6 +647,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             notices.Insert(0, olderCopy);
         }
 
+        if (ProgramFiles.HasProblem)
+        {
+            notices.Insert(0, new NoticeRow(
+                "program-files",
+                ProgramFiles.Describe(),
+                "Open downloads",
+                new RelayCommand(() => AboutViewModel.OpenAllowed(AppInfo.ReleasesUrl))));
+        }
+
         Dashboard.SetNotices(notices);
     }
 
@@ -609,22 +671,48 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         _updateChecked = true;
         _ = Settings.Updates.CheckAsync(quiet: true);
+        _ = ConfirmProgramFilesAsync();
+    }
+
+    // With the folder checked, compares its list with the signed release (only when MasterSafe may go online).
+    private async Task ConfirmProgramFilesAsync()
+    {
+        if (_programFilesCheck is not null)
+        {
+            await _programFilesCheck;
+            await Settings.Updates!.ConfirmProgramFilesAsync();
+        }
     }
 
     /// <summary>Resets the failure counter after a correct unlock and tells the user about any wrong attempts before it.</summary>
     private void AfterSuccessfulUnlock(string method)
     {
-        var failed = _throttle.RecordSuccess();
+        // Wrong passwords on this computer since this vault was last opened here. The vault's own record cannot be edited
+        // without the password, so a counter turned back in the settings file is noticed.
+        var total = _throttle.TotalFailures;
+        var seen = _failuresSeen.GetValueOrDefault(_computerKey);
+        var turnedBack = total < seen;
+        var failed = (int)Math.Min(1000, Math.Max(_throttle.RecordSuccess(), turnedBack ? 0 : total - seen));
+        _failuresSeen[_computerKey] = total;
         if (failed > 0)
         {
             SecurityLog.Record(SecurityEventsViewModel.WrongPasswords, failed.ToString(System.Globalization.CultureInfo.InvariantCulture), save: false);
+        }
+
+        if (turnedBack)
+        {
+            SecurityLog.Record(SecurityEventsViewModel.SignInCounterChanged, string.Empty, save: false);
         }
 
         // Saved by the unlock itself, which waits for it, so it never races another save.
         SecurityLog.Record(SecurityEventsViewModel.Unlocked, method, save: false);
         UpdateLockout();
         CheckForUpdatesOnce();
-        if (failed > 0)
+        if (turnedBack)
+        {
+            Dashboard.StatusMessage = "The count of wrong master passwords on this computer was turned back outside MasterSafe. If you did not do that, someone may have tried to guess your password: change it.";
+        }
+        else if (failed > 0)
         {
             Dashboard.StatusMessage = failed == 1
                 ? "1 wrong password was entered since your last sign-in."
@@ -1115,6 +1203,31 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         await RefreshUnlockMethodsAsync();
     }
 
+    // This computer's key in the vault's sign-in record: a hash of a random install id, so the vault does not name the computer.
+    private static string ComputerKey(ISettingsStore? store)
+    {
+        if (store is null)
+        {
+            return "demo";
+        }
+
+        try
+        {
+            var settings = store.Load();
+            if (string.IsNullOrWhiteSpace(settings.InstallId))
+            {
+                settings.InstallId = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
+                store.Save(settings);
+            }
+
+            return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("sign-in|" + settings.InstallId)))[..32];
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return "unsaved";
+        }
+    }
+
     private VaultContents BuildContents() => new()
     {
         Accounts = Dashboard.Accounts.Select(a => a.Account).ToList(),
@@ -1124,6 +1237,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         RecoveryKeyFingerprint = Recovery.TrustedKeyFingerprint,
         Security = Settings.CurrentSecurity(),
         SaveCounter = _saveCounter,
+        SignInFailuresSeen = _failuresSeen.TakeLast(50).ToDictionary(p => p.Key, p => p.Value),
         Tombstones = Passwords.TombstoneSnapshot().Concat(Dashboard.TombstoneSnapshot())
             .OrderByDescending(t => t.DeletedUtc).Take(Tombstone.MaxKept).ToList(),
         Sync = Sync.Settings,
@@ -1162,6 +1276,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         ReloadEntries(contents);
         SecurityLog.Load(contents.Events);
+        _failuresSeen = contents.SignInFailuresSeen.Where(p => p.Value >= 0).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
         Sync.Settings = contents.Sync;
         Recovery.TrustedKeyFingerprint = contents.RecoveryKeyFingerprint;
         Recovery.Refresh();

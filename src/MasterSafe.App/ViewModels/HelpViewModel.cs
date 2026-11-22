@@ -5,6 +5,7 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MasterSafe.App.Help;
 using MasterSafe.App.Services;
 
@@ -20,6 +21,16 @@ public sealed partial class HelpViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _searchText = string.Empty;
+
+    /// <summary>Opens an address in the browser. Replaced in tests.</summary>
+    public Action<string> UrlOpener { get; set; } = AboutViewModel.OpenAllowed;
+
+    /// <summary>The manual on the web, in the language the app shows.</summary>
+    public string ManualUrl => AppInfo.ManualUrl(Loc.Current);
+
+    /// <summary>Opens the manual with pictures on the author's site.</summary>
+    [RelayCommand]
+    private void OpenManual() => UrlOpener(ManualUrl);
 
     public HelpViewModel()
     {

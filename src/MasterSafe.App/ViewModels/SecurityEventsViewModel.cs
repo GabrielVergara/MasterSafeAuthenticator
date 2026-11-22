@@ -24,6 +24,7 @@ public sealed class SecurityEventsViewModel : ViewModelBase
     public const string Exported = "exported";
     public const string FileSaved = "file-saved";
     public const string CopyingPaused = "copying-paused";
+    public const string SignInCounterChanged = "sign-in-counter-changed";
 
     private readonly List<SecurityEvent> _events = [];
 
@@ -80,6 +81,7 @@ public sealed class SecurityEventsViewModel : ViewModelBase
             Exported => string.Format(CultureInfo.CurrentCulture, Loc.T("Exported: {0}"), Loc.T(e.Detail)),
             FileSaved => Loc.T("An attached file was saved to disk"),
             CopyingPaused => Loc.T("Copying paused: many secrets were copied in a short time"),
+            SignInCounterChanged => Loc.T("The count of wrong master passwords was turned back outside MasterSafe"),
             _ => e.Kind,
         };
 

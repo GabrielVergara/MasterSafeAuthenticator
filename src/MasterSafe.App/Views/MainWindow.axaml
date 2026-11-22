@@ -81,6 +81,8 @@
           <Button Grid.Column="1" Margin="12,0,0,0" Classes="accent" Content="Keep unlocked" Command="{Binding KeepUnlockedCommand}" />
         </Grid>
       </Border>
+      <Button DockPanel.Dock="Top" Margin="0,0,0,12" HorizontalAlignment="Left" Content="Back to sign in"
+              IsVisible="{Binding IsLockedHelp}" Command="{Binding BackToSignInCommand}" />
       <ContentControl Content="{Binding CurrentPage}" />
     </DockPanel>
   </Grid>

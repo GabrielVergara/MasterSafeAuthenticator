@@ -5,7 +5,7 @@
              x:Class="MasterSafe.App.Views.RecoveryView"
              x:DataType="vm:RecoveryViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="16" MaxWidth="640" HorizontalAlignment="Left" Margin="0,0,14,0">
+    <StackPanel Spacing="16" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch" Margin="0,0,14,0">
       <StackPanel Spacing="2">
         <TextBlock Text="Recovery" Classes="h1" />
         <TextBlock Classes="hint"

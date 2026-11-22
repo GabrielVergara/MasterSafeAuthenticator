@@ -280,6 +280,12 @@ public sealed record VaultContents
     /// </summary>
     public long SaveCounter { get; init; }
 
+    /// <summary>
+    /// For each computer (a hash of its install id), the count of wrong master passwords there when this vault was last
+    /// opened. A lower count in that computer's settings means the counter was turned back.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> SignInFailuresSeen { get; init; } = new Dictionary<string, long>();
+
     /// <summary>Items deleted for good.</summary>
     public IReadOnlyList<Tombstone> Tombstones { get; init; } = [];
 
@@ -297,5 +303,8 @@ public sealed record VaultContents
     public IReadOnlyDictionary<Guid, byte[]> AttachmentData { get; init; } = new Dictionary<Guid, byte[]>();
 
     /// <summary>The entries and accounts alone, without anything that belongs to this computer or this vault file.</summary>
-    public VaultContents DataOnly() => this with { Sync = null, Security = null, SaveCounter = 0, RecoveryKeyFingerprint = null };
+    public VaultContents DataOnly() => this with
+    {
+        Sync = null, Security = null, SaveCounter = 0, RecoveryKeyFingerprint = null, SignInFailuresSeen = new Dictionary<string, long>(),
+    };
 }

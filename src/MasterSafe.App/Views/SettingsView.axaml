@@ -6,7 +6,7 @@
              x:Class="MasterSafe.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="18" MaxWidth="520" HorizontalAlignment="Left">
+    <StackPanel Spacing="18" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch">
       <TextBlock Text="Settings" Classes="h1" />
 
       <Border Classes="card">

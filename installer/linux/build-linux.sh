@@ -20,6 +20,9 @@ dotnet publish "$ROOT/src/MasterSafe.App/MasterSafe.App.csproj" \
 # Debug symbols are for developers and only make the package bigger.
 find "$OUT" -name '*.pdb' -delete
 
+# The list of program files the app checks at start-up; a copy goes with the release files (see InstalledFiles.cs).
+dotnet run --project "$ROOT/src/MasterSafe.Cli/MasterSafe.Cli.csproj" -c Release -- installed-files "$OUT" "$VERSION" "$RID" "$ROOT/artifacts"
+
 mkdir -p "$STAGE/app"
 cp -r "$OUT"/. "$STAGE/app/"
 cp "$ROOT/LICENSE" "$STAGE/LICENSE"

@@ -4,7 +4,7 @@
              x:Class="MasterSafe.App.Views.GuideView"
              x:DataType="vm:GuideViewModel">
   <ScrollViewer>
-    <StackPanel Spacing="16" MaxWidth="760" HorizontalAlignment="Left" Margin="0,0,14,0">
+    <StackPanel Spacing="16" MaxWidth="{StaticResource PageMaxWidth}" HorizontalAlignment="Stretch" Margin="0,0,14,0">
       <StackPanel Spacing="2">
         <TextBlock Text="Your vault is ready" Classes="h1" />
         <TextBlock Classes="hint" TextWrapping="Wrap"

@@ -19,6 +19,27 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   different keys are named.
 - Printing or splitting the recovery key first asks to open the saved `.msrk` file; the picker now says so and starts
   in the folder where the key was saved.
+- **Help on the sign-in screen.** **Help (F1)** at the bottom left and **About** at the bottom right; F1 opens the help
+  without unlocking (it holds no vault data) and F1 again, or **Back to sign in**, returns.
+- **Folders can be closed.** An arrow in front of a folder with subfolders hides or shows them, and **Hide** / **Show folders**
+  gives the passwords the whole width.
+- **Pages use the window width.** Cards grow with the window up to a readable width (1200), instead of stopping at a
+  fixed narrow column.
+- "Forgot your master password?": the **Add a key part...** button wraps instead of being cut off, and a message about
+  restoring shows under **Restore my data**, where it is seen.
+- **Program files are checked.** Each release lists its program files with their SHA-256 (`installed-files.txt`, in the
+  format of `sha256sum`). At start-up MasterSafe compares its own files with that list and shows a notice for a changed,
+  missing or added program file (such as a planted `.dll`). When it may look for updates, it also compares the list with
+  the copy in the signed release. About shows the result.
+  `MasterSafe.Cli check-installed <program folder>` runs the same check from the command line. The Windows installer
+  now removes the `.dll` and `.pdb` files of earlier versions first, so no leftover file is reported.
+- **Sign-in pause and automatic lock ignore clock changes.** Both are timed by the system tick count, so moving the clock
+  forward does not end a pause after wrong passwords and moving it back does not keep the vault open longer.
+- **A turned-back sign-in counter is noticed.** The vault keeps, per computer, how many wrong master passwords there were
+  when it was last opened. If the settings file shows fewer, the next sign-in says so and the security log records it;
+  wrong passwords are counted from that record, so resetting the visible counter no longer hides them.
+- **Buttons follow the theme.** Secondary buttons have the accent border and text (green) instead of plain grey, in
+  light and dark; high contrast is unchanged.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

@@ -44,7 +44,7 @@ public partial class PasswordsView : UserControl
                 _vm.FolderNodes.CollectionChanged += (_, _) => ApplyFolderPaneWidth();
                 _vm.PropertyChanged += (_, e) =>
                 {
-                    if (e.PropertyName == nameof(PasswordsViewModel.UserFolderPaneWidth))
+                    if (e.PropertyName is nameof(PasswordsViewModel.UserFolderPaneWidth) or nameof(PasswordsViewModel.ShowFolders))
                     {
                         ApplyFolderPaneWidth();
                     }
@@ -144,6 +144,14 @@ public partial class PasswordsView : UserControl
 
         // The list of passwords and the entry form need their room too, so the folder list never takes more than
         // what is left after them (the form is 340 wide and the list needs about 380).
+        if (!_vm.ShowFolders)
+        {
+            MainGrid.ColumnDefinitions[0].MinWidth = 0;
+            MainGrid.ColumnDefinitions[0].Width = new GridLength(0);
+            return;
+        }
+
+        MainGrid.ColumnDefinitions[0].MinWidth = 150;
         var room = Bounds.Width > 0 ? (IsNarrow ? Bounds.Width - 380 - 30 : Bounds.Width - 340 - 380 - 30) : double.MaxValue;
         var width = Math.Min(_vm.EffectiveFolderPaneWidth, Math.Max(150, room));
         MainGrid.ColumnDefinitions[0].Width = new GridLength(width);

@@ -73,6 +73,11 @@
               Command="{Binding ShowForgotCommand}" />
       <Button Content="E_xit" HorizontalAlignment="Center" Command="{Binding ExitCommand}"
               ToolTip.Tip="Lock the vault and close MasterSafe completely" />
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6,0,0">
+        <Button Grid.Column="0" Classes="link" Content="Help (F1)" Command="{Binding ShowHelpCommand}"
+                ToolTip.Tip="How to sign in, restore a vault and use MasterSafe. Works without unlocking." />
+        <Button Grid.Column="2" Classes="link" Content="About" Command="{Binding ShowAboutCommand}" />
+      </Grid>
     </StackPanel>
     </Grid>
   </Border>

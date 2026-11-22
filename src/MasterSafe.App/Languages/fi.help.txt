@@ -313,6 +313,7 @@ MasterSafe on rakennettu turvallisuus edellä.
 - Holvi liitetiedostoineen pakataan ja salataan AES-256-GCM:llä, joka myös todentaa tiedot väärentämisen havaitsemiseksi.
 - Holvi salataan yhdellä satunnaisella avaimella. Tämä avain tallennetaan kerran jokaista avaustapaa varten (pääsalasana, Windows Hello, suojausavain), kukin suojattuna erikseen.
 - Julkaisut allekirjoitetaan kvanttiturvallisella ML-DSA-65-allekirjoituksella, jotta latauksen aitous voidaan todistaa. Palautusvarmuuskopiot käyttävät hybridimenetelmää ML-KEM-768 ja ECDH P-384.
+- Käynnistyessään MasterSafe vertaa omia ohjelmatiedostojaan niiden mukana tulleeseen luetteloon ja, kun se saa etsiä päivityksiä, luetteloa allekirjoitettuun versioon. Muuttuneesta, puuttuvasta tai lisätystä ohjelmatiedostosta ilmoitetaan.
 - Avaamasi tiedostot (holvit, varmuuskopiot, KeePass-viennit, QR-kuvat, lataukset) käsitellään epäluotettavina: koot, avainjohdannan asetukset, sisäkkäisyys ja lukumäärät rajataan ennen kuin mitään luetaan.
 - Salaisuuksia ei koskaan kirjoiteta levylle selväkielisinä, niitä ei koskaan kirjata lokiin eikä lähetetä verkon yli.
 

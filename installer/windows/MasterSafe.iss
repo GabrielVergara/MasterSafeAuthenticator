@@ -50,6 +50,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+[InstallDelete]
+; Libraries and symbols of earlier versions are removed first, so the folder holds exactly what installed-files.txt lists
+; and the start-up check does not report a leftover file as added. Only these two kinds of file are removed.
+Type: files; Name: "{app}\*.dll"
+Type: files; Name: "{app}\*.pdb"
+
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion

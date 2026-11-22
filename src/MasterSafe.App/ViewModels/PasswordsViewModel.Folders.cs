@@ -14,8 +14,12 @@ using MasterSafe.Core;
 namespace MasterSafe.App.ViewModels;
 
 /// <summary>One line of the folder list. <see cref="Path"/> is null for "All passwords".</summary>
-public sealed record FolderNode(string? Path, string Name, int Depth, int Count, string IconKey, bool IsBin = false)
+public sealed record FolderNode(string? Path, string Name, int Depth, int Count, string IconKey, bool IsBin = false,
+    bool HasChildren = false, bool IsExpanded = true)
 {
+    /// <summary>The arrow in front of a folder with subfolders: down when they are shown, right when they are hidden.</summary>
+    public Geometry Arrow => Geometry.Parse(IsExpanded ? "M0,2 L10,2 L5,8 Z" : "M2,0 L8,5 L2,10 Z");
+
     /// <summary>Text shown in the list.</summary>
     public string Display => $"{Name} ({Count})";
 
@@ -39,6 +43,36 @@ public sealed partial class PasswordsViewModel
     // Folders that have no entries yet. A folder with entries exists because of them.
     private readonly HashSet<string> _emptyFolders = new(StringComparer.OrdinalIgnoreCase);
     private bool _rebuildingFolders;
+
+    // Folders whose subfolders are hidden in the list. Only for this session.
+    private readonly HashSet<string> _collapsed = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Shows or hides the subfolders of a folder.</summary>
+    [RelayCommand]
+    private void ToggleFolder(FolderNode? node)
+    {
+        if (node?.Path is not { } path || !node.HasChildren)
+        {
+            return;
+        }
+
+        if (!_collapsed.Remove(path))
+        {
+            _collapsed.Add(path);
+        }
+
+        // A selected folder that would be hidden gives the selection to the folder just closed.
+        var selected = SelectedNode?.Path;
+        RebuildFolders(selected is not null && FolderPath.IsInside(selected, path) && _collapsed.Contains(path) ? path : selected,
+            SelectedNode?.IsBin == true);
+    }
+
+    /// <summary>True while the folder list is shown next to the passwords.</summary>
+    [ObservableProperty]
+    private bool _showFolders = true;
+
+    [RelayCommand]
+    private void ToggleFolderList() => ShowFolders = !ShowFolders;
 
     // Folder path to the key of its icon. Folders that are not in here use the default icon.
     private readonly Dictionary<string, string> _icons = new(StringComparer.OrdinalIgnoreCase);
@@ -366,11 +400,25 @@ public sealed partial class PasswordsViewModel
             FolderNodes.Add(new FolderNode(null, "All passwords", 0, activeCount, "key"));
             FolderChoices.Clear();
             FolderChoices.Add(new FolderChoice(string.Empty, "(No folder)", "lock"));
+            // The folder to select is never hidden: the folders above it open.
+            if (selectPath is not null)
+            {
+                _collapsed.ExceptWith(FolderPath.WithAncestors(selectPath).Where(p => !p.Equals(selectPath, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            var withChildren = paths.Where(p => FolderPath.Depth(p) > 1).Select(FolderPath.Parent).ToHashSet(StringComparer.OrdinalIgnoreCase);
             foreach (var path in paths)
             {
                 var depth = FolderPath.Depth(path) - 1;
                 var icon = IconKeyFor(path);
-                FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, counts.GetValueOrDefault(path), icon));
+                var hidden = FolderPath.WithAncestors(path).Any(a => !a.Equals(path, StringComparison.OrdinalIgnoreCase) && _collapsed.Contains(a));
+                if (!hidden)
+                {
+                    var hasChildren = withChildren.Contains(path);
+                    FolderNodes.Add(new FolderNode(path, FolderPath.Name(path), depth, counts.GetValueOrDefault(path), icon,
+                        HasChildren: hasChildren, IsExpanded: !_collapsed.Contains(path)));
+                }
+
                 FolderChoices.Add(new FolderChoice(path, new string(' ', depth * 2) + FolderPath.Name(path), icon));
             }
 
