@@ -220,6 +220,8 @@ Jos unohdat salasanan:
 
 Hätäarkki on isolla tekstillä tulostettava sivu säilytettäväksi paperilla. Se kertoo, missä tiedostosi ovat ja mitä tehdään, ja siinä on tyhjät ruudut käsin kirjoitettaville asioille. Tiedostossa ei ole salaisuuksia. Avaa se selaimessa, tulosta ja poista tiedosto.
 
+Tulosta palautusavain... tulostaa itse palautusavaintiedoston paperille QR-koodeina ja tekstinä, joten se säilyy, vaikka USB-tikku katoaisi. Avain on edelleen lukittu salalauseellaan, jota ei tulosteta; säilytä ne erillään. Käytä sitä valitsemalla palautuksessa Lue tulostettu avain... ja valitsemalla valokuva tai skannaus jokaisesta sivusta. Koodin, jota ei voi lukea, voi kirjoittaa tekstisivuilta.
+
 ### Unlock methods
 title: Avaustavat
 summary: Windows Hello ja suojausavaimet.

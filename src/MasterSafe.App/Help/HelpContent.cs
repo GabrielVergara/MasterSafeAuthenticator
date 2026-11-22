@@ -356,6 +356,11 @@ public static class HelpContent
             The emergency sheet is a large-print page to keep on paper. It says where your files are and
             what to do, with empty boxes for what you write by hand. The file holds no secrets. Open it in a
             browser, print it, and delete the file.
+
+            Print the recovery key... puts the recovery key file itself on paper, as QR codes and text, so it
+            survives a lost USB stick. The key on it is still locked with its passphrase, which is not printed;
+            keep the two apart. To use it, choose Read a printed key... when you restore, and pick a photo or scan
+            of each page. A code that cannot be read can be typed in from the text pages.
             """),
         new(
             "Unlock methods",

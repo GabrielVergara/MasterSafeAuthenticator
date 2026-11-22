@@ -113,6 +113,55 @@ public sealed partial class RecoveryViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Saves the recovery key as a printable page of QR codes and text. The key stays locked with its passphrase, so the
+    /// page is as safe as the key file itself.
+    /// </summary>
+    [RelayCommand]
+    private async Task CreateKeySheetAsync()
+    {
+        if (_services is null)
+        {
+            return;
+        }
+
+        var keyPath = await _services.Dialogs.OpenFileAsync("Choose your recovery key file", "Recovery key files", "*.msrk");
+        if (keyPath is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var full = Path.GetFullPath(keyPath);
+            if (new FileInfo(full).Length > 64 * 1024)
+            {
+                throw new InvalidDataException("That file is too large to be a recovery key.");
+            }
+
+            var bytes = await File.ReadAllBytesAsync(full);
+            var (publicKey, keyId, _) = _services.RecoveryKeys.ReadPublicInfo(bytes);
+            var html = RecoveryKeySheet.BuildHtml(bytes, keyId, DateTimeOffset.Now);
+
+            var path = await _services.Dialogs.SaveFileAsync("Save the recovery key sheet", "MasterSafe-recovery-key-sheet.html", "html");
+            if (path is null)
+            {
+                return;
+            }
+
+            await File.WriteAllTextAsync(path, html);
+            var inUse = _services.SettingsStore.Load().RecoveryKeyId == keyId && !IsUntrusted(Convert.ToBase64String(publicKey));
+            Status = inUse
+                ? "Saved. Open the file in a browser and print it. The key on it is locked with its passphrase, so keep the passphrase somewhere else."
+                : "Saved, but this is not the recovery key in use now. It only opens backups made with it.";
+            _services.Dialogs.ShowInFolder(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
+        {
+            Status = $"The sheet could not be made: {ex.Message}";
+        }
+    }
+
     /// <summary>The fingerprint of the recovery key the open vault trusts; null until it has one.</summary>
     public string? TrustedKeyFingerprint { get; set; }
 

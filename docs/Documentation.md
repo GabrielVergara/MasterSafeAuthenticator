@@ -199,6 +199,8 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Settings, Security events after the steps above | Unlocks with each method, the password change and the methods added and removed are listed |
 | Recovery, Create and save recovery key, then Create recovery backup | A `.msrk` key file and a `recovery-*.sauth` file are written where you chose |
 | Sign in screen, Forgot your master password, Restore from a recovery backup | The data returns in a new vault with the new password; the old vault is in the archive folder |
+| Recovery, Print the recovery key..., open the page in a browser and print it | Instructions, a page of 4 QR codes and pages of text; no passphrase anywhere |
+| Forgot your master password, Restore, Read a printed key... with a phone photo of the codes page | "The whole recovery key was read"; with the passphrase and a backup the data returns |
 | Export a KeePass or KeePassXC database to XML or CSV, then Import, Choose an export file | A summary of passwords and accounts to add; nothing is added until Import is clicked; importing the same file again adds nothing |
 | Settings, Clear the clipboard after, choose 30 seconds, then copy a password and wait | The clipboard is cleared after 30 seconds; the choice is still set after restarting the app |
 | Copy a password, then press Win+V (clipboard history) | The password is not listed in the history; after the wait it is also gone from the clipboard itself |
@@ -260,6 +262,7 @@ Unit tests cover the vault logic with a fake provider; these steps cover the rea
 | Drag a QR code PNG from Explorer onto the unlocked window | The account appears on the dashboard; dropping it again says it is already in the vault; while locked the drop is refused |
 | Vaults, Start a new vault, then Open the archived vault | The old vault opens again with its old password |
 | Vaults, Delete on an archived vault | Asks first; the file is gone afterwards and the other vaults are untouched |
+| Vaults, Daily copies, Restore... on a copy | Asks first; the vault locks, the copy opens with its password, and a `-before-restore` vault is in the archive |
 | Close and reopen the app | Theme, tray and auto-lock choices are remembered |
 | Start MasterSafe twice, also with the window hidden in the tray | One copy runs; the window comes to the front; the task manager shows one process |
 | Close it to the tray, end it in the task manager, start it again | It starts normally: no lock is left behind |

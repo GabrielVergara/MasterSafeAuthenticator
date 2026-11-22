@@ -79,6 +79,26 @@ public sealed class QrCodeImporter
     /// </summary>
     public string? DecodeText(Stream imageStream)
     {
+        using var bitmap = LoadBitmap(imageStream);
+        return _reader.Decode(ToLuminanceSource(bitmap))?.Text;
+    }
+
+    /// <summary>Decodes every QR code in an image, for example a photo of a printed page with several codes.</summary>
+    public IReadOnlyList<string> DecodeAllTexts(string imagePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(imagePath);
+        if (!QrImageFormats.IsSupported(imagePath))
+        {
+            throw new NotSupportedException($"Unsupported image format: {Path.GetExtension(imagePath)}");
+        }
+
+        using var stream = File.OpenRead(imagePath);
+        using var bitmap = LoadBitmap(stream);
+        return _reader.DecodeMultiple(ToLuminanceSource(bitmap))?.Select(r => r.Text).ToList() ?? [];
+    }
+
+    private static SKBitmap LoadBitmap(Stream imageStream)
+    {
         ArgumentNullException.ThrowIfNull(imageStream);
 
         // Images come from files the user picked or dropped, so they are treated as untrusted: the size of the file
@@ -104,11 +124,8 @@ public sealed class QrCodeImporter
             throw new QrImportException("The image is too large (more than 40 million pixels).");
         }
 
-        using var bitmap = SKBitmap.Decode(codec)
+        return SKBitmap.Decode(codec)
             ?? throw new QrImportException("The image could not be decoded.");
-        var source = ToLuminanceSource(bitmap);
-        var result = _reader.Decode(source);
-        return result?.Text;
     }
 
     /// <summary>
