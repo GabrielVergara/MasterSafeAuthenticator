@@ -73,6 +73,12 @@
     <control>pointing</control>
   </supports>
   <releases>
+    <release version="1.8.1" date="2026-11-22">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.8.1</url>
+      <description>
+        <p>A portable Windows copy without an installer, and the package for the Microsoft Store.</p>
+      </description>
+    </release>
     <release version="1.8.0" date="2026-11-22">
       <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.8.0</url>
       <description>
