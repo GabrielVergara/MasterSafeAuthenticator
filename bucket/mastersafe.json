@@ -12,7 +12,7 @@
     ],
     "architecture": {
         "64bit": {
-            "url": "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.8.0/MasterSafe-Authenticator-1.8.0-win-x64-setup.exe",
+            "url": "https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/download/v1.8.1/MasterSafe-Authenticator-1.8.1-win-x64-setup.exe",
             "hash": "dfd37c5cbafc498684e9070772cfe1746e565c210543b69578a86a68b9468808"
         }
     },

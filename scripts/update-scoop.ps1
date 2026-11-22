@@ -20,7 +20,8 @@ $hash = $Matches[1].ToLowerInvariant()
 $text = Get-Content $path -Raw -Encoding UTF8
 # Only the three values change, so the file keeps its formatting.
 $text = $text -replace '(?m)^(\s*"version":\s*")[^"]*(")', "`${1}$Version`$2"
-$text = $text -replace '(?m)^(\s*"url":\s*")https://github\.com/[^"]*/releases/download/v\d[^"$]*(",?)$', "`${1}$base/$name`$2"
+# The file may have CRLF line ends (Git on Windows), and .NET's $ matches only before \n, so allow the \r.
+$text = $text -replace '(?m)^(\s*"url":\s*")https://github\.com/[^"]*/releases/download/v\d[^"\r\n]*(",?)(?=\r?$)', "`${1}$base/$name`$2"
 $text = $text -replace '(?m)^(\s*"hash":\s*")[0-9a-f]{64}(")', "`${1}$hash`$2"
 [IO.File]::WriteAllText((Resolve-Path $path), $text, (New-Object Text.UTF8Encoding($false)))
 Write-Host "bucket/mastersafe.json now offers $Version ($hash)."
