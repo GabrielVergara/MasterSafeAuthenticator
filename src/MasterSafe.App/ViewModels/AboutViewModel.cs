@@ -71,6 +71,9 @@ public sealed partial class AboutViewModel : ViewModelBase
     /// <summary>The SHA-256 fingerprint of the key that signs releases, in groups for reading and comparing.</summary>
     public string SigningKeyFingerprint { get; } = ReadFingerprint();
 
+    /// <summary>What the check of the program files found.</summary>
+    public string ProgramFilesText => ProgramFiles.Describe();
+
     private static string ReadFingerprint()
     {
         try

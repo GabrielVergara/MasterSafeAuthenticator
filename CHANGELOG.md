@@ -27,6 +27,10 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   fixed narrow column.
 - "Forgot your master password?": the **Add a key part...** button wraps instead of being cut off, and a message about
   restoring shows under **Restore my data**, where it is seen.
+- **Program files are checked.** Each release lists its program files with their SHA-256 (`installed-files.txt`, in the
+  format of `sha256sum`). At start-up MasterSafe compares its own files with that list and shows a notice for a changed,
+  missing or added program file (such as a planted `.dll`). When it may look for updates, it also compares the list with
+  the copy in the signed release. About shows the result.
 - **Sign-in pause and automatic lock ignore clock changes.** Both are timed by the system tick count, so moving the clock
   forward does not end a pause after wrong passwords and moving it back does not keep the vault open longer.
 - **A turned-back sign-in counter is noticed.** The vault keeps, per computer, how many wrong master passwords there were

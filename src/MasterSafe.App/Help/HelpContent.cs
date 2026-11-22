@@ -506,6 +506,8 @@ public static class HelpContent
               (master password, Windows Hello, security key), each protected separately.
             - Releases are signed with the post-quantum signature ML-DSA-65, so a download can be proven
               genuine. Recovery backups use a hybrid ML-KEM-768 plus ECDH P-384 scheme.
+            - At start-up MasterSafe compares its own program files with the list that came with them, and, when it
+              may look for updates, that list with the signed release. A changed, missing or added program file is shown.
             - Files you open (vaults, backups, KeePass exports, QR images, downloads) are treated as untrusted:
               sizes, key-derivation settings, nesting and counts are limited before anything is read.
             - Secrets are never written to disk in plaintext, never logged, and not sent over the network.

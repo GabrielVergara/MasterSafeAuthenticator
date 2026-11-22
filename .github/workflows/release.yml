@@ -48,6 +48,8 @@ jobs:
             artifacts/*-setup.exe.sha256
             artifacts/MasterSafe-Cli-*-win-x64.exe
             artifacts/MasterSafe-Cli-*-win-x64.exe.sha256
+            artifacts/*-win-x64-installed-files.txt
+            artifacts/*-win-x64-installed-files.txt.sha256
 
   linux:
     runs-on: ubuntu-latest
@@ -88,6 +90,8 @@ jobs:
             artifacts/*.tar.gz.sha256
             artifacts/*.deb
             artifacts/*.deb.sha256
+            artifacts/*-linux-*-installed-files.txt
+            artifacts/*-linux-*-installed-files.txt.sha256
             artifacts/MasterSafe-Cli-*-linux-*
             artifacts/sbom.cyclonedx.json
 

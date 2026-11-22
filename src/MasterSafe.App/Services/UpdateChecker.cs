@@ -211,6 +211,62 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
         return new UpdateDownload(true, installerPath, "The signature and checksum are valid.");
     }
 
+    /// <summary>The release of a given version, by its tag.</summary>
+    public const string TagUrlPrefix = "https://api.github.com/repos/GabrielVergara/MasterSafeAuthenticator/releases/tags/v";
+
+    /// <summary>
+    /// Compares the list of program files in the program folder with the copy in the signed release of the same version.
+    /// True: they are the same, so the list can be trusted. False: they differ or the signature is wrong. Null: it could
+    /// not be checked (offline, or a release from before the list existed).
+    /// </summary>
+    public async Task<bool?> ConfirmInstalledFilesAsync(byte[] localList, CancellationToken cancellationToken = default)
+    {
+        // Only a plain version number goes into the address, whatever the file in the program folder says.
+        if (InstalledFiles.Parse(localList) is not { } local || !TryParseVersion(local.Version, out var version)
+            || local.Version != version.ToString() || !System.Text.RegularExpressions.Regex.IsMatch(local.Platform, "^[a-z0-9-]{1,20}$"))
+        {
+            return null;
+        }
+
+        var info = Parse(await ReadLimitedAsync(TagUrlPrefix + version, MaxInfoBytes, cancellationToken).ConfigureAwait(false));
+        var name = InstalledFiles.AssetName(local.Version, local.Platform);
+        var manifest = info?.Assets.FirstOrDefault(a => a.Name == ReleaseManifest.FileName);
+        var signature = info?.Assets.FirstOrDefault(a => a.Name == ReleaseManifest.FileName + ".sig");
+        var list = info?.Assets.FirstOrDefault(a => a.Name == name);
+        if (info is null || info.Version != version || manifest is null || signature is null || list is null
+            || !new[] { manifest, signature, list }.All(a => a.Url.StartsWith(DownloadPrefix, StringComparison.Ordinal)))
+        {
+            return null;
+        }
+
+        var manifestBytes = await ReadLimitedAsync(manifest.Url, ReleaseManifest.MaxBytes, cancellationToken).ConfigureAwait(false);
+        var signatureText = System.Text.Encoding.ASCII.GetString(await ReadLimitedAsync(signature.Url, MaxSmallFileBytes, cancellationToken).ConfigureAwait(false));
+        bool signed;
+        try
+        {
+            signed = ReleaseSigner.Verify(manifestBytes, Convert.FromBase64String(signatureText.Trim()), publicKey);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        var parsed = signed ? ReleaseManifest.TryParse(manifestBytes) : null;
+        if (parsed is null || !TryParseVersion(parsed.Version, out var listed) || listed != version)
+        {
+            return false;
+        }
+
+        if (parsed.HashOf(name) is not { } expected)
+        {
+            return null;
+        }
+
+        var remote = await ReadLimitedAsync(list.Url, InstalledFiles.MaxBytes, cancellationToken).ConfigureAwait(false);
+        return string.Equals(Convert.ToHexString(SHA256.HashData(remote)), expected, StringComparison.OrdinalIgnoreCase)
+               && remote.AsSpan().SequenceEqual(localList);
+    }
+
     private string? CheckManifest(string manifestPath, string installerName, string installerPath, Version offered, Version running)
     {
         const string refused = "The signed list of this release does not match what was offered, so the download was deleted. Do not install it.";

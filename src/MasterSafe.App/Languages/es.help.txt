@@ -313,6 +313,7 @@ MasterSafe está construido con la seguridad en primer lugar.
 - La bóveda, incluidos los archivos adjuntos, se comprime y se cifra con AES-256-GCM, que además autentica los datos para detectar manipulaciones.
 - La bóveda se cifra con una clave aleatoria. Esa clave se guarda una vez por cada forma de desbloqueo (contraseña maestra, Windows Hello, llave de seguridad), cada una protegida por separado.
 - Las versiones se firman con la firma poscuántica ML-DSA-65, de modo que se puede demostrar que una descarga es genuina. Las copias de recuperación usan un esquema híbrido ML-KEM-768 más ECDH P-384.
+- Al arrancar, MasterSafe compara sus propios archivos del programa con la lista que vino con ellos y, cuando puede buscar actualizaciones, esa lista con la versión firmada. Se avisa de cualquier archivo del programa cambiado, que falte o añadido.
 - Los archivos que abre (bóvedas, copias, exportaciones de KeePass, imágenes QR, descargas) se tratan como no fiables: tamaños, ajustes de derivación de clave, anidamiento y cantidades se limitan antes de leer nada.
 - Los secretos nunca se escriben en disco en texto plano, nunca se registran y no se envían por la red.
 

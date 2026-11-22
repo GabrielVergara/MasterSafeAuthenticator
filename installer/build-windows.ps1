@@ -38,6 +38,10 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 # Debug symbols are for developers. SkiaSharp 4 ships two native ones of over 110 MB that users never need.
 Get-ChildItem $publishDir -Recurse -Filter *.pdb | Remove-Item -Force
 
+# The list of program files the app checks at start-up; a copy goes with the release files (see InstalledFiles.cs).
+dotnet run --project (Join-Path $root "src\MasterSafe.Cli\MasterSafe.Cli.csproj") -c Release -- installed-files $publishDir $Version win-x64 $artifacts
+if ($LASTEXITCODE -ne 0) { throw "Writing the list of installed files failed" }
+
 $iscc = @(
     "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
     "$env:ProgramFiles\Inno Setup 6\ISCC.exe",

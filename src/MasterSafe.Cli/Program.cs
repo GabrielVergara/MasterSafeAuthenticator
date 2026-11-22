@@ -14,7 +14,7 @@ using MasterSafe.PostQuantum;
 //   MasterSafe.Cli keygen <name>                        writes <name>.pub and <name>.key (keep the .key file secret)
 //   MasterSafe.Cli sign <file> <name>.key               writes <file>.sig
 //   MasterSafe.Cli manifest <folder> <version>          writes the release manifest listing the installers and packages in a folder
-if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "manifest" or "help" or "--help" or "-h")
+if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "manifest" or "installed-files" or "help" or "--help" or "-h")
 {
     return RunSigningCommand(args);
 }
@@ -39,6 +39,7 @@ static int RunSigningCommand(string[] args)
             "verify-release" when args.Length == 3 => VerifyRelease(args[1], args[2]),
             "fingerprint" when args.Length == 2 => Fingerprint(args[1]),
             "manifest" when args.Length == 3 => Manifest(args[1], args[2]),
+            "installed-files" when args.Length is 4 or 5 => WriteInstalledFiles(args[1], args[2], args[3], args.Length == 5 ? args[4] : null),
             "help" or "--help" or "-h" => Usage(0),
             _ => Usage(64),
         };
@@ -72,6 +73,8 @@ static int Usage(int exitCode)
     output.WriteLine("  keygen <name>                      create a signing key pair (maintainers)");
     output.WriteLine("  sign <file> <key>                  sign a file (maintainers)");
     output.WriteLine("  manifest <folder> <version>        write the release manifest for the files in a folder (maintainers)");
+    output.WriteLine("  installed-files <folder> <version> <platform> [<release folder>]");
+    output.WriteLine("                                     list the program files with their SHA-256 (build scripts)");
     return exitCode;
 }
 
@@ -126,6 +129,25 @@ static int Manifest(string folder, string version)
 
     File.WriteAllBytes(Path.Combine(folder, ReleaseManifest.FileName), ReleaseManifest.Build(folder, version, names));
     Console.WriteLine($"Wrote {ReleaseManifest.FileName} for version {version} with {names.Count} files.");
+    return 0;
+}
+
+// The list of program files the app checks at start-up. A copy goes with the release files, where the signed manifest
+// vouches for it.
+static int WriteInstalledFiles(string folder, string version, string platform, string? releaseFolder)
+{
+    var list = InstalledFiles.Build(folder, version, platform);
+    File.WriteAllBytes(Path.Combine(folder, InstalledFiles.FileName), list);
+    Console.WriteLine($"Wrote {InstalledFiles.FileName} for {version} {platform}.");
+    if (releaseFolder is not null)
+    {
+        var name = InstalledFiles.AssetName(version, platform);
+        File.WriteAllBytes(Path.Combine(releaseFolder, name), list);
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(list)).ToLowerInvariant();
+        File.WriteAllText(Path.Combine(releaseFolder, name + ".sha256"), $"{hash}  {name}\n");
+        Console.WriteLine($"Wrote {name} and its .sha256.");
+    }
+
     return 0;
 }
 

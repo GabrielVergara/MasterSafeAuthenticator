@@ -77,6 +77,10 @@ public sealed partial class UpdatesViewModel : ViewModelBase
 
     private bool CanRun => !IsBusy && _checker is not null;
 
+    /// <summary>Compares the list of program files with the signed release; nothing when updates are handled elsewhere.</summary>
+    public Task ConfirmProgramFilesAsync()
+        => _checker is null ? Task.CompletedTask : ProgramFiles.ConfirmAsync(_checker, AppContext.BaseDirectory);
+
     /// <summary>Asks GitHub for the latest release. Returns true when a newer one exists.</summary>
     public async Task<bool> CheckAsync(bool quiet = false)
     {

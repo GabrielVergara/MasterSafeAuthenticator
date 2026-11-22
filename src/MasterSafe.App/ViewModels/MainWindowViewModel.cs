@@ -422,6 +422,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
             _lockoutTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _lockoutTimer.Tick += (_, _) => UpdateLockout();
+
+            // The program's own files are compared with their list in the background; a problem shows as a notice.
+            ProgramFiles.Changed += (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                if (IsUnlocked)
+                {
+                    RefreshNotices();
+                }
+            });
+            _programFilesCheck = Task.Run(() => ProgramFiles.CheckFolder(AppContext.BaseDirectory));
         }
 
         UpdateLockout();
@@ -558,6 +568,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     private UpdateInfo? _newerRelease;
+    private Task? _programFilesCheck;
 
     /// <summary>Rebuilds the reminders at the top of the codes page.</summary>
     public void RefreshNotices()
@@ -636,6 +647,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             notices.Insert(0, olderCopy);
         }
 
+        if (ProgramFiles.HasProblem)
+        {
+            notices.Insert(0, new NoticeRow(
+                "program-files",
+                ProgramFiles.Describe(),
+                "Open downloads",
+                new RelayCommand(() => AboutViewModel.OpenAllowed(AppInfo.ReleasesUrl))));
+        }
+
         Dashboard.SetNotices(notices);
     }
 
@@ -651,6 +671,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         _updateChecked = true;
         _ = Settings.Updates.CheckAsync(quiet: true);
+        _ = ConfirmProgramFilesAsync();
+    }
+
+    // With the folder checked, compares its list with the signed release (only when MasterSafe may go online).
+    private async Task ConfirmProgramFilesAsync()
+    {
+        if (_programFilesCheck is not null)
+        {
+            await _programFilesCheck;
+            await Settings.Updates!.ConfirmProgramFilesAsync();
+        }
     }
 
     /// <summary>Resets the failure counter after a correct unlock and tells the user about any wrong attempts before it.</summary>

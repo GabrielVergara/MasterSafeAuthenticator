@@ -65,6 +65,7 @@
             <TextBlock Text="Check your download" FontWeight="SemiBold" FontSize="15" />
             <TextBlock TextWrapping="Wrap" Opacity="0.8"
                        Text="Every release is signed with the post-quantum signature ML-DSA-65. This is the SHA-256 fingerprint of the signing key. It must match the one in the project's README and security policy." />
+            <TextBlock Text="{Binding ProgramFilesText}" TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
             <TextBox Text="{Binding SigningKeyFingerprint, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                      FontFamily="Consolas, Menlo, monospace" FontSize="12" />
           </StackPanel>

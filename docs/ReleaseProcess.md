@@ -40,6 +40,16 @@ could offer an old, signed installer as "the new version". From 1.6 the app down
 unless the signed version equals the version offered, is newer than the running version, and lists this installer with the same
 SHA-256. The `.sig` file of each installer is still produced, so versions before 1.6 keep verifying updates as they did.
 
+## The list of installed files
+
+`installer/build-windows.ps1` and `installer/linux/build-linux.sh` run `MasterSafe.Cli installed-files`, which writes
+`installed-files.txt` into the program folder (so it is installed with the app) and the same list as
+`MasterSafe-Authenticator-<version>-<platform>-installed-files.txt` with a `.sha256` next to the release files. The release
+workflow uploads it like any other file, so `sign-release.ps1` checks its attestation and checksum, signs it and lists it
+in the signed manifest; nothing changes in the signing steps. The app compares its folder with the local list at start-up
+and, when it may look for updates, the local list with the signed one. Anyone can check by hand with
+`tail -n +2 installed-files.txt | sha256sum -c` in the program folder.
+
 ## The signing key
 
 - It lives in `~/.masterSafe-signing/masterSafe-release.key` on the maintainer's computer, **not** in the repository, not in
