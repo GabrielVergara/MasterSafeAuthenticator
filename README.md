@@ -30,7 +30,7 @@ The pictures use made-up data. The app keeps itself out of screenshots, so they 
 - TOTP / HOTP codes (RFC 6238 / RFC 4226; SHA-1, SHA-256, SHA-512; 6 or 8 digits) from an `otpauth://` link or a QR code
   image (drag it onto the window, or choose the file). Search, sort, your own order, groups and rename on the codes page,
   and codes can stay hidden until you click them.
-- Password manager: folders with icons you choose, attached files (5 MB each), a recycle bin (30 days), entry history,
+- Password manager: folders with icons you choose (move a folder with everything in it by dragging), attached files (5 MB each), a recycle bin (30 days), entry history,
   a strength meter, a password generator, sorting, tags, shortcuts, right-click menus and drag and drop. Besides logins it
   keeps secure notes, payment cards, identities and extra fields, with letter icons and an optional website icon.
 - **Password health**: weak, reused and old passwords, possible copies, `http://` addresses and expiry dates, plus an
