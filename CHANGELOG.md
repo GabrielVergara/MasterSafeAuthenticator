@@ -31,6 +31,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   format of `sha256sum`). At start-up MasterSafe compares its own files with that list and shows a notice for a changed,
   missing or added program file (such as a planted `.dll`). When it may look for updates, it also compares the list with
   the copy in the signed release. About shows the result.
+  `MasterSafe.Cli check-installed <program folder>` runs the same check from the command line. The Windows installer
+  now removes the `.dll` and `.pdb` files of earlier versions first, so no leftover file is reported.
 - **Sign-in pause and automatic lock ignore clock changes.** Both are timed by the system tick count, so moving the clock
   forward does not end a pause after wrong passwords and moving it back does not keep the vault open longer.
 - **A turned-back sign-in counter is noticed.** The vault keeps, per computer, how many wrong master passwords there were

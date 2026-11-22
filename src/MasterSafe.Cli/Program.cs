@@ -14,7 +14,7 @@ using MasterSafe.PostQuantum;
 //   MasterSafe.Cli keygen <name>                        writes <name>.pub and <name>.key (keep the .key file secret)
 //   MasterSafe.Cli sign <file> <name>.key               writes <file>.sig
 //   MasterSafe.Cli manifest <folder> <version>          writes the release manifest listing the installers and packages in a folder
-if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "manifest" or "installed-files" or "help" or "--help" or "-h")
+if (args.Length > 0 && args[0] is "keygen" or "sign" or "verify" or "verify-release" or "fingerprint" or "manifest" or "installed-files" or "check-installed" or "help" or "--help" or "-h")
 {
     return RunSigningCommand(args);
 }
@@ -39,6 +39,7 @@ static int RunSigningCommand(string[] args)
             "verify-release" when args.Length == 3 => VerifyRelease(args[1], args[2]),
             "fingerprint" when args.Length == 2 => Fingerprint(args[1]),
             "manifest" when args.Length == 3 => Manifest(args[1], args[2]),
+            "check-installed" when args.Length == 2 => CheckInstalled(args[1]),
             "installed-files" when args.Length is 4 or 5 => WriteInstalledFiles(args[1], args[2], args[3], args.Length == 5 ? args[4] : null),
             "help" or "--help" or "-h" => Usage(0),
             _ => Usage(64),
@@ -73,6 +74,7 @@ static int Usage(int exitCode)
     output.WriteLine("  keygen <name>                      create a signing key pair (maintainers)");
     output.WriteLine("  sign <file> <key>                  sign a file (maintainers)");
     output.WriteLine("  manifest <folder> <version>        write the release manifest for the files in a folder (maintainers)");
+    output.WriteLine("  check-installed <program folder>   compare the installed program files with their list");
     output.WriteLine("  installed-files <folder> <version> <platform> [<release folder>]");
     output.WriteLine("                                     list the program files with their SHA-256 (build scripts)");
     return exitCode;
@@ -149,6 +151,29 @@ static int WriteInstalledFiles(string folder, string version, string platform, s
     }
 
     return 0;
+}
+
+// The same check the app runs at start-up, for a program folder.
+static int CheckInstalled(string folder)
+{
+    var report = InstalledFiles.Check(folder);
+    if (!report.Available)
+    {
+        Console.WriteLine($"No {InstalledFiles.FileName} in that folder, so there is nothing to compare with.");
+        return 2;
+    }
+
+    Console.WriteLine($"List of version {report.Version} ({report.Platform}).");
+    foreach (var (label, files) in new[] { ("changed", report.Changed), ("missing", report.Missing), ("added", report.Unexpected) })
+    {
+        foreach (var file in files)
+        {
+            Console.WriteLine($"  {label}: {file}");
+        }
+    }
+
+    Console.WriteLine(report.Ok ? "All program files match the list." : "SOME PROGRAM FILES DO NOT MATCH THE LIST. Reinstall from the official download.");
+    return report.Ok ? 0 : 1;
 }
 
 static int VerifyRelease(string folder, string pubFile)
