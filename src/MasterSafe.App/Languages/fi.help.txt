@@ -79,6 +79,7 @@ Salasanat-sivun vasemmalla oleva luettelo näyttää kansiosi ja sen, montako sa
 
 - Uusi kansio: kirjoita nimi luettelon alla olevaan kenttään ja valitse Uusi kansio. Se luodaan valitun kansion sisään. Nimi kuten Työ/Etä luo molemmat tasot.
 - Nimeä valittu uudelleen nimeää kansion kaikkine sisältöineen. Poista kansio poistaa vain kansion: sen salasanat siirtyvät yhden tason ylemmäs eikä niitä koskaan poisteta.
+- Siirrä kansio: valitse kansio luettelon alla olevasta ruudusta ja valitse Siirrä kansio, tai vedä kansio toisen kansion päälle tai kohdan Kaikki salasanat päälle, jolloin se siirtyy ylimmälle tasolle. Sen salasanat ja alikansiot siirtyvät mukana.
 - Vaihda kuvake antaa kansiolle yhden 24 kuvakkeesta. Valitse tavallinen kansio palataksesi.
 - Salasanojen siirtäminen: aseta Kansio merkinnän lomakkeella, valitse useita merkintöjä ja käytä kohtaa "Siirrä valitut kansioon" tai vedä merkintä kansion päälle. Valitun merkinnän vetäminen siirtää kaikki valitut.
 - Napsauta kansiota hiiren oikealla painikkeella samoja toimintoja varten. Vedä jakajaa muuttaaksesi luettelon leveyttä ja kaksoisnapsauta jakajaa sovittaaksesi sen taas kansioiden nimiin.

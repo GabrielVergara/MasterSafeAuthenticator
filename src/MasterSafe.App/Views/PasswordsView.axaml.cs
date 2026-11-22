@@ -19,6 +19,7 @@ public partial class PasswordsView : UserControl
 {
     /// <summary>The clipboard-style format that carries the id of an entry while it is dragged onto a folder.</summary>
     internal static readonly DataFormat<string> EntryDragFormat = DataFormat.CreateStringApplicationFormat("mastersafe-entry-id");
+    internal static readonly DataFormat<string> FolderDragFormat = DataFormat.CreateStringApplicationFormat("mastersafe-folder-path");
 
     private PasswordsViewModel? _vm;
     private PointerPressedEventArgs? _dragStart;
@@ -351,25 +352,99 @@ public partial class PasswordsView : UserControl
         _vm!.DeleteFolderCommand.Execute(null);
     }
 
+    private void OnFolderMenuMove(object? sender, RoutedEventArgs e)
+    {
+        var node = NodeOf(sender);
+        if (node?.Path is null)
+        {
+            return;
+        }
+
+        SelectNode(node);
+        _vm!.Status = "Choose where to move it in the box under the folder list, then choose Move folder.";
+        Dispatcher.UIThread.Post(() =>
+        {
+            FolderMoveBox.Focus();
+            FolderMoveBox.IsDropDownOpen = true;
+        }, DispatcherPriority.Background);
+    }
+
+    // A folder is dragged by its line in the list, like a password by its card.
+    private PointerPressedEventArgs? _folderDragStart;
+    private string? _folderDragPath;
+    private Point _folderDragOrigin;
+
+    private void OnFolderPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (NodeOf(sender) is { Path: { } path, IsBin: false } && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            _folderDragStart = e;
+            _folderDragPath = path;
+            _folderDragOrigin = e.GetPosition(this);
+        }
+    }
+
+    private async void OnFolderPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (_folderDragStart is null || _folderDragPath is null || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        var moved = e.GetPosition(this) - _folderDragOrigin;
+        if (Math.Abs(moved.X) + Math.Abs(moved.Y) < 10)
+        {
+            return;
+        }
+
+        var start = _folderDragStart;
+        var path = _folderDragPath;
+        _folderDragStart = null;
+        _folderDragPath = null;
+
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(FolderDragFormat, path));
+        await DragDrop.DoDragDropAsync(start, data, DragDropEffects.Move);
+    }
+
+    private void OnFolderPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        _folderDragStart = null;
+        _folderDragPath = null;
+    }
+
     private FolderNode? NodeAt(DragEventArgs e)
         => (e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(true)?.DataContext as FolderNode;
 
     private void OnFolderDragOver(object? sender, DragEventArgs e)
     {
         var node = NodeAt(e);
-        e.DragEffects = e.DataTransfer.Contains(EntryDragFormat) && node is { } n && (n.IsBin || n.Path is not null)
-            ? DragDropEffects.Move
-            : DragDropEffects.None;
+        e.DragEffects = node switch
+        {
+            null => DragDropEffects.None,
+            // A folder goes into another folder, or to the top level on "All passwords"; never into the bin.
+            _ when e.DataTransfer.Contains(FolderDragFormat) => node.IsBin ? DragDropEffects.None : DragDropEffects.Move,
+            _ when e.DataTransfer.Contains(EntryDragFormat) && (node.IsBin || node.Path is not null) => DragDropEffects.Move,
+            _ => DragDropEffects.None,
+        };
         e.Handled = true;
     }
 
     private void OnFolderDrop(object? sender, DragEventArgs e)
     {
-        if (_vm is not null
+        var node = NodeAt(e);
+        if (_vm is not null && e.DataTransfer.TryGetValue(FolderDragFormat) is { } folder)
+        {
+            if (node is { IsBin: false })
+            {
+                _vm.MoveFolderTo(folder, node.Path ?? string.Empty);
+            }
+        }
+        else if (_vm is not null
             && e.DataTransfer.TryGetValue(EntryDragFormat) is { } text
             && Guid.TryParse(text, out var id))
         {
-            _vm.MoveDraggedTo(id, NodeAt(e));
+            _vm.MoveDraggedTo(id, node);
         }
 
         e.Handled = true;

@@ -2,6 +2,15 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## 1.8.2 (2026-11-23)
+
+### Added
+- **Move folders:** a password folder can be moved into another folder or to the top level, with its passwords,
+  subfolders, empty subfolders and icons. Use the "Move the selected folder into" box under the folder list, the
+  folder's right-click menu (Move to...), or drag the folder onto another one, or onto All passwords for the top level.
+  A move into the folder itself or one of its subfolders, onto a name that already exists there, or deeper than
+  8 levels is refused and changes nothing.
+
 ## 1.8.1 (2026-11-22)
 
 ### Added
