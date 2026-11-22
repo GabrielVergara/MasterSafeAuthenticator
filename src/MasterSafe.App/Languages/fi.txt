@@ -869,3 +869,6 @@ Key part {0} is damaged. Use the other two. => Avaimen osa {0} on vioittunut. K�
 A key part is damaged. => Avaimen osa on vioittunut.
 This is not a MasterSafe recovery key part. => T채m채 ei ole MasterSafen palautusavaimen osa.
 Choose the recovery backup and the recovery key file (or read a printed key, or add its parts), and enter the key's passphrase. => Valitse palautusvarmuuskopio ja palautusavaintiedosto (tai lue tulostettu avain tai lis채채 sen osat) ja kirjoita avaimen salalause.
+First you choose the recovery key file (.msrk) you saved in step 1. => Valitse ensin vaiheessa 1 tallentamasi palautusavaintiedosto (.msrk).
+Open the recovery key file you saved (.msrk) => Avaa tallentamasi palautusavaintiedosto (.msrk)
+There is no recovery key yet. Create one first in step 1 above. => Palautusavainta ei ole viel채. Luo se ensin yll채 vaiheessa 1.

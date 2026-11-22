@@ -871,3 +871,6 @@ Key part {0} is damaged. Use the other two. => La parte {0} de la clave está da
 A key part is damaged. => Una parte de la clave está dañada.
 This is not a MasterSafe recovery key part. => Esto no es una parte de una clave de recuperación de MasterSafe.
 Choose the recovery backup and the recovery key file (or read a printed key, or add its parts), and enter the key's passphrase. => Elija la copia de recuperación y el archivo de la clave de recuperación (o lea una clave impresa, o añada sus partes), y escriba la frase de contraseña de la clave.
+First you choose the recovery key file (.msrk) you saved in step 1. => Primero se elige el archivo de la clave de recuperación (.msrk) que guardó en el paso 1.
+Open the recovery key file you saved (.msrk) => Abra el archivo de la clave de recuperación que guardó (.msrk)
+There is no recovery key yet. Create one first in step 1 above. => Todavía no hay clave de recuperación. Cree una primero en el paso 1, más arriba.

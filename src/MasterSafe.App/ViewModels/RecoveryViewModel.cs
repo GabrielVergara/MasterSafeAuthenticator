@@ -200,7 +200,15 @@ public sealed partial class RecoveryViewModel : ViewModelBase
     // Asks for a recovery key file and reads it, refusing anything too large to be one. Null when nothing was chosen.
     private async Task<byte[]?> ChooseKeyFileAsync()
     {
-        var keyPath = await _services!.Dialogs.OpenFileAsync("Choose your recovery key file", "Recovery key files", "*.msrk");
+        var settings = _services!.SettingsStore.Load();
+        if (!HasKey && string.IsNullOrEmpty(settings.RecoveryKeyFolder))
+        {
+            Status = "There is no recovery key yet. Create one first in step 1 above.";
+            return null;
+        }
+
+        var keyPath = await _services.Dialogs.OpenFileInAsync(
+            "Open the recovery key file you saved (.msrk)", settings.RecoveryKeyFolder, "Recovery key files", "*.msrk");
         if (keyPath is null)
         {
             return null;
@@ -212,7 +220,20 @@ public sealed partial class RecoveryViewModel : ViewModelBase
             throw new InvalidDataException("That file is too large to be a recovery key.");
         }
 
-        return await File.ReadAllBytesAsync(full);
+        var bytes = await File.ReadAllBytesAsync(full);
+        RememberKeyFolder(full);
+        return bytes;
+    }
+
+    private void RememberKeyFolder(string keyPath)
+    {
+        var settings = _services!.SettingsStore.Load();
+        var folder = Path.GetDirectoryName(keyPath);
+        if (folder != settings.RecoveryKeyFolder)
+        {
+            settings.RecoveryKeyFolder = folder;
+            _services.SettingsStore.Save(settings);
+        }
     }
 
     /// <summary>The fingerprint of the recovery key the open vault trusts; null until it has one.</summary>
@@ -360,6 +381,7 @@ public sealed partial class RecoveryViewModel : ViewModelBase
             await File.WriteAllBytesAsync(path, created.FileBytes);
 
             var settings = _services.SettingsStore.Load();
+            settings.RecoveryKeyFolder = Path.GetDirectoryName(Path.GetFullPath(path));
             settings.RecoveryPublicKey = Convert.ToBase64String(created.PublicKey);
             settings.RecoveryKeyId = created.KeyId;
             settings.RecoveryKeyCreatedUtc = created.CreatedUtc;

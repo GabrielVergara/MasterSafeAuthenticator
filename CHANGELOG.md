@@ -17,6 +17,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   rebuild the key file, 1 alone tells nothing about it (Shamir's secret sharing, 2 of 3). The key still needs its
   passphrase. **Add a key part...** on the "Forgot your master password?" panel takes them; a damaged part or parts of
   different keys are named.
+- Printing or splitting the recovery key first asks to open the saved `.msrk` file; the picker now says so and starts
+  in the folder where the key was saved.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

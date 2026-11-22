@@ -17,6 +17,10 @@ public interface IFileDialogs
     /// <param name="patterns">File patterns such as <c>*.sauth</c>.</param>
     Task<string?> OpenFileAsync(string title, string description, params string[] patterns);
 
+    /// <summary>Like <see cref="OpenFileAsync"/>, starting in <paramref name="startFolder"/> when it exists.</summary>
+    Task<string?> OpenFileInAsync(string title, string? startFolder, string description, params string[] patterns)
+        => OpenFileAsync(title, description, patterns);
+
     /// <summary>Asks the user where to save a file, starting in <paramref name="startFolder"/> when given. Returns null when cancelled.</summary>
     Task<string?> SaveFileAsync(string title, string suggestedName, string extension, string? startFolder = null);
 
@@ -31,7 +35,11 @@ public interface IFileDialogs
 public sealed class WindowFileDialogs(Func<TopLevel?> owner) : IFileDialogs
 {
     /// <inheritdoc />
-    public async Task<string?> OpenFileAsync(string title, string description, params string[] patterns)
+    public Task<string?> OpenFileAsync(string title, string description, params string[] patterns)
+        => OpenFileInAsync(title, null, description, patterns);
+
+    /// <inheritdoc />
+    public async Task<string?> OpenFileInAsync(string title, string? startFolder, string description, params string[] patterns)
     {
         var storage = owner()?.StorageProvider;
         if (storage is null)
@@ -39,9 +47,13 @@ public sealed class WindowFileDialogs(Func<TopLevel?> owner) : IFileDialogs
             return null;
         }
 
+        var start = !string.IsNullOrWhiteSpace(startFolder) && Directory.Exists(startFolder)
+            ? await storage.TryGetFolderFromPathAsync(startFolder)
+            : null;
         var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
+            SuggestedStartLocation = start,
             AllowMultiple = false,
             FileTypeFilter = [new FilePickerFileType(description) { Patterns = patterns }, FilePickerFileTypes.All],
         });
