@@ -27,6 +27,8 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
   fixed narrow column.
 - "Forgot your master password?": the **Add a key part...** button wraps instead of being cut off, and a message about
   restoring shows under **Restore my data**, where it is seen.
+- **Buttons follow the theme.** Secondary buttons have the accent border and text (green) instead of plain grey, in
+  light and dark; high contrast is unchanged.
 
 ### Security
 - Deleting a vault no longer removes Windows Hello or security-key credentials that another listed vault still uses (for

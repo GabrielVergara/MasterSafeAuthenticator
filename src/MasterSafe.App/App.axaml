@@ -19,6 +19,16 @@
           <SolidColorBrush x:Key="TileBorderBrush" Color="Transparent" />
           <SolidColorBrush x:Key="CodeBrush" Color="#12263A" />
           <SolidColorBrush x:Key="TimerBrush" Color="#A15F00" />
+          <!-- Secondary buttons follow the theme: accent border and text instead of plain grey. -->
+          <SolidColorBrush x:Key="ButtonBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E6F3F0" />
+          <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#CCE7E1" />
+          <SolidColorBrush x:Key="ButtonBorderBrush" Color="#17806B" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#17806B" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#17806B" />
+          <SolidColorBrush x:Key="ButtonForeground" Color="#10614F" />
+          <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#10614F" />
+          <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#10614F" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
           <SolidColorBrush x:Key="CardBrush" Color="#16222F" />
@@ -27,6 +37,16 @@
           <SolidColorBrush x:Key="TileBorderBrush" Color="Transparent" />
           <SolidColorBrush x:Key="CodeBrush" Color="#E8F1F2" />
           <SolidColorBrush x:Key="TimerBrush" Color="#F2B33D" />
+          <!-- Secondary buttons follow the theme: accent border and text instead of plain grey. -->
+          <SolidColorBrush x:Key="ButtonBackground" Color="#16222F" />
+          <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#1D3B3A" />
+          <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#24504B" />
+          <SolidColorBrush x:Key="ButtonBorderBrush" Color="#2CC3A5" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#2CC3A5" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#2CC3A5" />
+          <SolidColorBrush x:Key="ButtonForeground" Color="#8BE3D1" />
+          <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#8BE3D1" />
+          <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#8BE3D1" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="{x:Static local:App.HighContrastVariant}">
           <SolidColorBrush x:Key="CardBrush" Color="#000000" />
@@ -109,6 +129,10 @@
     <Style Selector="Button.danger /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
     </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+    </Style>
 
     <!-- Quiet text buttons, like the website menu: no frame, a soft highlight under the pointer. -->
     <Style Selector="Button.link">
@@ -133,6 +157,11 @@
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="#C9D6DF" />
       <Setter Property="FontSize" Value="14" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.nav:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#24476A" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
     </Style>
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="#1A324A" />
