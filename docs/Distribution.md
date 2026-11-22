@@ -1,15 +1,42 @@
-# Distribution: winget and Flathub
+# Distribution: Microsoft Store, winget and Flathub
 
-MasterSafe is offered through two free stores besides the GitHub releases:
+MasterSafe is offered through free stores besides the GitHub releases:
 
 | Store | Command once accepted | Package id | Files here |
 | --- | --- | --- | --- |
+| Microsoft Store | Search for MasterSafe Authenticator, or <https://apps.microsoft.com/detail/9PBQMTB6GJT0> | Store ID `9PBQMTB6GJT0`, package `GabrielVergaraEzcurdia.MasterSafeAuthenticator` | `installer/windows/msix/`, `installer/build-msix.ps1` |
 | Windows Package Manager | `winget install mastersafe` | `GabrielVergara.MasterSafeAuthenticator` | `packaging/winget/<version>/` |
 | Flathub | `flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` | `io.github.GabrielVergara.MasterSafeAuthenticator` | `packaging/flatpak/` |
 
 Both install the **official signed release files**: winget downloads the installer from the GitHub release and checks
 its SHA-256; the Flatpak repackages the Linux `.tar.gz`, also checked by SHA-256. Licence 1.2, section 3, allows these
 approved repositories to do that. Neither needs a code-signing certificate.
+
+## Microsoft Store
+
+The Store signs the package itself, so Store copies are trusted by SmartScreen without a code-signing certificate.
+The owner holds the Partner Center account (individual) and uploads each version; the app was reserved as an
+MSIX app on 2026-11-22. The reservation lapses if nothing is submitted within three months.
+
+- **Package identity** (from Partner Center, Product identity; it must never change): name
+  `GabrielVergaraEzcurdia.MasterSafeAuthenticator`, publisher `CN=EC0E6F3B-2BDE-408E-8186-63090AD200E2`, publisher
+  display name `Gabriel Vergara Ezcurdia`, family name `GabrielVergaraEzcurdia.MasterSafeAuthenticator_er3303etstrd0`.
+  These are in `installer/windows/msix/AppxManifest.xml`.
+- **Build:** `.\installer\build-msix.ps1 -Version X.Y.Z -Source <release portable zip>`. Using the signed release's zip
+  means the Store gets exactly the published program files. The package version is `X.Y.Z.0`.
+- **The vault stays outside the package.** Normally Windows moves new files a packaged app writes in `%LocalAppData%`
+  into the package's own folder and deletes them when the package is removed. The manifest turns that off
+  (`desktop6:FileSystemWriteVirtualization` disabled, restricted capability `unvirtualizedResources`), so all copies,
+  installer, portable and Store, share `%LocalAppData%\MasterSafe`. A test checks the manifest keeps this. In the
+  submission, justify the capability: "MasterSafe is a password manager. Its encrypted vault must stay in
+  %LocalAppData%\MasterSafe, shared with the installer and portable versions, and must not be deleted when the package
+  is uninstalled." `runFullTrust` is needed because it is a desktop (Avalonia/.NET) app.
+- **Updates:** inside the package (it has a package identity), MasterSafe never looks for or downloads updates; the
+  Settings page says the Store updates it.
+- **Test on this computer before uploading:** the unsigned package cannot be installed. Sign a copy with a test
+  certificate whose subject equals the publisher above, trust that certificate in *Local Machine > Trusted People*
+  (administrator), and install it with `Add-AppxPackage`. Close any other MasterSafe first: it uses the same vault.
+  Remove the test package and certificate afterwards.
 
 ## winget
 

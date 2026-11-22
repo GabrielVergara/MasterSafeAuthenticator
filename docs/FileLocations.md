@@ -61,6 +61,8 @@ passphrase of your recovery key.
 | --- | --- |
 | Windows installer (default, current user) | `%LocalAppData%\Programs\MasterSafe Authenticator`. Every installed program folder also holds `installed-files.txt`, the list the start-up check uses |
 | Windows installer (all users, if you choose it) | `C:\Program Files\MasterSafe Authenticator` |
+| Windows portable zip | Wherever you unpack it. Nothing else is written outside the vault folders above; delete the folder to remove the program |
+| Microsoft Store | `C:\Program Files\WindowsApps\GabrielVergaraEzcurdia.MasterSafeAuthenticator_<version>_x64__er3303etstrd0`, managed by Windows. The package turns off file-system redirection, so the vault stays in `%LocalAppData%\MasterSafe` and survives uninstalling |
 | Linux `install.sh` | `~/.local/opt/masterSafe-authenticator`, launcher `~/.local/bin/masterSafe-authenticator`, uninstaller `~/.local/bin/masterSafe-authenticator-uninstall` (and `uninstall.sh` in the program folder), menu entry `~/.local/share/applications/masterSafe-authenticator.desktop`, icon `~/.local/share/icons/hicolor/256x256/apps/masterSafe-authenticator.png` |
 
 Windows also records the install in the registry (the Uninstall list) and creates a Start Menu shortcut.

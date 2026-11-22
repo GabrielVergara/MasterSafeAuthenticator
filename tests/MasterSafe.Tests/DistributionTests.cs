@@ -38,6 +38,23 @@ public sealed partial class DistributionTests
         => AppInfo.StoreFor(flatpakId).Should().Be(expected);
 
     [Fact]
+    public void InsideAnMsixPackage_TheMicrosoftStoreProvidesTheUpdates()
+    {
+        AppInfo.StoreFor(null, msixPackaged: true).Should().Be(AppInfo.MicrosoftStore);
+        var updates = new UpdatesViewModel(checker: null, updatedBy: AppInfo.MicrosoftStore);
+        updates.UpdatesItself.Should().BeFalse();
+        updates.StoreText.Should().Contain("Microsoft Store").And.NotContain("flatpak");
+    }
+
+    [Fact]
+    public void TheStoreManifest_KeepsTheVaultOutsideThePackage()
+    {
+        var manifest = File.ReadAllText(Path.Combine(Root(), "installer", "windows", "msix", "AppxManifest.xml"));
+        manifest.Should().Contain("<desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>")
+            .And.Contain("unvirtualizedResources", "otherwise uninstalling the package would delete the vault");
+    }
+
+    [Fact]
     public async Task AStoreCopy_NeverLooksForUpdatesItself()
     {
         var updates = new UpdatesViewModel(checker: null, updatedBy: "Flathub");

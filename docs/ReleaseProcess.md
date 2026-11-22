@@ -31,6 +31,8 @@ verification.
    the pull request that Flathub's data checker opens after checking it points at the signed release. See
    [Distribution.md](Distribution.md).
 
+**Microsoft Store:** after publishing, download the release's `-win-x64-portable.zip` with the other files, check them with `verify-release`, run `.\installer\build-msix.ps1 -Version X.Y.Z -Source <the zip>` and upload the `.msix` in Partner Center (see [Distribution.md](Distribution.md#microsoft-store)).
+
 **Scoop:** after publishing, run `.\scripts\update-scoop.ps1 -Version X.Y.Z`, test it with `scoop install .\bucket\mastersafe.json` and commit `bucket/mastersafe.json` (a test fails if it is stale). See [Distribution.md](Distribution.md).
 
 ## Why there is a signed manifest

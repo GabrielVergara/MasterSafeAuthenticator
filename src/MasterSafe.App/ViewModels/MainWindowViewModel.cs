@@ -544,7 +544,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            return new UpdateChecker(UpdateChecker.CreateClient(), ReleaseKey.Load(), AppInfo.Version);
+            return new UpdateChecker(UpdateChecker.CreateClient(), ReleaseKey.Load(), AppInfo.Version)
+            {
+                Portable = UpdateChecker.IsPortable(AppContext.BaseDirectory),
+            };
         }
         catch (Exception ex) when (ex is InvalidOperationException or FormatException)
         {

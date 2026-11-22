@@ -50,6 +50,8 @@ jobs:
           path: |
             artifacts/*-setup.exe
             artifacts/*-setup.exe.sha256
+            artifacts/*-win-x64-portable.zip
+            artifacts/*-win-x64-portable.zip.sha256
             artifacts/MasterSafe-Cli-*-win-x64.exe
             artifacts/MasterSafe-Cli-*-win-x64.exe.sha256
             artifacts/*-win-x64-installed-files.txt

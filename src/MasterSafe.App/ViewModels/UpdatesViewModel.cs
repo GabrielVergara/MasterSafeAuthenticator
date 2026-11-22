@@ -40,9 +40,12 @@ public sealed partial class UpdatesViewModel : ViewModelBase
     public bool UpdatesItself => UpdatedBy is null;
 
     /// <summary>For example "This copy was installed from Flathub, which keeps it up to date. ..."</summary>
-    public string StoreText => UpdatedBy is null
-        ? string.Empty
-        : $"This copy was installed from {UpdatedBy}, which keeps it up to date. Update it in your software centre, or run: flatpak update";
+    public string StoreText => UpdatedBy switch
+    {
+        null => string.Empty,
+        AppInfo.MicrosoftStore => "This copy was installed from the Microsoft Store, which keeps it up to date. Update it in the Store app, under Library.",
+        _ => $"This copy was installed from {UpdatedBy}, which keeps it up to date. Update it in your software centre, or run: flatpak update",
+    };
 
     /// <summary>Progress and results.</summary>
     [ObservableProperty]
@@ -142,7 +145,9 @@ public sealed partial class UpdatesViewModel : ViewModelBase
             if (result.Verified)
             {
                 InstallerPath = result.InstallerPath;
-                Status = $"Verified. The installer was saved to {result.InstallerPath}. Close MasterSafe and run it to update; your vault is not touched.";
+                Status = result.InstallerPath!.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)
+                    ? $"Verified. The new portable copy was saved to {result.InstallerPath}. Close MasterSafe and unpack it into a new folder; your vault is not touched."
+                    : $"Verified. The installer was saved to {result.InstallerPath}. Close MasterSafe and run it to update; your vault is not touched.";
             }
             else
             {

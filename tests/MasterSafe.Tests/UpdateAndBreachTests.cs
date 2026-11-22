@@ -131,6 +131,7 @@ public sealed class UpdateAndBreachTests : IDisposable
         var names = new[]
         {
             "MasterSafe-Authenticator-9.9.9-win-x64-setup.exe",
+            "MasterSafe-Authenticator-9.9.9-win-x64-portable.zip",
             "MasterSafe-Authenticator-9.9.9-linux-x64.tar.gz",
             "MasterSafe-Authenticator-9.9.9-linux-arm64.tar.gz",
             "MasterSafe-Cli-9.9.9-win-x64.exe",
@@ -142,6 +143,24 @@ public sealed class UpdateAndBreachTests : IDisposable
         UpdateChecker.PickInstaller(info, windows: false, Architecture.X64)!.Name.Should().EndWith("linux-x64.tar.gz");
         UpdateChecker.PickInstaller(info, windows: false, Architecture.Arm64)!.Name.Should().EndWith("linux-arm64.tar.gz");
         UpdateChecker.PickInstaller(info, windows: true, Architecture.X64)!.Name.Should().NotContain("Cli");
+        UpdateChecker.PickInstaller(info, windows: true, Architecture.X64, portable: true)!.Name.Should().EndWith("win-x64-portable.zip");
+        UpdateChecker.PickInstaller(info, windows: false, Architecture.X64, portable: true)!.Name.Should().EndWith("linux-x64.tar.gz");
+    }
+
+    [Fact]
+    public void ACopyWithoutTheUninstaller_IsPortable_OnWindows()
+    {
+        var folder = Directory.CreateTempSubdirectory("ms-portable-").FullName;
+        try
+        {
+            UpdateChecker.IsPortable(folder).Should().Be(OperatingSystem.IsWindows());
+            File.WriteAllText(Path.Combine(folder, "unins000.exe"), string.Empty);
+            UpdateChecker.IsPortable(folder).Should().BeFalse();
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
     }
 
     [Fact]

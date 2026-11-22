@@ -52,12 +52,39 @@ public static class AppInfo
 
     /// <summary>
     /// The store that installs and updates this copy, or null when MasterSafe updates itself. Inside a Flatpak
-    /// (the <c>FLATPAK_ID</c> variable is set) updates come from Flathub, whose rules forbid an app updating itself.
+    /// (the <c>FLATPAK_ID</c> variable is set) updates come from Flathub, and inside an MSIX package from the Microsoft
+    /// Store; both stores forbid an app updating itself.
     /// </summary>
-    public static string? UpdatedBy { get; } = StoreFor(Environment.GetEnvironmentVariable("FLATPAK_ID"));
+    public static string? UpdatedBy { get; } = StoreFor(Environment.GetEnvironmentVariable("FLATPAK_ID"), IsPackaged());
 
-    /// <summary>The store for a given <c>FLATPAK_ID</c> value. Public for tests.</summary>
-    public static string? StoreFor(string? flatpakId) => string.IsNullOrWhiteSpace(flatpakId) ? null : "Flathub";
+    /// <summary>The store for a given <c>FLATPAK_ID</c> value and MSIX state. Public for tests.</summary>
+    public static string? StoreFor(string? flatpakId, bool msixPackaged = false)
+        => !string.IsNullOrWhiteSpace(flatpakId) ? "Flathub" : msixPackaged ? MicrosoftStore : null;
+
+    /// <summary>The name shown when the Microsoft Store updates this copy.</summary>
+    public const string MicrosoftStore = "Microsoft Store";
+
+    // A process started from an MSIX package has a package identity; any other gets APPMODEL_ERROR_NO_PACKAGE (15700).
+    private static bool IsPackaged()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return false;
+        }
+
+        try
+        {
+            var length = 0;
+            return GetCurrentPackageFullName(ref length, null) != 15700;
+        }
+        catch (EntryPointNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref int packageFullNameLength, char[]? packageFullName);
 
     /// <summary>Author of the application.</summary>
     public const string Author = "Gabriel Vergara Ezcurdia";
