@@ -2,6 +2,12 @@
 
 All notable changes to MasterSafe Authenticator. The newest version is first. Dates are when the version was built.
 
+## Unreleased
+
+### Fixed
+- The `.sha256` files of the Windows installer and command-line tool end their line with LF, so `sha256sum -c` on Linux
+  and macOS reads them (1.8.0 and earlier wrote CRLF).
+
 ## 1.8.0 (2026-11-22)
 
 ### Added
