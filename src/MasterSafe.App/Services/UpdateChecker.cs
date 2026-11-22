@@ -121,16 +121,29 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
         return Version.TryParse(clean, out version!);
     }
 
-    /// <summary>Chooses the installer or package for this system: the Windows installer, or the Linux package for this processor.</summary>
-    public static ReleaseAsset? PickInstaller(UpdateInfo info, bool windows, Architecture architecture)
+    /// <summary>
+    /// Chooses the download for this system: the Windows installer, the portable Windows zip when this copy was not
+    /// installed, or the Linux package for this processor.
+    /// </summary>
+    public static ReleaseAsset? PickInstaller(UpdateInfo info, bool windows, Architecture architecture, bool portable = false)
     {
         var suffix = windows
-            ? "-win-x64-setup.exe"
+            ? portable ? "-win-x64-portable.zip" : "-win-x64-setup.exe"
             : architecture == Architecture.Arm64 ? "-linux-arm64.tar.gz" : "-linux-x64.tar.gz";
         return info.Assets.FirstOrDefault(a => a.Name.StartsWith("MasterSafe-Authenticator-", StringComparison.Ordinal)
                                                && a.Name.EndsWith(suffix, StringComparison.Ordinal)
                                                && IsPlainFileName(a.Name));
     }
+
+    /// <summary>
+    /// True for a Windows copy unpacked from the portable zip: the installer always puts its uninstaller next to the
+    /// program, and the zip has none.
+    /// </summary>
+    public static bool IsPortable(string programFolder)
+        => OperatingSystem.IsWindows() && !File.Exists(Path.Combine(programFolder, "unins000.exe"));
+
+    /// <summary>True when this copy updates from the portable zip rather than the installer (see <see cref="IsPortable"/>).</summary>
+    public bool Portable { get; init; }
 
     // The name comes from the server and becomes a path on this computer, so it must not be able to leave the folder.
     private static bool IsPlainFileName(string name)
@@ -144,7 +157,7 @@ public sealed class UpdateChecker(HttpClient http, byte[] publicKey, string curr
     {
         ArgumentNullException.ThrowIfNull(info);
 
-        var installer = PickInstaller(info, OperatingSystem.IsWindows(), RuntimeInformation.OSArchitecture);
+        var installer = PickInstaller(info, OperatingSystem.IsWindows(), RuntimeInformation.OSArchitecture, Portable);
         var signature = installer is null ? null : info.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sig");
         var checksum = installer is null ? null : info.Assets.FirstOrDefault(a => a.Name == installer.Name + ".sha256");
         var manifest = info.Assets.FirstOrDefault(a => a.Name == ReleaseManifest.FileName);

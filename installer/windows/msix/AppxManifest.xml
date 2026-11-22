@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Microsoft Store package. installer\build-msix.ps1 fills in the version and packs it with the published program.
+  The identity comes from Partner Center (Product identity) and must not change.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop6 rescap">
+
+  <Identity
+    Name="GabrielVergaraEzcurdia.MasterSafeAuthenticator"
+    Publisher="CN=EC0E6F3B-2BDE-408E-8186-63090AD200E2"
+    Version="$VERSION$"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>MasterSafe Authenticator</DisplayName>
+    <PublisherDisplayName>Gabriel Vergara Ezcurdia</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <!-- The vault must stay in %LocalAppData%\MasterSafe, where the installed and portable copies keep it, and must
+         survive uninstalling. Without this, Windows would move new files into the package's own folder and delete
+         them with the package. -->
+    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
+    <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="es-es" />
+    <Resource Language="fi-fi" />
+  </Resources>
+
+  <Applications>
+    <Application Id="MasterSafe" Executable="MasterSafe.App.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="MasterSafe Authenticator"
+        Description="Passwords and authenticator codes in one encrypted vault on your own computer."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

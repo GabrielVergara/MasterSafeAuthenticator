@@ -4,6 +4,15 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 
 ## Unreleased
 
+### Added
+- **Portable Windows copy:** `MasterSafe-Authenticator-<version>-win-x64-portable.zip`, the program folder without an
+  installer. Unpack it and run `MasterSafe.App.exe`; the vault stays in `%LocalAppData%\MasterSafe`. It is signed and
+  listed in the signed manifest like every release file. A portable copy downloads the zip, not the installer, when
+  it updates.
+- **Microsoft Store package:** `installer/build-msix.ps1` packs the release's portable zip as an MSIX for the Store.
+  Inside the Store package MasterSafe never looks for updates itself; the Store updates it. The package keeps the
+  vault in `%LocalAppData%\MasterSafe`, outside the package, so uninstalling it does not delete the vault.
+
 ### Fixed
 - The `.sha256` files of the Windows installer and command-line tool end their line with LF, so `sha256sum -c` on Linux
   and macOS reads them (1.8.0 and earlier wrote CRLF).

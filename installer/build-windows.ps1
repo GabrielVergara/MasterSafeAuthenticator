@@ -4,7 +4,8 @@
 
 .DESCRIPTION
   1. Publishes a self-contained win-x64 build (no .NET install needed on the user's PC).
-  2. Compiles installer\windows\MasterSafe.iss with Inno Setup into artifacts\.
+  2. Zips the program folder as the portable copy, and compiles installer\windows\MasterSafe.iss with Inno Setup,
+     both into artifacts\.
   3. Writes a SHA-256 checksum file and, when a signing key is given, an ML-DSA-65 signature.
 
 .PARAMETER Version
@@ -41,6 +42,25 @@ Get-ChildItem $publishDir -Recurse -Filter *.pdb | Remove-Item -Force
 # The list of program files the app checks at start-up; a copy goes with the release files (see InstalledFiles.cs).
 dotnet run --project (Join-Path $root "src\MasterSafe.Cli\MasterSafe.Cli.csproj") -c Release -- installed-files $publishDir $Version win-x64 $artifacts
 if ($LASTEXITCODE -ne 0) { throw "Writing the list of installed files failed" }
+
+# The portable copy: the same program folder in a zip, for people who would rather not run an installer.
+# Unpacked anywhere, it runs as it is; the vault stays in %LocalAppData%\MasterSafe as with the installer.
+$portable = Join-Path $artifacts "MasterSafe-Authenticator-$Version-win-x64-portable.zip"
+Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+if (Test-Path $portable) { Remove-Item $portable -Force }
+$top = "MasterSafe-Authenticator-$Version-win-x64"
+$zip = [IO.Compression.ZipFile]::Open($portable, [IO.Compression.ZipArchiveMode]::Create)
+try {
+    foreach ($file in Get-ChildItem $publishDir -Recurse -File) {
+        $entry = "$top/" + $file.FullName.Substring($publishDir.Length + 1).Replace('\', '/')
+        [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entry, [IO.Compression.CompressionLevel]::Optimal)
+    }
+    [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, (Join-Path $root "LICENSE"), "$top/LICENSE", [IO.Compression.CompressionLevel]::Optimal)
+}
+finally { $zip.Dispose() }
+$zipHash = (Get-FileHash $portable -Algorithm SHA256).Hash.ToLowerInvariant()
+[IO.File]::WriteAllText("$portable.sha256", "$zipHash  $(Split-Path $portable -Leaf)`n")
+Write-Host "Portable SHA-256: $zipHash"
 
 $iscc = @(
     "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
