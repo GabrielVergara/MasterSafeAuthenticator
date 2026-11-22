@@ -79,6 +79,7 @@ La lista de la izquierda de la página Contraseñas muestra sus carpetas y cuán
 
 - Carpeta nueva: escriba un nombre en el cuadro bajo la lista y elija Carpeta nueva. Se crea dentro de la carpeta seleccionada. Un nombre como Trabajo/Remoto crea los dos niveles.
 - Renombrar la seleccionada renombra una carpeta con todo su contenido. Eliminar carpeta quita solo la carpeta: sus contraseñas suben un nivel y nunca se eliminan.
+- Mover carpeta: elija una carpeta en el cuadro bajo la lista y elija Mover carpeta, o arrastre una carpeta sobre otra, o sobre Todas las contraseñas para el nivel superior. Sus contraseñas y subcarpetas se mueven con ella.
 - Cambiar icono da a la carpeta uno de 24 iconos. Elija la carpeta simple para volver atrás.
 - Mover contraseñas: ponga la Carpeta en el formulario de la entrada, marque varias entradas y use «Mover la selección a», o arrastre una entrada a una carpeta. Arrastrar una entrada marcada mueve todas las marcadas.
 - Haga clic derecho en una carpeta para las mismas acciones. Arrastre el divisor para cambiar el ancho de la lista y haga doble clic en él para ajustarlo de nuevo a los nombres.

@@ -73,6 +73,12 @@
     <control>pointing</control>
   </supports>
   <releases>
+    <release version="1.8.2" date="2026-11-23">
+      <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.8.2</url>
+      <description>
+        <p>Password folders can be moved into other folders or to the top level, with their passwords and subfolders.</p>
+      </description>
+    </release>
     <release version="1.8.1" date="2026-11-22">
       <url type="details">https://github.com/GabrielVergara/MasterSafeAuthenticator/releases/tag/v1.8.1</url>
       <description>

@@ -211,6 +211,69 @@ public sealed class PasswordFolderTests
     }
 
     [Fact]
+    public void MoveFolder_IntoAnother_TakesItsPasswordsAndSubfolders_AndSavesOnce()
+    {
+        var vm = Vm(Entry("a", "Email/Work"), Entry("b", "Email"), Entry("c", "Archive"));
+        var saves = 0;
+        vm.EntriesChanged += (_, _) => saves++;
+        Select(vm, "Email");
+
+        vm.FolderMoveTarget = vm.FolderChoices.Single(c => c.Path == "Archive");
+        vm.MoveFolderCommand.Execute(null);
+
+        vm.Snapshot().ToDictionary(e => e.Title, e => e.Folder).Should().Equal(
+            new Dictionary<string, string> { ["a"] = "Archive/Email/Work", ["b"] = "Archive/Email", ["c"] = "Archive" });
+        vm.SelectedNode!.Path.Should().Be("Archive/Email");
+        vm.Status.Should().Be("Moved the folder to Archive/Email.");
+        saves.Should().Be(1);
+    }
+
+    [Fact]
+    public void MoveFolder_ToTheTopLevel_KeepsItsEmptySubfolders()
+    {
+        var vm = Vm(Entry("a", "Old/Email"));
+        Select(vm, "Old/Email");
+        vm.FolderName = "Empty";
+        vm.CreateFolderCommand.Execute(null);
+
+        vm.MoveFolderTo("Old/Email", "").Should().BeTrue();
+
+        vm.Snapshot().Single().Folder.Should().Be("Email");
+        vm.FolderSnapshot().Should().Equal("Email/Empty");
+    }
+
+    [Theory]
+    [InlineData("Email", "Email/Work", "into itself")]
+    [InlineData("Email", "Email", "into itself")]
+    [InlineData("Email/Work", "Email", "already there")]
+    [InlineData("Other/Work", "Email", "already exists there")]
+    [InlineData("Missing", "", "Choose the folder")]
+    public void MoveFolder_RefusesImpossibleMoves_AndChangesNothing(string from, string to, string reason)
+    {
+        var vm = Vm(Entry("a", "Email/Work"), Entry("b", "Other/Work"));
+        var saves = 0;
+        vm.EntriesChanged += (_, _) => saves++;
+
+        vm.MoveFolderTo(from, to).Should().BeFalse();
+
+        vm.Status.Should().Contain(reason);
+        vm.Snapshot().Select(e => e.Folder).Should().Equal("Email/Work", "Other/Work");
+        saves.Should().Be(0);
+    }
+
+    [Fact]
+    public void MoveFolder_RefusesAMoveThatWouldNestTooDeeply()
+    {
+        var deep = string.Join('/', Enumerable.Range(1, FolderPath.MaxDepth));
+        var vm = Vm(Entry("a", deep), Entry("b", "X"));
+
+        vm.MoveFolderTo("1", "X").Should().BeFalse();
+
+        vm.Status.Should().Contain("nested that deeply");
+        vm.Snapshot().Single(e => e.Title == "a").Folder.Should().Be(deep);
+    }
+
+    [Fact]
     public void DeleteFolder_KeepsEveryPassword_MovingThemUp()
     {
         var vm = Vm(Entry("a", "Email/Work"), Entry("b", "Email"), Entry("c", "Email/Work/Deep"));

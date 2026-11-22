@@ -149,6 +149,8 @@ public static class HelpContent
               the folder that is selected. A name like Work/Remote makes both levels.
             - Rename selected renames a folder with everything inside it. Delete folder removes the folder
               only: its passwords move up one level and are never deleted.
+            - Move folder: choose a folder in the box under the list and choose Move folder, or drag a folder
+              onto another one, or onto All passwords for the top level. Its passwords and subfolders move with it.
             - Change icon gives a folder one of 24 icons. Choose the plain folder to go back.
             - Move passwords: set the Folder in the entry form, tick several entries and use "Move selected
               to", or drag an entry onto a folder. Dragging a ticked entry moves all ticked entries.

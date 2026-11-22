@@ -320,6 +320,80 @@ public sealed partial class PasswordsViewModel
         EntriesChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Where the selected folder is moved to. "(No folder)" is the top level.</summary>
+    [ObservableProperty]
+    private FolderChoice? _folderMoveTarget;
+
+    /// <summary>Moves the selected folder, with its passwords and subfolders, into the chosen folder.</summary>
+    [RelayCommand]
+    private void MoveFolder()
+    {
+        if (SelectedNode?.Path is not { } from)
+        {
+            Status = "Choose the folder to move first.";
+            return;
+        }
+
+        if (FolderMoveTarget is null)
+        {
+            Status = "Choose where to move the folder first.";
+            return;
+        }
+
+        MoveFolderTo(from, FolderMoveTarget.Path);
+    }
+
+    /// <summary>
+    /// Moves <paramref name="from"/> and everything in it under <paramref name="parent"/> (empty for the top level).
+    /// Returns false, with the reason in <see cref="Status"/>, when the move is not possible.
+    /// </summary>
+    public bool MoveFolderTo(string from, string parent)
+    {
+        from = FolderPath.Normalize(from);
+        parent = FolderPath.Normalize(parent);
+        if (from.Length == 0 || !FolderExists(from))
+        {
+            Status = "Choose the folder to move first.";
+            return false;
+        }
+
+        if (FolderPath.IsInside(parent, from))
+        {
+            Status = "A folder cannot be moved into itself or into one of its subfolders.";
+            return false;
+        }
+
+        if (FolderPath.Parent(from).Equals(parent, StringComparison.OrdinalIgnoreCase))
+        {
+            Status = "The folder is already there.";
+            return false;
+        }
+
+        var moved = FolderPath.Combine(parent, FolderPath.Name(from));
+        if (FolderExists(moved))
+        {
+            Status = "A folder with that name already exists there.";
+            return false;
+        }
+
+        // Deeper paths would be cut short when cleaned, so refuse instead of losing part of the tree.
+        var deepest = _all.Select(e => e.Folder).Concat(_emptyFolders)
+            .Where(p => FolderPath.IsInside(p, from)).Select(FolderPath.Depth).DefaultIfEmpty(FolderPath.Depth(from)).Max();
+        if (deepest - FolderPath.Depth(from) + FolderPath.Depth(moved) > FolderPath.MaxDepth)
+        {
+            Status = "Folders cannot be nested that deeply.";
+            return false;
+        }
+
+        Relocate(from, moved);
+        _collapsed.RemoveWhere(p => FolderPath.IsInside(p, from));
+        FolderMoveTarget = null;
+        Status = $"Moved the folder to {moved}.";
+        ApplyFilter(moved);
+        EntriesChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
     private bool FolderExists(string path)
         => _emptyFolders.Contains(path) || Active.Any(e => FolderPath.IsInside(e.Folder, path));
 
@@ -383,6 +457,7 @@ public sealed partial class PasswordsViewModel
 
             var formPath = FormFolder?.Path ?? string.Empty;
             var movePath = MoveTarget?.Path;
+            var folderMovePath = FolderMoveTarget?.Path;
 
             // Counted once here: asking every folder to look through every entry takes seconds with thousands of them.
             var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -430,6 +505,7 @@ public sealed partial class PasswordsViewModel
                     ?? FolderNodes[0];
             FormFolder = ChoiceFor(formPath) ?? FolderChoices[0];
             MoveTarget = movePath is null ? null : ChoiceFor(movePath);
+            FolderMoveTarget = folderMovePath is null ? null : ChoiceFor(folderMovePath);
         }
         finally
         {
