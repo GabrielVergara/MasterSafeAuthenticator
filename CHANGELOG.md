@@ -86,7 +86,7 @@ All notable changes to MasterSafe Authenticator. The newest version is first. Da
 - **Install with Scoop** (Windows): `scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator`, then
   `scoop install mastersafe`. The manifest is in `bucket/`; `scripts/update-scoop.ps1` points it at each new release.
 - **Release announcements** on Bluesky and Mastodon through a workflow that does nothing until its secrets exist, a social preview
-  image and repository topics. See [docs/Promotion.md](docs/Promotion.md).
+  image and repository topics.
 - **The winget workflow checks every day.** Once the first package is accepted it proposes the newest signed release by
   itself (if winget lacks it and no pull request is open) and opens an issue to say so.
 - **SkiaSharp 4.156.1** (drawing and QR codes) and its Linux native library. They must change together, so the two

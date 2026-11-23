@@ -1,7 +1,7 @@
 name: announce
 
 # Announces a published release on Mastodon and Bluesky (scripts/announce.py). A service is skipped when its secrets are
-# not set, so this is harmless until the accounts exist. See docs/Promotion.md.
+# not set, so this is harmless until the accounts exist. Secrets: BLUESKY_HANDLE, BLUESKY_APP_PASSWORD, MASTODON_URL, MASTODON_TOKEN.
 on:
   release:
     types: [published]

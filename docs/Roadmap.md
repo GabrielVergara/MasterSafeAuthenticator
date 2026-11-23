@@ -32,8 +32,7 @@ This is a plan, not a promise. Items move as I learn what users need. Security f
 - **Scoop** and a **`.deb`** for Debian, Ubuntu and Mint: available since 1.7.2.
 - **Flathub: on hold.** It asks for a build from source, a longer history, a manifest written by hand and a licence that allows
   its own builds. See [Distribution.md](Distribution.md).
-- **Promotion without money:** release announcements on Bluesky and Mastodon, articles and a feed on the author's site. See
-  [Promotion.md](Promotion.md).
+- **Promotion without money:** release announcements on Bluesky and Mastodon, articles and a feed on the author's site.
 
 The .NET version stays on .NET 10 (LTS, supported until November 2028). .NET 11 is a short-term release that ends at about
 the same time, so the next move is .NET 12 (LTS, November 2027). Monthly .NET 10 patches are picked up by every build.
