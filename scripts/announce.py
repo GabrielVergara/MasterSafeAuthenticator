@@ -4,7 +4,7 @@
 # Author:  Gabriel Vergara Ezcurdia
 # License: See LICENSE
 #
-# Announces a published release on Mastodon and Bluesky. Used by .github/workflows/announce.yml; see docs/Promotion.md.
+# Announces a published release on Mastodon and Bluesky. Used by .github/workflows/announce.yml.
 #   announce.py <version> [--dry-run] [--only all|bluesky|mastodon]
 # A service is skipped when its secrets are missing. Secrets (environment): MASTODON_URL (for example https://mastodon.social),
 # MASTODON_TOKEN (scope write:statuses), BLUESKY_HANDLE, BLUESKY_APP_PASSWORD (an app password, never the account password).
