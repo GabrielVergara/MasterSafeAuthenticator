@@ -2,11 +2,11 @@
 
 MasterSafe is offered through free stores besides the GitHub releases:
 
-| Store | Command once accepted | Package id | Files here |
+| Store | How to get it | Package id | Files here |
 | --- | --- | --- | --- |
-| Microsoft Store | Search for MasterSafe Authenticator, or <https://apps.microsoft.com/detail/9PBQMTB6GJT0> | Store ID `9PBQMTB6GJT0`, package `GabrielVergaraEzcurdia.MasterSafeAuthenticator` | `installer/windows/msix/`, `installer/build-msix.ps1` |
-| Windows Package Manager | `winget install mastersafe` | `GabrielVergara.MasterSafeAuthenticator` | `packaging/winget/<version>/` |
-| Flathub | `flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` | `io.github.GabrielVergara.MasterSafeAuthenticator` | `packaging/flatpak/` |
+| Microsoft Store (published 2026-11-26) | Search for MasterSafe Authenticator, or <https://apps.microsoft.com/detail/9PBQMTB6GJT0> | Store ID `9PBQMTB6GJT0`, package `GabrielVergaraEzcurdia.MasterSafeAuthenticator` | `installer/windows/msix/`, `installer/build-msix.ps1` |
+| Windows Package Manager (in review) | `winget install mastersafe` once accepted | `GabrielVergara.MasterSafeAuthenticator` | `packaging/winget/<version>/` |
+| Flathub (on hold) | `flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` once accepted | `io.github.GabrielVergara.MasterSafeAuthenticator` | `packaging/flatpak/` |
 
 Both install the **official signed release files**: winget downloads the installer from the GitHub release and checks
 its SHA-256; the Flatpak repackages the Linux `.tar.gz`, also checked by SHA-256. Licence 1.2, section 3, allows these

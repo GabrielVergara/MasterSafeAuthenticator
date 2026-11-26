@@ -92,13 +92,14 @@ Releases are published at <https://github.com/GabrielVergara/MasterSafeAuthentic
 
 | System | File | How |
 | --- | --- | --- |
+| Windows 10/11 (x64), Microsoft Store | [MasterSafe Authenticator in the Microsoft Store](https://apps.microsoft.com/detail/9PBQMTB6GJT0) | Choose Get. The Store installs and updates it, and Windows trusts it without a SmartScreen warning |
 | Windows 10/11 (x64) | `MasterSafe-Authenticator-<version>-win-x64-setup.exe` | Run it. Installs for your user, no administrator needed |
 | Windows 10/11 (x64), portable | `MasterSafe-Authenticator-<version>-win-x64-portable.zip` | Unpack it into a folder only you can write to, and run `MasterSafe.App.exe`. Nothing is installed; delete the folder to remove it (your vault is kept) |
 | Windows, Scoop | `scoop bucket add mastersafe https://github.com/GabrielVergara/MasterSafeAuthenticator` then `scoop install mastersafe` | Installs for your user, no administrator. `scoop update mastersafe` updates it |
 | Linux x64 / arm64, Debian, Ubuntu, Mint | `mastersafe-authenticator_<version>_<amd64 or arm64>.deb` | Double click, or `sudo apt install ./<file>.deb`. To remove it: `sudo apt remove mastersafe-authenticator` (your vault is kept) |
 | Linux x64 / arm64 | `MasterSafe-Authenticator-<version>-linux-<arch>.tar.gz` | `tar xzf` the file, then `bash install.sh` (installs to `~/.local`). To remove it: `masterSafe-authenticator-uninstall` (your vault is kept) |
 
-Coming soon, once the stores accept the package: the Microsoft Store and `winget install mastersafe` on Windows, and
+Coming soon, once the stores accept the package: `winget install mastersafe` on Windows, and
 `flatpak install flathub io.github.GabrielVergara.MasterSafeAuthenticator` on Linux. Both install the same signed release files; see
 [docs/Distribution.md](docs/Distribution.md).
 
@@ -144,6 +145,7 @@ downloads and its installer is not yet signed with a Windows code-signing (Authe
 Before running it, check that the file is genuine, as described in [How to verify a download](#how-to-verify-a-download).
 If a check fails, do not run the file and please report it (see [SECURITY.md](SECURITY.md)).
 Windows code signing is on the [roadmap](docs/Roadmap.md); the warning fades as signed releases build reputation.
+The [Microsoft Store](https://apps.microsoft.com/detail/9PBQMTB6GJT0) copy has no such warning, because the Store signs it.
 
 **One scanner flags the installer.** On VirusTotal, Deep Instinct marks the 1.8.1 installer as malicious, and the other
 scanners find nothing (1 of 67). The same program files in the portable zip get 0 of 64, Deep Instinct included, so the
